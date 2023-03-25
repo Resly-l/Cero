@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{d6fc7ef4-3116-4278-8a47-05a6c9448f12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Window">
+      <UniqueIdentifier>{275d4a4f-f082-4c1f-ae0e-d62d82c85f67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{f536f895-b048-4df3-a289-6d61faeb15e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer">
+      <UniqueIdentifier>{8603c568-db4e-48a3-aa79-f3104ad4fb43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty">
+      <UniqueIdentifier>{37c2925f-2b77-48df-b6d9-1478904fa852}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{49e87693-98f1-4465-b3c7-d9e837ee5dfe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{448062ed-8eaa-4289-b1ed-2eecadeac3b9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Window\Window.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Window\WindowsMinimal.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Renderer.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\GraphicsDevice.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\IDeviceHandle.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Window\Window.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\GraphicsDevice.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Renderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
