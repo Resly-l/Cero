@@ -1,13 +1,7 @@
-#define USE_SOFTWARE_RENDERING
-
-
 #include "Window/Window.h"
 
 class DemoWindow : public Window
 {
-private:
-
-
 public:
 	DemoWindow()
 		:

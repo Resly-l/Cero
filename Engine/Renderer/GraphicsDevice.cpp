@@ -2,9 +2,23 @@
 #include <vector>
 
 #ifndef USE_SOFTWARE_RENDERING
+#include <d3d11.h>
+#include <wrl.h>
+
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
 #pragma comment(lib, "dxguid.lib")
+#endif
+
+#ifdef USE_SOFTWARE_RENDERING
+HDC mainDC;
+HDC bufferDC;
+#else
+template <typename T>
+using ComPtr = Microsoft::WRL::ComPtr<T>;
+
+ComPtr<ID3D11Device> device;
+ComPtr<ID3D11DeviceContext> deviceContext;
 #endif
 
 GraphicsDevice::GraphicsDevice(HWND window, int width_in, int height_in)
@@ -23,11 +37,11 @@ std::unique_ptr<IDeviceHandle> GraphicsDevice::CreateSwapChain(HWND window)
 	class D3D11SwapChain : public IDeviceHandle
 	{
 	private:
-		Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;
+		ComPtr<IDXGISwapChain> swapChain;
 
 	public:
-		virtual void* operator*() override { return swapChain.Get(); }
-		virtual void* operator&() override { return swapChain.GetAddressOf(); }
+		virtual void* Get() override { return swapChain.Get(); }
+		virtual void* GetAddressOf() override { return swapChain.GetAddressOf(); }
 	};
 
 	auto swapChain = std::make_unique<D3D11SwapChain>();
@@ -46,20 +60,19 @@ std::unique_ptr<IDeviceHandle> GraphicsDevice::CreateSwapChain(HWND window)
 	sd.BufferCount = 1;
 	sd.OutputWindow = window;
 	sd.Windowed = true;
-	sd.SwapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_DISCARD;
+	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
-	Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
-	device->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice);
-
-	Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
-	dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&dxgiAdapter);
-
+	ComPtr<IDXGIDevice> dxgiDevice;
+	ComPtr<IDXGIAdapter> dxgiAdapter;
+	ComPtr<IDXGIFactory> dxgiFactory;
 	DXGI_ADAPTER_DESC desc = {};
-	dxgiAdapter->GetDesc(&desc);
 
-	Microsoft::WRL::ComPtr<IDXGIFactory> dxgiFactory;
+	device->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice);
+	dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&dxgiAdapter);
+	dxgiAdapter->GetDesc(&desc);
 	dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory);
-	if (FAILED(dxgiFactory->CreateSwapChain(device.Get(), &sd, (IDXGISwapChain**)swapChain->operator&())))
+
+	if (FAILED(dxgiFactory->CreateSwapChain(device.Get(), &sd, (IDXGISwapChain**)swapChain->GetAddressOf())))
 	{
 		MessageBox(nullptr, L"Failed to create swap chain", L"Error", MB_ICONERROR | MB_OK);
 		PostQuitMessage(0);
@@ -75,14 +88,14 @@ std::unique_ptr<IDeviceHandle> GraphicsDevice::CreateBackBuffer(IDeviceHandle* s
 	class SoftwareRenderingBackBuffer : public IDeviceHandle
 	{
 	private:
-		std::unique_ptr<std::vector<int>> colorBuffer;
+		std::vector<int> colorBuffer;
 
 	public:
-		SoftwareRenderingBackBuffer(int width, int height) { colorBuffer = std::make_unique<std::vector<int>>(width * height); }
+		SoftwareRenderingBackBuffer(int width, int height) : colorBuffer(width * height) {}
 
 	public:
-		virtual void* operator*() override { return colorBuffer.get(); }
-		virtual void* operator&() override { return nullptr; }
+		virtual void* Get() override { return &colorBuffer; }
+		virtual void* GetAddressOf() override { return nullptr; }
 	};
 
 	return std::make_unique<SoftwareRenderingBackBuffer>(width, height);
@@ -90,51 +103,51 @@ std::unique_ptr<IDeviceHandle> GraphicsDevice::CreateBackBuffer(IDeviceHandle* s
 	class D3D11BackBuffer : public IDeviceHandle
 	{
 	private:
-		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
+		ComPtr<ID3D11RenderTargetView> renderTargetView;
 
 	public:
-		virtual void* operator*() override { return renderTargetView.Get(); }
-		virtual void* operator&() override { return renderTargetView.GetAddressOf(); }
+		virtual void* Get() override { return renderTargetView.Get(); }
+		virtual void* GetAddressOf() override { return renderTargetView.GetAddressOf(); }
 	};
 
 	auto backBuffer = std::make_unique<D3D11BackBuffer>();
 
-	Microsoft::WRL::ComPtr<ID3D11Resource> resource;
-	((IDXGISwapChain*)swapChain->operator*())->GetBuffer(0, __uuidof(ID3D11Resource), &resource);
-	if (FAILED(device->CreateRenderTargetView(resource.Get(), nullptr, (ID3D11RenderTargetView**)backBuffer->operator&())))
+	ComPtr<ID3D11Resource> resource;
+	((IDXGISwapChain*)swapChain->Get())->GetBuffer(0, __uuidof(ID3D11Resource), &resource);
+	if (FAILED(device->CreateRenderTargetView(resource.Get(), nullptr, (ID3D11RenderTargetView**)backBuffer->GetAddressOf())))
 	{
 		MessageBox(nullptr, L"Failed to create back buffer", L"Error", MB_ICONERROR | MB_OK);
 		PostQuitMessage(0);
 	}
 
-	deviceContext->OMSetRenderTargets(1, (ID3D11RenderTargetView* const*)backBuffer->operator&(), nullptr);
+	deviceContext->OMSetRenderTargets(1, (ID3D11RenderTargetView**)backBuffer->GetAddressOf(), nullptr);
 
 	return backBuffer;
 #endif
 }
 
-void GraphicsDevice::ClearBackBuffer(IDeviceHandle* backBuffer)
+void GraphicsDevice::ClearRenderTarget(IDeviceHandle* renderTarget)
 {
 #ifdef USE_SOFTWARE_RENDERING
-	auto colorBuffer = (std::vector<int>*)backBuffer->operator*();
+	auto colorBuffer = (std::vector<int>*)renderTarget->Get();
 	memset(colorBuffer->data(), 0, colorBuffer->size() * sizeof(int));
 #else
-	static float clearColor[4] = {};
-	deviceContext->ClearRenderTargetView((ID3D11RenderTargetView*)backBuffer->operator*(), clearColor);
+	static float clearColor[4] = { 0.03f, 0.08f, 0.08f };
+	deviceContext->ClearRenderTargetView((ID3D11RenderTargetView*)renderTarget->Get(), clearColor);
 #endif
 }
 
 void GraphicsDevice::PresentSwapChain(IDeviceHandle* swapChain, IDeviceHandle* backBuffer)
 {
 #ifdef USE_SOFTWARE_RENDERING
-	auto bitmap = CreateBitmap(width, height, 1, sizeof(unsigned int) * 8, ((std::vector<int>*)backBuffer->operator*())->data());
+	auto bitmap = CreateBitmap(width, height, 1, sizeof(unsigned int) * 8, ((std::vector<int>*)backBuffer->Get())->data());
 
 	SelectObject(bufferDC, bitmap);
 	BitBlt(mainDC, 0, 0, width, height, bufferDC, 0, 0, SRCCOPY);
 
 	DeleteObject(bitmap);
 #else
-	((IDXGISwapChain*)swapChain->operator*())->Present(0, 0);
+	((IDXGISwapChain*)swapChain->Get())->Present(0, 0);
 #endif
 }
 

@@ -7,6 +7,6 @@ public:
 	virtual ~IDeviceHandle() = default;
 
 public:
-	virtual void* operator*() = 0;
-	virtual void* operator&() = 0;
+	virtual void* Get() = 0;
+	virtual void* GetAddressOf() = 0;
 };

@@ -10,7 +10,7 @@ Renderer::Renderer(HWND window, int width, int height)
 
 void Renderer::BeginFrame()
 {
-	device.ClearBackBuffer(backBuffer.get());
+	device.ClearRenderTarget(backBuffer.get());
 }
 
 void Renderer::EndFrame()

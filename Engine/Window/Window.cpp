@@ -1,14 +1,15 @@
 #include "Window.h"
 
-Window::Window(int width_in, int height_in, std::wstring_view title_in, std::wstring_view iconPath)
+Window::Window(int width, int height, std::wstring_view title_in, std::wstring_view iconPath)
 	:
 	instance(GetModuleHandleW(nullptr)),
-	title(title_in),
-	width(width_in),
-	height(height_in)
+	title(title_in)
 {
 	RegisterWindowClass(instance, iconPath.data());
-	window = CreateWindowExW(0, className.c_str(), title.data(), WS_SYSMENU | WS_MINIMIZEBOX, 0, 0, width, height, nullptr, nullptr, instance, nullptr);
+
+	RECT rect = { 0, 0, (LONG)width, (LONG)height };
+	AdjustWindowRect(&rect, WS_SYSMENU | WS_MINIMIZEBOX | WS_CAPTION, FALSE);
+	window = CreateWindowExW(0, className.c_str(), title.data(), WS_SYSMENU | WS_MINIMIZEBOX, 0, 0, rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, instance, nullptr);
 
 	renderer = std::make_unique<Renderer>(window, width, height);
 
@@ -56,7 +57,7 @@ void Window::RegisterWindowClass(HINSTANCE instance, LPCWSTR iconPath) const
 	wc.lpfnWndProc = WindowProc;
 	wc.hInstance = instance;
 	wc.hIcon = (HICON)LoadImageW(0, iconPath, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wc.hCursor = LoadCursorW(nullptr, IDC_ARROW);
 	wc.lpszClassName = L"Window Class";
 
 	RegisterClassExW(&wc);

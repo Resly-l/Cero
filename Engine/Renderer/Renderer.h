@@ -1,6 +1,7 @@
 #pragma once
 #include "GraphicsDevice.h"
 
+
 class Renderer
 {
 private:
