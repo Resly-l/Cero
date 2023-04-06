@@ -11,16 +11,49 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Renderer\GraphicsDevice.h" />
-    <ClInclude Include="Renderer\IDeviceHandle.h" />
-    <ClInclude Include="Renderer\Renderer.h" />
-    <ClInclude Include="Window\Window.h" />
-    <ClInclude Include="Window\WindowsMinimal.h" />
+    <ClInclude Include="Source\Common\Types.h" />
+    <ClInclude Include="Source\Renderer\ConstantBuffer.h" />
+    <ClInclude Include="Source\Renderer\IDeviceHandle.h" />
+    <ClInclude Include="Source\Renderer\IGraphicsAPI.h" />
+    <ClInclude Include="Source\Renderer\PipelineState.h" />
+    <ClInclude Include="Source\Renderer\Private\VulkanAPI.h" />
+    <ClInclude Include="Source\Renderer\Renderer.h" />
+    <ClInclude Include="Source\ThirdParty\glfw\glfw3.h" />
+    <ClInclude Include="Source\ThirdParty\glfw\glfw3native.h" />
+    <ClInclude Include="Source\ThirdParty\glm\common.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\exponential.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\ext.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\fwd.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\geometric.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\glm.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\integer.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\mat2x2.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\mat2x3.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\mat2x4.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\mat3x2.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\mat3x3.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\mat3x4.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\mat4x2.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\mat4x3.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\mat4x4.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\matrix.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\packing.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\trigonometric.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\vec2.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\vec3.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\vec4.hpp" />
+    <ClInclude Include="Source\ThirdParty\glm\vector_relational.hpp" />
+    <ClInclude Include="Source\Window\Window.h" />
+    <ClInclude Include="Source\Window\WindowsMinimal.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Renderer\GraphicsDevice.cpp" />
-    <ClCompile Include="Renderer\Renderer.cpp" />
-    <ClCompile Include="Window\Window.cpp" />
+    <ClCompile Include="Source\Renderer\Private\VulkanAPI.cpp" />
+    <ClCompile Include="Source\Renderer\Renderer.cpp" />
+    <ClCompile Include="Source\Window\Window.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\HelloTriangle.frag" />
+    <None Include="Shader\HelloTriangle.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -73,13 +106,20 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Source\;C:\VulkanSDK\1.3.243.0\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
       </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>Source\ThirdParty\glfw\Bin\;C:\VulkanSDK\1.3.243.0\Lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -93,7 +133,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Source\;C:\VulkanSDK\1.3.243.0\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -102,6 +142,13 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>Source\ThirdParty\glfw\Bin\;C:\VulkanSDK\1.3.243.0\Lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

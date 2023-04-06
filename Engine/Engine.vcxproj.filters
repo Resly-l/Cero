@@ -1,54 +1,164 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Framework">
-      <UniqueIdentifier>{d6fc7ef4-3116-4278-8a47-05a6c9448f12}</UniqueIdentifier>
+    <Filter Include="Source">
+      <UniqueIdentifier>{ba2a664d-0f3e-431d-a01c-a775fac0ce8d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Window">
+    <Filter Include="Source\Window">
       <UniqueIdentifier>{275d4a4f-f082-4c1f-ae0e-d62d82c85f67}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Input">
-      <UniqueIdentifier>{f536f895-b048-4df3-a289-6d61faeb15e0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Renderer">
-      <UniqueIdentifier>{8603c568-db4e-48a3-aa79-f3104ad4fb43}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ThirdParty">
-      <UniqueIdentifier>{37c2925f-2b77-48df-b6d9-1478904fa852}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Common">
+    <Filter Include="Source\Common">
       <UniqueIdentifier>{49e87693-98f1-4465-b3c7-d9e837ee5dfe}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Utility">
+    <Filter Include="Source\Framework">
+      <UniqueIdentifier>{d6fc7ef4-3116-4278-8a47-05a6c9448f12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Input">
+      <UniqueIdentifier>{f536f895-b048-4df3-a289-6d61faeb15e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Renderer">
+      <UniqueIdentifier>{8603c568-db4e-48a3-aa79-f3104ad4fb43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Renderer\Private">
+      <UniqueIdentifier>{156659e9-96de-4614-9a33-15b49b2a2252}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ThirdParty">
+      <UniqueIdentifier>{37c2925f-2b77-48df-b6d9-1478904fa852}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ThirdParty\glfw">
+      <UniqueIdentifier>{6dd33840-c48c-4b4a-93a2-1309a0fddcf5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility">
       <UniqueIdentifier>{448062ed-8eaa-4289-b1ed-2eecadeac3b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{9ea4729b-1723-44d6-bcab-eb1284fc10a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ThirdParty\glm">
+      <UniqueIdentifier>{35f633fe-5a0c-4e77-9292-ae497d18eea1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Window\Window.h">
-      <Filter>Window</Filter>
+    <ClInclude Include="Source\Common\Types.h">
+      <Filter>Source\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Window\WindowsMinimal.h">
-      <Filter>Window</Filter>
+    <ClInclude Include="Source\Renderer\ConstantBuffer.h">
+      <Filter>Source\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\Renderer.h">
-      <Filter>Renderer</Filter>
+    <ClInclude Include="Source\Renderer\IDeviceHandle.h">
+      <Filter>Source\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\GraphicsDevice.h">
-      <Filter>Renderer</Filter>
+    <ClInclude Include="Source\Renderer\IGraphicsAPI.h">
+      <Filter>Source\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\IDeviceHandle.h">
-      <Filter>Renderer</Filter>
+    <ClInclude Include="Source\Renderer\PipelineState.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Renderer\Renderer.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Renderer\Private\VulkanAPI.h">
+      <Filter>Source\Renderer\Private</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Window\Window.h">
+      <Filter>Source\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Window\WindowsMinimal.h">
+      <Filter>Source\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glfw\glfw3.h">
+      <Filter>Source\ThirdParty\glfw</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glfw\glfw3native.h">
+      <Filter>Source\ThirdParty\glfw</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\common.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\exponential.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\ext.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\fwd.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\geometric.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\glm.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\integer.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\mat2x2.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\mat2x3.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\mat2x4.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\mat3x2.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\mat3x3.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\mat3x4.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\mat4x2.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\mat4x3.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\mat4x4.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\matrix.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\packing.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\trigonometric.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\vec2.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\vec3.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\vec4.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThirdParty\glm\vector_relational.hpp">
+      <Filter>Source\ThirdParty\glm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Window\Window.cpp">
-      <Filter>Window</Filter>
+    <ClCompile Include="Source\Renderer\Renderer.cpp">
+      <Filter>Source\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer\GraphicsDevice.cpp">
-      <Filter>Renderer</Filter>
+    <ClCompile Include="Source\Renderer\Private\VulkanAPI.cpp">
+      <Filter>Source\Renderer\Private</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer\Renderer.cpp">
-      <Filter>Renderer</Filter>
+    <ClCompile Include="Source\Window\Window.cpp">
+      <Filter>Source\Window</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\HelloTriangle.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\HelloTriangle.vert">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
