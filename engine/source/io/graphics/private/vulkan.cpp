@@ -128,7 +128,7 @@ namespace io::graphics
 	void Vulkan::Pipeline::CreateVertexInputCreateInfo(const PipelineState& _pipelineState)
 	{
 		vertexBindingDescription_.binding = 0;
-		vertexBindingDescription_.stride = _pipelineState.vertexBuffer.GetElementSize();
+		vertexBindingDescription_.stride = (uint32_t)_pipelineState.vertexBuffer.GetElementSize();
 		vertexBindingDescription_.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
 		for (size_t i = 0; i < _pipelineState.vertexBuffer.GetLayout()->GetNumAttibutes(); i++)
@@ -143,7 +143,7 @@ namespace io::graphics
 			case 12: vertexAttributeDescription.format = VK_FORMAT_R32G32B32_SFLOAT; break;
 			}
 
-			vertexAttributeDescription.offset = _pipelineState.vertexBuffer.GetLayout()->GetAttributeOffset(i);
+			vertexAttributeDescription.offset = (uint32_t)_pipelineState.vertexBuffer.GetLayout()->GetAttributeOffset(i);
 
 			vertexAttributeDescriptions_.push_back(vertexAttributeDescription);
 		}
@@ -427,7 +427,7 @@ namespace io::graphics
 		createInfo.enabledExtensionCount = glfwExtensionCount;
 		createInfo.ppEnabledExtensionNames = glfwExtensions;
 #if _DEBUG
-		createInfo.enabledLayerCount = validationLayers.size();
+		createInfo.enabledLayerCount = (uint32_t)validationLayers.size();
 		createInfo.ppEnabledLayerNames = validationLayers.data();
 #endif
 

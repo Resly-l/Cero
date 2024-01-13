@@ -35,7 +35,7 @@ HelloTriangle::HelloTriangle()
 	if (auto vertex = pipelineState_->vertexBuffer.Add())
 	{
 		vertex->Get<utility::math::Vec2<float>>("position") = utility::math::Vec2(-0.35f, 0.5f);
-		vertex->Get<utility::math::Vec3<float>>("color") = utility::math::Vec3(1.0f, 1.0f, 1.0f);
+		vertex->Get<utility::math::Vec3<float>>("color") = utility::math::Vec3(.0f, .0f, .0f);
 	}
 }
 
