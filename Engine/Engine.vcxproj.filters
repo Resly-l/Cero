@@ -1,164 +1,203 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source">
-      <UniqueIdentifier>{ba2a664d-0f3e-431d-a01c-a775fac0ce8d}</UniqueIdentifier>
+    <Filter Include="asset">
+      <UniqueIdentifier>{c3188c5e-2e04-4938-a27a-f524c9d7ffc5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Window">
-      <UniqueIdentifier>{275d4a4f-f082-4c1f-ae0e-d62d82c85f67}</UniqueIdentifier>
+    <Filter Include="source">
+      <UniqueIdentifier>{8cdd8692-376a-4068-ba35-2b7ec2e3d729}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Common">
-      <UniqueIdentifier>{49e87693-98f1-4465-b3c7-d9e837ee5dfe}</UniqueIdentifier>
+    <Filter Include="source\io">
+      <UniqueIdentifier>{44b33d38-1fa1-4098-a730-14aac4bd8706}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Framework">
-      <UniqueIdentifier>{d6fc7ef4-3116-4278-8a47-05a6c9448f12}</UniqueIdentifier>
+    <Filter Include="tool">
+      <UniqueIdentifier>{e3d14f78-71a8-43d7-9b5a-c970ca559360}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Input">
-      <UniqueIdentifier>{f536f895-b048-4df3-a289-6d61faeb15e0}</UniqueIdentifier>
+    <Filter Include="source\thirdparty">
+      <UniqueIdentifier>{40736596-50c3-4325-a20f-8f5ba7ff559d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Renderer">
-      <UniqueIdentifier>{8603c568-db4e-48a3-aa79-f3104ad4fb43}</UniqueIdentifier>
+    <Filter Include="source\io\graphics">
+      <UniqueIdentifier>{5ea576ca-567e-403f-944d-1037bea38fd1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Renderer\Private">
-      <UniqueIdentifier>{156659e9-96de-4614-9a33-15b49b2a2252}</UniqueIdentifier>
+    <Filter Include="source\io\window">
+      <UniqueIdentifier>{281d4af5-3e08-44f5-9d3c-ec30e4591fed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\ThirdParty">
-      <UniqueIdentifier>{37c2925f-2b77-48df-b6d9-1478904fa852}</UniqueIdentifier>
+    <Filter Include="source\io\graphics\private">
+      <UniqueIdentifier>{89d85c7d-e9a6-4dab-8c8f-6c8cc5b7c443}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\ThirdParty\glfw">
-      <UniqueIdentifier>{6dd33840-c48c-4b4a-93a2-1309a0fddcf5}</UniqueIdentifier>
+    <Filter Include="source\utility">
+      <UniqueIdentifier>{8d33f904-ce3d-4a0b-b51f-997dd6dcde10}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Utility">
-      <UniqueIdentifier>{448062ed-8eaa-4289-b1ed-2eecadeac3b9}</UniqueIdentifier>
+    <Filter Include="source\thirdparty\glfw">
+      <UniqueIdentifier>{b395c39c-f57d-47b7-b3b4-8f017fe569e4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shader">
-      <UniqueIdentifier>{9ea4729b-1723-44d6-bcab-eb1284fc10a4}</UniqueIdentifier>
+    <Filter Include="source\thirdparty\glm">
+      <UniqueIdentifier>{9414f1a7-cbe8-4c4b-95f2-7d65774924e3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\ThirdParty\glm">
-      <UniqueIdentifier>{35f633fe-5a0c-4e77-9292-ae497d18eea1}</UniqueIdentifier>
+    <Filter Include="source\io\file">
+      <UniqueIdentifier>{292c6752-526e-4f64-aa93-a6975c212f18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="asset\shader">
+      <UniqueIdentifier>{281c5ab6-7a35-40e8-8497-681e2a7cc3d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="asset\shader\source">
+      <UniqueIdentifier>{d925cfc9-0fe2-416d-a08e-e66f2fb2daa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tool\shader_compiler">
+      <UniqueIdentifier>{41e1773c-a2a6-4b6f-a987-9984baa5f10d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\utility\math">
+      <UniqueIdentifier>{b5d0e175-3879-4a80-b735-811b359e9a5a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Common\Types.h">
-      <Filter>Source\Common</Filter>
+    <ClInclude Include="source\io\graphics\graphics_api.h">
+      <Filter>source\io\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Renderer\ConstantBuffer.h">
-      <Filter>Source\Renderer</Filter>
+    <ClInclude Include="source\io\graphics\pipeline_state.h">
+      <Filter>source\io\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Renderer\IDeviceHandle.h">
-      <Filter>Source\Renderer</Filter>
+    <ClInclude Include="source\io\graphics\renderer.h">
+      <Filter>source\io\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Renderer\IGraphicsAPI.h">
-      <Filter>Source\Renderer</Filter>
+    <ClInclude Include="source\io\graphics\private\vulkan.h">
+      <Filter>source\io\graphics\private</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Renderer\PipelineState.h">
-      <Filter>Source\Renderer</Filter>
+    <ClInclude Include="source\utility\stl.h">
+      <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Renderer\Renderer.h">
-      <Filter>Source\Renderer</Filter>
+    <ClInclude Include="source\io\window\window.h">
+      <Filter>source\io\window</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Renderer\Private\VulkanAPI.h">
-      <Filter>Source\Renderer\Private</Filter>
+    <ClInclude Include="source\io\window\window_min.h">
+      <Filter>source\io\window</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Window\Window.h">
-      <Filter>Source\Window</Filter>
+    <ClInclude Include="source\thirdparty\glfw\glfw3.h">
+      <Filter>source\thirdparty\glfw</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Window\WindowsMinimal.h">
-      <Filter>Source\Window</Filter>
+    <ClInclude Include="source\thirdparty\glfw\glfw3native.h">
+      <Filter>source\thirdparty\glfw</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glfw\glfw3.h">
-      <Filter>Source\ThirdParty\glfw</Filter>
+    <ClInclude Include="source\thirdparty\glm\common.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glfw\glfw3native.h">
-      <Filter>Source\ThirdParty\glfw</Filter>
+    <ClInclude Include="source\thirdparty\glm\exponential.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\common.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\ext.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\exponential.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\fwd.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\ext.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\geometric.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\fwd.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\glm.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\geometric.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\integer.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\glm.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\mat2x2.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\integer.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\mat2x3.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\mat2x2.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\mat2x4.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\mat2x3.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\mat3x2.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\mat2x4.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\mat3x3.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\mat3x2.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\mat3x4.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\mat3x3.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\mat4x2.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\mat3x4.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\mat4x3.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\mat4x2.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\mat4x4.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\mat4x3.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\matrix.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\mat4x4.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\packing.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\matrix.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\trigonometric.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\packing.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\vec2.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\trigonometric.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\vec3.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\vec2.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\vec4.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\vec3.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\thirdparty\glm\vector_relational.hpp">
+      <Filter>source\thirdparty\glm</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\vec4.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\utility\forward_declaration.h">
+      <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThirdParty\glm\vector_relational.hpp">
-      <Filter>Source\ThirdParty\glm</Filter>
+    <ClInclude Include="source\io\window\application.h">
+      <Filter>source\io\window</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\byte_buffer.h">
+      <Filter>source\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\math\vector.h">
+      <Filter>source\utility\math</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\file\file_interface.h">
+      <Filter>source\io\file</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\render_pass.h">
+      <Filter>source\io\graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Renderer\Renderer.cpp">
-      <Filter>Source\Renderer</Filter>
+    <ClCompile Include="source\io\graphics\renderer.cpp">
+      <Filter>source\io\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Renderer\Private\VulkanAPI.cpp">
-      <Filter>Source\Renderer\Private</Filter>
+    <ClCompile Include="source\io\graphics\private\vulkan.cpp">
+      <Filter>source\io\graphics\private</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Window\Window.cpp">
-      <Filter>Source\Window</Filter>
+    <ClCompile Include="source\io\window\window.cpp">
+      <Filter>source\io\window</Filter>
+    </ClCompile>
+    <ClCompile Include="source\io\window\application.cpp">
+      <Filter>source\io\window</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\byte_buffer.cpp">
+      <Filter>source\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\math\vector.cpp">
+      <Filter>source\utility\math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shader\HelloTriangle.frag">
-      <Filter>Shader</Filter>
+    <None Include="asset\shader\source\hello_triangle.frag">
+      <Filter>asset\shader\source</Filter>
     </None>
-    <None Include="Shader\HelloTriangle.vert">
-      <Filter>Shader</Filter>
+    <None Include="asset\shader\source\hello_triangle.vert">
+      <Filter>asset\shader\source</Filter>
+    </None>
+    <None Include="tool\shader_compiler\compile_shaders.bat">
+      <Filter>tool\shader_compiler</Filter>
+    </None>
+    <None Include="tool\shader_compiler\config.ini">
+      <Filter>tool\shader_compiler</Filter>
     </None>
   </ItemGroup>
 </Project>

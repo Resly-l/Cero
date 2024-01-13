@@ -52,7 +52,7 @@ extern "C" {
  *  shouldn't be using them.**
  *
  *  Before the inclusion of @ref glfw3native.h, you may define zero or more
- *  window system API macro and zero or more context creation API macros.
+ *  window layer0 API macro and zero or more context creation API macros.
  *
  *  The chosen backends must match those the library was compiled for.  Failure
  *  to do this will cause a link-time error.
@@ -88,7 +88,7 @@ extern "C" {
 
 
 /*************************************************************************
- * System headers and types
+ * layer0 headers and types
  *************************************************************************/
 
 #if !defined(GLFW_NATIVE_INCLUDE_NONE)

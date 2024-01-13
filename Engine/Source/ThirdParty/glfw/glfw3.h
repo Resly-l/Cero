@@ -710,13 +710,13 @@ extern "C" {
  *
  *  A memory allocation failed.
  *
- *  @analysis A bug in GLFW or the underlying operating system.  Report the bug
+ *  @analysis A bug in GLFW or the underlying operating layer0.  Report the bug
  *  to our [issue tracker](https://github.com/glfw/glfw/issues).
  */
 #define GLFW_OUT_OF_MEMORY          0x00010005
-/*! @brief GLFW could not find support for the requested API on the system.
+/*! @brief GLFW could not find support for the requested API on the layer0.
  *
- *  GLFW could not find support for the requested API on the system.
+ *  GLFW could not find support for the requested API on the layer0.
  *
  *  @analysis The installed graphics driver does not support the requested
  *  API, or does not support it via the chosen context creation backend.
@@ -754,7 +754,7 @@ extern "C" {
  *  specific categories.
  *
  *  @analysis A bug or configuration error in GLFW, the underlying operating
- *  system or its drivers, or a lack of required resources.  Report the issue to
+ *  layer0 or its drivers, or a lack of required resources.  Report the issue to
  *  our [issue tracker](https://github.com/glfw/glfw/issues).
  */
 #define GLFW_PLATFORM_ERROR         0x00010008
@@ -1064,7 +1064,7 @@ extern "C" {
 #define GLFW_OSMESA_CONTEXT_API     0x00036003
 
 /*! @defgroup shapes Standard cursor shapes
- *  @brief Standard system cursor shapes.
+ *  @brief Standard layer0 cursor shapes.
  *
  *  See [standard cursor creation](@ref cursor_standard) for how these are used.
  *
@@ -1511,7 +1511,7 @@ typedef void (* GLFWscrollfun)(GLFWwindow* window, double xoffset, double yoffse
  *
  *  @param[in] window The window that received the event.
  *  @param[in] key The [keyboard key](@ref keys) that was pressed or released.
- *  @param[in] scancode The system-specific scancode of the key.
+ *  @param[in] scancode The layer0-specific scancode of the key.
  *  @param[in] action `GLFW_PRESS`, `GLFW_RELEASE` or `GLFW_REPEAT`.  Future
  *  releases may add more actions.
  *  @param[in] mods Bit field describing which [modifier keys](@ref mods) were
@@ -2080,7 +2080,7 @@ GLFWAPI void glfwGetMonitorPos(GLFWmonitor* monitor, int* xpos, int* ypos);
  *  This function returns the position, in screen coordinates, of the upper-left
  *  corner of the work area of the specified monitor along with the work area
  *  size in screen coordinates. The work area is defined as the area of the
- *  monitor not occluded by the operating system task bar where present. If no
+ *  monitor not occluded by the operating layer0 task bar where present. If no
  *  task bar exists then the work area is the monitor resolution in screen
  *  coordinates.
  *
@@ -2111,7 +2111,7 @@ GLFWAPI void glfwGetMonitorWorkarea(GLFWmonitor* monitor, int* xpos, int* ypos, 
  *  This function returns the size, in millimetres, of the display area of the
  *  specified monitor.
  *
- *  Some systems do not provide accurate monitor size information, either
+ *  Some layer0s do not provide accurate monitor size information, either
  *  because the monitor
  *  [EDID](https://en.wikipedia.org/wiki/Extended_display_identification_data)
  *  data is incorrect or because the driver does not report it accurately.
@@ -2128,7 +2128,7 @@ GLFWAPI void glfwGetMonitorWorkarea(GLFWmonitor* monitor, int* xpos, int* ypos, 
  *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED.
  *
  *  @remark @win32 On Windows 8 and earlier the physical size is calculated from
- *  the current resolution and system DPI instead of querying the monitor EDID data.
+ *  the current resolution and layer0 DPI instead of querying the monitor EDID data.
  *
  *  @thread_safety This function must only be called from the main thread.
  *
@@ -2147,7 +2147,7 @@ GLFWAPI void glfwGetMonitorPhysicalSize(GLFWmonitor* monitor, int* widthMM, int*
  *  default DPI.  This is especially important for text and any UI elements.  If
  *  the pixel dimensions of your UI scaled by this look appropriate on your
  *  machine then it should appear at a reasonable size on other machines
- *  regardless of their DPI and scaling settings.  This relies on the system DPI
+ *  regardless of their DPI and scaling settings.  This relies on the layer0 DPI
  *  and scaling settings being somewhat correct.
  *
  *  The content scale may depend on both the monitor resolution and pixel
@@ -2252,7 +2252,7 @@ GLFWAPI void* glfwGetMonitorUserPointer(GLFWmonitor* monitor);
  *
  *  This function sets the monitor configuration callback, or removes the
  *  currently set callback.  This is called when a monitor is connected to or
- *  disconnected from the system.
+ *  disconnected from the layer0.
  *
  *  @param[in] callback The new callback, or `NULL` to remove the currently set
  *  callback.
@@ -2572,7 +2572,7 @@ GLFWAPI void glfwWindowHintString(int hint, const char* value);
  *  OpenGL or OpenGL ES context.
  *
  *  By default, newly created windows use the placement recommended by the
- *  window system.  To create the window at a specific position, make it
+ *  window layer0.  To create the window at a specific position, make it
  *  initially invisible using the [GLFW_VISIBLE](@ref GLFW_VISIBLE_hint) window
  *  hint, set its [position](@ref window_pos) and then [show](@ref window_hide)
  *  it.
@@ -2580,8 +2580,8 @@ GLFWAPI void glfwWindowHintString(int hint, const char* value);
  *  As long as at least one full screen window is not iconified, the screensaver
  *  is prohibited from starting.
  *
- *  Window systems put limits on window sizes.  Very large or very small window
- *  dimensions may be overridden by the window system on creation.  Check the
+ *  Window layer0s put limits on window sizes.  Very large or very small window
+ *  dimensions may be overridden by the window layer0 on creation.  Check the
  *  actual [size](@ref window_size) after creation.
  *
  *  The [swap interval](@ref buffer_swap) is not set during window creation and
@@ -2789,7 +2789,7 @@ GLFWAPI void glfwSetWindowTitle(GLFWwindow* window, const char* title);
 /*! @brief Sets the icon for the specified window.
  *
  *  This function sets the icon of the specified window.  If passed an array of
- *  candidate images, those of or closest to the sizes desired by the system are
+ *  candidate images, those of or closest to the sizes desired by the layer0 are
  *  selected.  If no images are specified, the window reverts to its default
  *  icon.
  *
@@ -2797,7 +2797,7 @@ GLFWAPI void glfwSetWindowTitle(GLFWwindow* window, const char* title);
  *  bits per channel with the red channel first.  They are arranged canonically
  *  as packed sequential rows, starting from the top-left corner.
  *
- *  The desired image sizes varies depending on platform and system settings.
+ *  The desired image sizes varies depending on platform and layer0 settings.
  *  The selected images will be rescaled as needed.  Good sizes include 16x16,
  *  32x32 and 48x48.
  *
@@ -3130,11 +3130,11 @@ GLFWAPI void glfwGetWindowFrameSize(GLFWwindow* window, int* left, int* top, int
  *  default DPI.  This is especially important for text and any UI elements.  If
  *  the pixel dimensions of your UI scaled by this look appropriate on your
  *  machine then it should appear at a reasonable size on other machines
- *  regardless of their DPI and scaling settings.  This relies on the system DPI
+ *  regardless of their DPI and scaling settings.  This relies on the layer0 DPI
  *  and scaling settings being somewhat correct.
  *
- *  On systems where each monitors can have its own content scale, the window
- *  content scale will depend on which monitor the system considers the window
+ *  On layer0s where each monitors can have its own content scale, the window
+ *  content scale will depend on which monitor the layer0 considers the window
  *  to be on.
  *
  *  @param[in] window The window to query.
@@ -3161,7 +3161,7 @@ GLFWAPI void glfwGetWindowContentScale(GLFWwindow* window, float* xscale, float*
  *  This function returns the opacity of the window, including any decorations.
  *
  *  The opacity (or alpha) value is a positive finite number between zero and
- *  one, where zero is fully transparent and one is fully opaque.  If the system
+ *  one, where zero is fully transparent and one is fully opaque.  If the layer0
  *  does not support whole window transparency, this function always returns one.
  *
  *  The initial opacity value for newly created windows is one.
@@ -3392,7 +3392,7 @@ GLFWAPI void glfwFocusWindow(GLFWwindow* window);
  *  application as a whole.
  *
  *  Once the user has given attention, usually by focusing the window or
- *  application, the system will end the request automatically.
+ *  application, the layer0 will end the request automatically.
  *
  *  @param[in] window The window to request attention to.
  *
@@ -3724,7 +3724,7 @@ GLFWAPI GLFWwindowclosefun glfwSetWindowCloseCallback(GLFWwindow* window, GLFWwi
  *  called when the content area of the window needs to be redrawn, for example
  *  if the window has been exposed after having been covered by another window.
  *
- *  On compositing window systems such as Aero, Compiz, Aqua or Wayland, where
+ *  On compositing window layer0s such as Aero, Compiz, Aqua or Wayland, where
  *  the window contents are saved off-screen, this callback may be called only
  *  very infrequently or never at all.
  *
@@ -3927,8 +3927,8 @@ GLFWAPI GLFWwindowcontentscalefun glfwSetWindowContentScaleCallback(GLFWwindow* 
  *
  *  Do not assume that callbacks you set will _only_ be called in response to
  *  event processing functions like this one.  While it is necessary to poll for
- *  events, window systems that require GLFW to register callbacks of its own
- *  can pass events to GLFW in response to many window system function calls.
+ *  events, window layer0s that require GLFW to register callbacks of its own
+ *  can pass events to GLFW in response to many window layer0 function calls.
  *  GLFW will pass those events on to the application callbacks before
  *  returning.
  *
@@ -3972,8 +3972,8 @@ GLFWAPI void glfwPollEvents(void);
  *
  *  Do not assume that callbacks you set will _only_ be called in response to
  *  event processing functions like this one.  While it is necessary to poll for
- *  events, window systems that require GLFW to register callbacks of its own
- *  can pass events to GLFW in response to many window system function calls.
+ *  events, window layer0s that require GLFW to register callbacks of its own
+ *  can pass events to GLFW in response to many window layer0 function calls.
  *  GLFW will pass those events on to the application callbacks before
  *  returning.
  *
@@ -4019,8 +4019,8 @@ GLFWAPI void glfwWaitEvents(void);
  *
  *  Do not assume that callbacks you set will _only_ be called in response to
  *  event processing functions like this one.  While it is necessary to poll for
- *  events, window systems that require GLFW to register callbacks of its own
- *  can pass events to GLFW in response to many window system function calls.
+ *  events, window layer0s that require GLFW to register callbacks of its own
+ *  can pass events to GLFW in response to many window layer0 function calls.
  *  GLFW will pass those events on to the application callbacks before
  *  returning.
  *
@@ -4155,9 +4155,9 @@ GLFWAPI void glfwSetInputMode(GLFWwindow* window, int mode, int value);
 /*! @brief Returns whether raw mouse motion is supported.
  *
  *  This function returns whether raw mouse motion is supported on the current
- *  system.  This status does not change after GLFW has been initialized so you
+ *  layer0.  This status does not change after GLFW has been initialized so you
  *  only need to check this once.  If you attempt to enable raw motion on
- *  a system that does not support it, @ref GLFW_PLATFORM_ERROR will be emitted.
+ *  a layer0 that does not support it, @ref GLFW_PLATFORM_ERROR will be emitted.
  *
  *  Raw mouse motion is closer to the actual motion of the mouse across
  *  a surface.  It is not affected by the scaling and acceleration applied to
@@ -4430,7 +4430,7 @@ GLFWAPI void glfwSetCursorPos(GLFWwindow* window, double xpos, double ypos);
  *  as packed sequential rows, starting from the top-left corner.
  *
  *  The cursor hotspot is specified in pixels, relative to the upper-left corner
- *  of the cursor image.  Like all other coordinate systems in GLFW, the X-axis
+ *  of the cursor image.  Like all other coordinate layer0s in GLFW, the X-axis
  *  points to the right and the Y-axis points down.
  *
  *  @param[in] image The desired cursor image.
@@ -4596,7 +4596,7 @@ GLFWAPI GLFWkeyfun glfwSetKeyCallback(GLFWwindow* window, GLFWkeyfun callback);
  *  want to know whether a specific physical key was pressed or released, see
  *  the key callback instead.
  *
- *  The character callback behaves as system text input normally does and will
+ *  The character callback behaves as layer0 text input normally does and will
  *  not be called if modifier keys are held down that would prevent normal text
  *  input on that platform, for example a Super (Command) key on macOS or Alt key
  *  on Windows.
@@ -5149,7 +5149,7 @@ GLFWAPI int glfwJoystickIsGamepad(int jid);
  *
  *  This function sets the joystick configuration callback, or removes the
  *  currently set callback.  This is called when a joystick is connected to or
- *  disconnected from the system.
+ *  disconnected from the layer0.
  *
  *  For joystick connection and disconnection events to be delivered on all
  *  platforms, you need to call one of the [event processing](@ref events)
@@ -5258,7 +5258,7 @@ GLFWAPI const char* glfwGetGamepadName(int jid);
  *  whether it has a mapping.
  *
  *  The Guide button may not be available for input as it is often hooked by the
- *  system or the Steam client.
+ *  layer0 or the Steam client.
  *
  *  Not all devices have all the buttons or axes provided by @ref
  *  GLFWgamepadstate.  Unavailable buttons and axes will always report
@@ -5287,7 +5287,7 @@ GLFWAPI int glfwGetGamepadState(int jid, GLFWgamepadstate* state);
 
 /*! @brief Sets the clipboard to the specified string.
  *
- *  This function sets the system clipboard to the specified, UTF-8 encoded
+ *  This function sets the layer0 clipboard to the specified, UTF-8 encoded
  *  string.
  *
  *  @param[in] window Deprecated.  Any valid window or `NULL`.
@@ -5312,7 +5312,7 @@ GLFWAPI void glfwSetClipboardString(GLFWwindow* window, const char* string);
 
 /*! @brief Returns the contents of the clipboard as a string.
  *
- *  This function returns the contents of the system clipboard, if it contains
+ *  This function returns the contents of the layer0 clipboard, if it contains
  *  or is convertible to a UTF-8 encoded string.  If the clipboard is empty or
  *  if its contents cannot be converted, `NULL` is returned and a @ref
  *  GLFW_FORMAT_UNAVAILABLE error is generated.
@@ -5349,7 +5349,7 @@ GLFWAPI const char* glfwGetClipboardString(GLFWwindow* window);
  *  This function and @ref glfwSetTime are helper functions on top of @ref
  *  glfwGetTimerFrequency and @ref glfwGetTimerValue.
  *
- *  The resolution of the timer is system dependent, but is usually on the order
+ *  The resolution of the timer is layer0 dependent, but is usually on the order
  *  of a few micro- or nanoseconds.  It uses the highest-resolution monotonic
  *  time source on each supported platform.
  *
@@ -5881,7 +5881,7 @@ GLFWAPI VkResult glfwCreateWindowSurface(VkInstance instance, GLFWwindow* window
  * Global definition cleanup
  *************************************************************************/
 
-/* ------------------- BEGIN SYSTEM/COMPILER SPECIFIC -------------------- */
+/* ------------------- BEGIN layer0/COMPILER SPECIFIC -------------------- */
 
 #ifdef GLFW_WINGDIAPI_DEFINED
  #undef WINGDIAPI
@@ -5901,7 +5901,7 @@ GLFWAPI VkResult glfwCreateWindowSurface(VkInstance instance, GLFWwindow* window
  #define GLFW_GLAPIENTRY_DEFINED
 #endif
 
-/* -------------------- END SYSTEM/COMPILER SPECIFIC --------------------- */
+/* -------------------- END layer0/COMPILER SPECIFIC --------------------- */
 
 
 #ifdef __cplusplus
