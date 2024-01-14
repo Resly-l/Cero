@@ -46,9 +46,6 @@
     <Filter Include="tool\shader_compiler">
       <UniqueIdentifier>{41e1773c-a2a6-4b6f-a987-9984baa5f10d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\utility\math">
-      <UniqueIdentifier>{b5d0e175-3879-4a80-b735-811b359e9a5a}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\io\graphics\graphics_api.h">
@@ -59,9 +56,6 @@
     </ClInclude>
     <ClInclude Include="source\io\graphics\renderer.h">
       <Filter>source\io\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="source\io\graphics\private\vulkan.h">
-      <Filter>source\io\graphics\private</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\stl.h">
       <Filter>source\utility</Filter>
@@ -156,22 +150,28 @@
     <ClInclude Include="source\utility\byte_buffer.h">
       <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\utility\math\vector.h">
-      <Filter>source\utility\math</Filter>
-    </ClInclude>
     <ClInclude Include="source\io\file\file_interface.h">
       <Filter>source\io\file</Filter>
     </ClInclude>
-    <ClInclude Include="source\io\graphics\render_pass.h">
-      <Filter>source\io\graphics</Filter>
+    <ClInclude Include="source\io\graphics\private\vulkan_api.h">
+      <Filter>source\io\graphics\private</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\private\vulkan_device.h">
+      <Filter>source\io\graphics\private</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\private\vulkan_swapchain.h">
+      <Filter>source\io\graphics\private</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\private\vulkan_pipeline.h">
+      <Filter>source\io\graphics\private</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\private\vulkan_commander.h">
+      <Filter>source\io\graphics\private</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\io\graphics\renderer.cpp">
       <Filter>source\io\graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="source\io\graphics\private\vulkan.cpp">
-      <Filter>source\io\graphics\private</Filter>
     </ClCompile>
     <ClCompile Include="source\io\window\window.cpp">
       <Filter>source\io\window</Filter>
@@ -182,8 +182,20 @@
     <ClCompile Include="source\utility\byte_buffer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
-    <ClCompile Include="source\utility\math\vector.cpp">
-      <Filter>source\utility\math</Filter>
+    <ClCompile Include="source\io\graphics\private\vulkan_api.cpp">
+      <Filter>source\io\graphics\private</Filter>
+    </ClCompile>
+    <ClCompile Include="source\io\graphics\private\vulkan_device.cpp">
+      <Filter>source\io\graphics\private</Filter>
+    </ClCompile>
+    <ClCompile Include="source\io\graphics\private\vulkan_swapchain.cpp">
+      <Filter>source\io\graphics\private</Filter>
+    </ClCompile>
+    <ClCompile Include="source\io\graphics\private\vulkan_pipeline.cpp">
+      <Filter>source\io\graphics\private</Filter>
+    </ClCompile>
+    <ClCompile Include="source\io\graphics\private\vulkan_commander.cpp">
+      <Filter>source\io\graphics\private</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

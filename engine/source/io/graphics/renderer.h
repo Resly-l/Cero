@@ -10,10 +10,7 @@ namespace io::graphics
 	{
 	private:
 		std::unique_ptr<GraphicsAPI> graphicsAPI_;
-
-#if _DEBUG
 		std::shared_ptr<PipelineState> pipelineState_;
-#endif
 
 	public:
 		Renderer(GLFWwindow& _window);

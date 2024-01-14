@@ -3,7 +3,7 @@
 #include "thirdparty/glm/vec4.hpp"
 #include "thirdparty/glm/geometric.hpp"
 
-namespace utility::math
+namespace math
 {
 	template <typename T>
 	struct Vec2

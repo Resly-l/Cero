@@ -1,6 +1,5 @@
 #include "window.h"
 #include "thirdparty/glfw/glfw3.h"
-#include <iostream>
 
 namespace io::window
 {

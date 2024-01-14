@@ -14,3 +14,5 @@
 
 #include <algorithm>
 #include <fstream>
+
+#include <exception>
