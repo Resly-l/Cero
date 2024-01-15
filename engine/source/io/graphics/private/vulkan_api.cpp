@@ -20,7 +20,6 @@ namespace io::graphics
 
 	VulkanAPI::~VulkanAPI()
 	{
-		pipeline_.Release(device_);
 		commander_.Release(device_);
 		swapChain_.Release(device_);
 		device_.Release();
@@ -29,20 +28,50 @@ namespace io::graphics
 		vkDestroyInstance(instance_, nullptr);
 	}
 
-	void VulkanAPI::BindPipeline(const PipelineState& _pipelineState)
+	void VulkanAPI::BeginFrame()
 	{
-		pipeline_.Release(device_);
-		pipeline_.Initialize(device_, _pipelineState, commander_, swapChain_);
+		commander_.BeginCommandBuffer(device_, swapChain_);
+	}
+
+	std::shared_ptr<Pipeline> VulkanAPI::CreatePipeline(const PipelineState& _pipelineState)
+	{
+		pipelines_.push_back(std::make_shared<VulkanPipeline>(device_, _pipelineState, commander_, swapChain_));
+		return pipelines_.back();
+	}
+
+	void VulkanAPI::BindPipeline(std::shared_ptr<Pipeline> _pipeline)
+	{
+		pipeline_ = std::static_pointer_cast<VulkanPipeline>(_pipeline).get();
 	}
 
 	void VulkanAPI::Draw()
 	{
-		commander_.Execute(device_, swapChain_, pipeline_);
+		if (pipeline_ == nullptr)
+		{
+			return;
+		}
+
+		commander_.Execute(device_, swapChain_, *pipeline_);
 	}
 
-	void VulkanAPI::Present()
+	void VulkanAPI::EndFrame()
 	{
 		commander_.Present(device_, swapChain_);
+
+		if (++pipelineReleaseCounter_ >= pipelineReleaseInterval_)
+		{
+			ReleaseUnusedPipelines();
+			pipelineReleaseCounter_ = 0;
+		}
+	}
+
+	void VulkanAPI::ReleaseUnusedPipelines()
+	{
+		std::erase_if(pipelines_,
+			[](const std::shared_ptr<Pipeline>& _pipeline)
+			{
+				return _pipeline.use_count() == 1;
+			});
 	}
 
 	void VulkanAPI::CreateVulkanInstance()

@@ -31,6 +31,7 @@ namespace io::graphics
 		void Intialize(const VulkanDevice& _device);
 		void Release(const VulkanDevice& _device);
 
+		void BeginCommandBuffer(const VulkanDevice& _device,  const VulkanSwapChain& _swapChain);
 		void Execute(const VulkanDevice& _device, const VulkanSwapChain& _swapChain, const VulkanPipeline& _pipeline);
 		void Present(const VulkanDevice& _device, const VulkanSwapChain& _swapChain);
 

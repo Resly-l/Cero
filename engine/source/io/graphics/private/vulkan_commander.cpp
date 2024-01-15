@@ -27,9 +27,23 @@ namespace io::graphics
 		vkDestroyCommandPool(_device.GetLogicalDevice(), commandPool_, nullptr);
 	}
 
-	void VulkanCommander::Execute(const VulkanDevice& _device, const VulkanSwapChain& _swapChain, const VulkanPipeline& _pipeline)
+	void VulkanCommander::BeginCommandBuffer(const VulkanDevice& _device,  const VulkanSwapChain& _swapChain)
 	{
 		currentImageIndex_ = AcquireSwapChainImage(_device, _swapChain);
+
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = 0; // Optional
+		beginInfo.pInheritanceInfo = nullptr; // Optional
+
+		if (vkBeginCommandBuffer(commandBuffers_[currentFrame_], &beginInfo) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to begin recording command buffer");
+		}
+	}
+
+	void VulkanCommander::Execute(const VulkanDevice& _device, const VulkanSwapChain& _swapChain, const VulkanPipeline& _pipeline)
+	{
 		RecordCommandBuffer(_swapChain, _pipeline, currentImageIndex_);
 		SubmitCommand();
 	}
@@ -205,16 +219,6 @@ namespace io::graphics
 
 	void VulkanCommander::RecordCommandBuffer(const VulkanSwapChain& _swapChain, const VulkanPipeline& _pipeline, const size_t _bufferIndex) const
 	{
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = 0; // Optional
-		beginInfo.pInheritanceInfo = nullptr; // Optional
-
-		if (vkBeginCommandBuffer(commandBuffers_[currentFrame_], &beginInfo) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to begin recording command buffer");
-		}
-
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassInfo.renderPass = _swapChain.GetRenderPass();
@@ -237,7 +241,7 @@ namespace io::graphics
 
 		if (vkEndCommandBuffer(commandBuffers_[currentFrame_]) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to record command buffer!");
+			throw std::runtime_error("failed to record command buffer");
 		}
 	}
 

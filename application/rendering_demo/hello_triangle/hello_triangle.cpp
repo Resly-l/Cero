@@ -38,9 +38,10 @@ HelloTriangle::HelloTriangle()
 		vertex->Get<math::Vec3<float>>("color") = math::Vec3(.0f, .0f, .0f);
 	}
 
-	renderer_->SetPipelineState(pipelineState_);
+	pipeline_ = renderer_->CreatePipeline(*pipelineState_);
 }
 
 void HelloTriangle::Update()
 {
+	renderer_->BindPipeline(pipeline_);
 }

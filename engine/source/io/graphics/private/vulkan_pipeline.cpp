@@ -7,27 +7,15 @@
 
 namespace io::graphics
 {
-	void VulkanPipeline::Initialize(const VulkanDevice& _device, const PipelineState& _pipelineState, const VulkanCommander& _commander, const VulkanSwapChain& _swapChain)
+	VulkanPipeline::VulkanPipeline(const VulkanDevice& _device, const PipelineState& _pipelineState, const VulkanCommander& _commander, const VulkanSwapChain& _swapChain)
+		: device_(_device)
 	{
-		CreatePipelineLayout(_device);
-
-		/*std::vector<VkDynamicState> dynamicStates =
-		{
-			VK_DYNAMIC_STATE_VIEWPORT,
-			VK_DYNAMIC_STATE_SCISSOR
-		};
-
-		VkPipelineDynamicStateCreateInfo dynamicState{};
-		dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-		dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
-		dynamicState.pDynamicStates = dynamicStates.data();*/
-
-		auto pipelineLayout = CreatePipelineLayout(_device);
-		auto shaderStageInfos = CreateShaderStageInfos(_device, _pipelineState);
+		auto pipelineLayout = CreatePipelineLayout();
+		auto shaderStageInfos = CreateShaderStageInfos(_pipelineState);
 		auto vertexBindingDescription = CreateVertexBindingDesc(_pipelineState);
 		auto vertexAttributeDescs = CreateVertexAttributeDescs(_pipelineState);
 		auto vertexInputInfo = CreateVertexInputInfo(_pipelineState, vertexBindingDescription, vertexAttributeDescs);
-		CreateVertexBuffer(_device, _pipelineState, _commander);
+		CreateVertexBuffer(_pipelineState, _commander);
 		auto inputAssemblyInfo = CreateInputAssemblyInfo(_pipelineState);
 		auto viewport = CreateViewport(_pipelineState);
 		auto scissor = CreateScissor(_pipelineState);
@@ -49,6 +37,16 @@ namespace io::graphics
 		pipelineInfo.pMultisampleState = &multisamplingInfo;
 		//pipelineInfo.pDepthStencilState = &depthStencilInfo; // Optional
 		pipelineInfo.pColorBlendState = &colorBlendingInfo;
+		/*std::vector<VkDynamicState> dynamicStates =
+		{
+			VK_DYNAMIC_STATE_VIEWPORT,
+			VK_DYNAMIC_STATE_SCISSOR
+		};
+
+		VkPipelineDynamicStateCreateInfo dynamicState{};
+		dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+		dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+		dynamicState.pDynamicStates = dynamicStates.data();*/
 		//pipelineInfo.pDynamicState = &dynamicState;
 		pipelineInfo.layout = pipelineLayout;
 		pipelineInfo.renderPass = _swapChain.GetRenderPass();
@@ -56,24 +54,24 @@ namespace io::graphics
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 		pipelineInfo.basePipelineIndex = -1; // Optional
 
-		if (vkCreateGraphicsPipelines(_device.GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &instance_) != VK_SUCCESS)
+		if (vkCreateGraphicsPipelines(device_.GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &instance_) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create graphics pipeline");
 		}
 
 		for (auto& info : shaderStageInfos)
 		{
-			vkDestroyShaderModule(_device.GetLogicalDevice(), info.module, nullptr);
+			vkDestroyShaderModule(device_.GetLogicalDevice(), info.module, nullptr);
 		}
 
-		vkDestroyPipelineLayout(_device.GetLogicalDevice(), pipelineLayout, nullptr);
+		vkDestroyPipelineLayout(device_.GetLogicalDevice(), pipelineLayout, nullptr);
 	}
 
-	void VulkanPipeline::Release(const VulkanDevice& _device)
+	VulkanPipeline::~VulkanPipeline()
 	{
-		vkDestroyPipeline(_device.GetLogicalDevice(), instance_, nullptr);
-		vkDestroyBuffer(_device.GetLogicalDevice(), vertexBuffer_, nullptr);
-		vkFreeMemory(_device.GetLogicalDevice(), vertexBufferMemory_, nullptr);
+		vkDestroyPipeline(device_.GetLogicalDevice(), instance_, nullptr);
+		vkDestroyBuffer(device_.GetLogicalDevice(), vertexBuffer_, nullptr);
+		vkFreeMemory(device_.GetLogicalDevice(), vertexBufferMemory_, nullptr);
 	}
 
 	VkPipeline VulkanPipeline::GetInstance() const
@@ -86,7 +84,7 @@ namespace io::graphics
 		return vertexBuffer_;
 	}
 
-	VkPipelineLayout VulkanPipeline::CreatePipelineLayout(const VulkanDevice& _device)
+	VkPipelineLayout VulkanPipeline::CreatePipelineLayout()
 	{
 		VkPipelineLayout pipelineLayout;
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
@@ -96,7 +94,7 @@ namespace io::graphics
 		pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
 		pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
-		if (vkCreatePipelineLayout(_device.GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+		if (vkCreatePipelineLayout(device_.GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create pipeline layout");
 		}
@@ -104,7 +102,7 @@ namespace io::graphics
 		return pipelineLayout;
 	}
 
-	std::vector<VkPipelineShaderStageCreateInfo> VulkanPipeline::CreateShaderStageInfos(const VulkanDevice& _device, const PipelineState& _pipelineState)
+	std::vector<VkPipelineShaderStageCreateInfo> VulkanPipeline::CreateShaderStageInfos(const PipelineState& _pipelineState)
 	{
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos;
 		auto vertShaderCode = io::file::FileInterface::LoadFile(_pipelineState.vertexShaderPath, true, true);
@@ -116,7 +114,7 @@ namespace io::graphics
 		createInfo.codeSize = vertShaderCode.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(vertShaderCode.data());
 
-		if (vkCreateShaderModule(_device.GetLogicalDevice(), &createInfo, nullptr, &vertexShaderModule) != VK_SUCCESS)
+		if (vkCreateShaderModule(device_.GetLogicalDevice(), &createInfo, nullptr, &vertexShaderModule) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create vertex shader");
 		}
@@ -124,7 +122,7 @@ namespace io::graphics
 		createInfo.codeSize = fragShaderCode.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(fragShaderCode.data());
 
-		if (vkCreateShaderModule(_device.GetLogicalDevice(), &createInfo, nullptr, &fragShaderModule) != VK_SUCCESS)
+		if (vkCreateShaderModule(device_.GetLogicalDevice(), &createInfo, nullptr, &fragShaderModule) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create fragment shader");
 		}
@@ -193,23 +191,23 @@ namespace io::graphics
 		return vertexInputStateInfo;
 	}
 
-	void VulkanPipeline::CreateVertexBuffer(const VulkanDevice& _device, const PipelineState& _pipelineState, const VulkanCommander& _commander)
+	void VulkanPipeline::CreateVertexBuffer(const PipelineState& _pipelineState, const VulkanCommander& _commander)
 	{
 		const size_t bufferSize = _pipelineState.vertexBuffer.GetSizeInBytes();
-		auto stagingBuffer = _commander.CreateBuffer(_device, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-		auto stagingBufferMemory = _commander.AllocateMemory(_device, stagingBuffer, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		auto stagingBuffer = _commander.CreateBuffer(device_, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+		auto stagingBufferMemory = _commander.AllocateMemory(device_, stagingBuffer, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 		void* data;
-		vkMapMemory(_device.GetLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+		vkMapMemory(device_.GetLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
 		memcpy(data, _pipelineState.vertexBuffer.GetRawBufferAddress(), (size_t)bufferSize);
-		vkUnmapMemory(_device.GetLogicalDevice(), stagingBufferMemory);
+		vkUnmapMemory(device_.GetLogicalDevice(), stagingBufferMemory);
 
-		vertexBuffer_ = _commander.CreateBuffer(_device, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-		vertexBufferMemory_ = _commander.AllocateMemory(_device, vertexBuffer_, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        _commander.CopyBuffer(_device, stagingBuffer, vertexBuffer_, bufferSize);
+		vertexBuffer_ = _commander.CreateBuffer(device_, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+		vertexBufferMemory_ = _commander.AllocateMemory(device_, vertexBuffer_, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        _commander.CopyBuffer(device_, stagingBuffer, vertexBuffer_, bufferSize);
 
-        vkDestroyBuffer(_device.GetLogicalDevice(), stagingBuffer, nullptr);
-        vkFreeMemory(_device.GetLogicalDevice(), stagingBufferMemory, nullptr);
+        vkDestroyBuffer(device_.GetLogicalDevice(), stagingBuffer, nullptr);
+        vkFreeMemory(device_.GetLogicalDevice(), stagingBufferMemory, nullptr);
 	}
 
 	VkPipelineInputAssemblyStateCreateInfo VulkanPipeline::CreateInputAssemblyInfo(const PipelineState& _pipelineState)

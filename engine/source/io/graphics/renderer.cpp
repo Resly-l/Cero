@@ -10,26 +10,26 @@ namespace io::graphics
 
 	void Renderer::BeginFrame()
 	{
+		graphicsAPI_->BeginFrame();
 	}
 
-	void Renderer::SetPipelineState(std::shared_ptr<PipelineState> _pipelineState)
+	std::shared_ptr<Pipeline> Renderer::CreatePipeline(const PipelineState& _pipelineState)
 	{
-		pipelineState_ = _pipelineState;
-		return graphicsAPI_->BindPipeline(*_pipelineState);
+		return graphicsAPI_->CreatePipeline(_pipelineState);
+	}
+
+	void Renderer::BindPipeline(std::shared_ptr<Pipeline> _pipeline)
+	{
+		graphicsAPI_->BindPipeline(_pipeline);
 	}
 
 	void Renderer::Render()
 	{
-		if (!pipelineState_)
-		{
-			return;
-		}
-
 		graphicsAPI_->Draw();
 	}
 
 	void Renderer::EndFrame()
 	{
-		graphicsAPI_->Present();
+		graphicsAPI_->EndFrame();
 	}
 }

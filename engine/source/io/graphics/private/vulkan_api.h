@@ -17,17 +17,25 @@ namespace io::graphics
 
 		VulkanDevice device_;
 		VulkanSwapChain swapChain_;
-		VulkanPipeline pipeline_;
+		VulkanPipeline* pipeline_;
 		VulkanCommander commander_;
+
+		std::vector<std::shared_ptr<Pipeline>> pipelines_;
+		uint64_t pipelineReleaseInterval_ = 1;
+		uint64_t pipelineReleaseCounter_{};
 
 	public:
 		VulkanAPI(GLFWwindow& _window);
 		~VulkanAPI();
 
 	public:
-		virtual void BindPipeline(const PipelineState& _pipelineState) override;
+		virtual void BeginFrame() override;
+		virtual std::shared_ptr<Pipeline> CreatePipeline(const PipelineState& _pipelineState) override;
+		virtual void BindPipeline(std::shared_ptr<Pipeline> _pipeline) override;
 		virtual void Draw() override;
-		virtual void Present() override;
+		virtual void EndFrame() override;
+
+		void ReleaseUnusedPipelines();
 
 	private:
 		void CreateVulkanInstance();

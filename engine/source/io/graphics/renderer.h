@@ -10,14 +10,14 @@ namespace io::graphics
 	{
 	private:
 		std::unique_ptr<GraphicsAPI> graphicsAPI_;
-		std::shared_ptr<PipelineState> pipelineState_;
 
 	public:
 		Renderer(GLFWwindow& _window);
 
 	public:
 		void BeginFrame();
-		void SetPipelineState(std::shared_ptr<PipelineState> _pipelineState);
+		std::shared_ptr<Pipeline> CreatePipeline(const PipelineState& _pipelineState);
+		void BindPipeline(std::shared_ptr<Pipeline> _pipeline);
 		void Render();
 		void EndFrame();
 	};
