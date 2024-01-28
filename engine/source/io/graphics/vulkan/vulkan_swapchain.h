@@ -14,8 +14,6 @@ namespace io::graphics
 		std::vector<VkImageView> imageViews_;
 		std::vector<VkFramebuffer> framebuffers_;
 
-		VkRenderPass renderPass_;
-
 		uint32_t width_;
 		uint32_t height_;
 
@@ -25,15 +23,11 @@ namespace io::graphics
 
 		VkSwapchainKHR GetInstance() const;
 		const std::vector<VkFramebuffer>& GetFrameBuffers() const;
-		VkRenderPass GetRenderPass() const;
 
 		uint32_t GetWidth() const;
 		uint32_t GetHeight() const;
 
 	private:
-		void CreateSwapChain(const VulkanDevice& _device, VkSurfaceKHR _surface);
-		void InitializeImages(const VulkanDevice& _device);
-		void CreateRenderPass(const VulkanDevice& _device);
 		void CreateFrameBuffer(const VulkanDevice& _device);
 	};
 }

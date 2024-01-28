@@ -1,0 +1,14 @@
+implementation
+	function separation
+		- functionalities which are used in more that two places must be functions.
+		- functionalities which are used only in single place are [ undefined ]
+	
+nameing
+	file
+		- file name must only contain small letter, number, '_', and '.'
+		- each words are separated by '_'.
+		- every class which have logic but not inside another class should have it's own .h or .cpp file
+	type
+		- user types must start with cappital letter.
+		- each words are separated by capital letter of following word.
+			- use '_' when necessary.

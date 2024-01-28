@@ -14,7 +14,6 @@ namespace io::window
 		{
 			renderer_->BeginFrame();
 			Update();
-			renderer_->Render();
 			renderer_->EndFrame();
 		}
 	}

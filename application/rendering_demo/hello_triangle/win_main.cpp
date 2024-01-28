@@ -2,6 +2,13 @@
 
 int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ PWSTR, _In_ int)
 {
-	HelloTriangle{}.Run();
+	try
+	{
+		HelloTriangle{}.Run();
+	}
+	catch (const std::exception& _exception)
+	{
+		return 1;
+	}
 	return 0;
 }

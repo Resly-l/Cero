@@ -1,5 +1,5 @@
 #include "renderer.h"
-#include "private/vulkan_api.h"
+#include "io/graphics/vulkan/vulkan_api.h"
 
 namespace io::graphics
 {
@@ -18,13 +18,9 @@ namespace io::graphics
 		return graphicsAPI_->CreatePipeline(_pipelineState);
 	}
 
-	void Renderer::BindPipeline(std::shared_ptr<Pipeline> _pipeline)
+	void Renderer::Render(std::shared_ptr<Pipeline> _pipeline)
 	{
 		graphicsAPI_->BindPipeline(_pipeline);
-	}
-
-	void Renderer::Render()
-	{
 		graphicsAPI_->Draw();
 	}
 

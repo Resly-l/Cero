@@ -9,8 +9,9 @@ namespace io::window
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+		glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
 
-		window_ = glfwCreateWindow(_width, _height, _title.data(), nullptr, nullptr);
+		window_ = glfwCreateWindow(_width, _height, _title.data(), nullptr , nullptr);
 	}
 
 	Window::~Window()

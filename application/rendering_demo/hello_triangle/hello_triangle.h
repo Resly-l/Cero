@@ -9,7 +9,6 @@ namespace io::graphics
 class HelloTriangle : public io::window::Application
 {
 private:
-	std::shared_ptr<io::graphics::PipelineState> pipelineState_;
 	std::shared_ptr<io::graphics::Pipeline> pipeline_;
 
 public:
