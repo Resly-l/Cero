@@ -1,32 +1,26 @@
 #pragma once
-#include <vulkan/vulkan.h>
 #include "io/graphics/graphics_api.h"
-#include "utility/stl.h"
+#include "vulkan/vulkan.h"
 
 namespace io::graphics
 {
-	class VulkanDevice;
-	class VulkanSwapChain;
-	struct PipelineState;
-
 	class VulkanPipeline : public Pipeline
 	{
 	private:
-		const VulkanDevice& device_;
-
-		VkPipeline instance_{};
-
-		VkBuffer vertexBuffer_{};
-		VkBuffer indexBuffer_{};
-		VkDeviceMemory vertexBufferMemory_{};
-		VkDeviceMemory indexBufferMemory_{};
+		const VkDevice& logicalDevice_;
+		VkPipeline instance_;
+		VkBuffer vertexBuffer_;
+		VkDeviceMemory vertexBufferMemory_;
+		VkBuffer indexBuffer_;
+		VkDeviceMemory indexBufferMemory_;
 
 	public:
-		VulkanPipeline(const VulkanDevice& _device, const PipelineState& _pipelineState, const VulkanSwapChain& _swapChain);
+		VulkanPipeline(const VkDevice& _logicalDevice, VkPhysicalDevice _physicalDevice, VkCommandPool _commandPool, VkQueue _queue, const PipelineState& _pipelineState, VkRenderPass _renderPass, uint32_t _numFramebufferAttachements);
 		~VulkanPipeline();
 
 	public:
 		VkPipeline GetInstance() const;
 		VkBuffer GetVertexBuffer() const;
+		VkBuffer GetIndexBuffer() const;
 	};
 }

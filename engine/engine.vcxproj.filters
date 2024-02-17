@@ -52,6 +52,9 @@
     <Filter Include="source\core\math">
       <UniqueIdentifier>{84ba9e08-b034-4256-9668-ef5f08c0efbd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="docs">
+      <UniqueIdentifier>{96190bec-90fb-4d4b-9a67-a185ccf4c7d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\io\graphics\graphics_api.h">
@@ -159,20 +162,24 @@
     <ClInclude Include="source\io\file\file_interface.h">
       <Filter>source\io\file</Filter>
     </ClInclude>
+    <ClInclude Include="source\core\math\vector.h">
+      <Filter>source\core\math</Filter>
+    </ClInclude>
+    <ClInclude Include="Header.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_api.h">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="source\io\graphics\vulkan\vulkan_device.h">
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_bootstrap.h">
+      <Filter>source\io\graphics\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_render_pass.h">
+      <Filter>source\io\graphics\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_attachment.h">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="source\io\graphics\vulkan\vulkan_pipeline.h">
       <Filter>source\io\graphics\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="source\io\graphics\vulkan\vulkan_swapchain.h">
-      <Filter>source\io\graphics\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="source\core\math\vector.h">
-      <Filter>source\core\math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -188,20 +195,23 @@
     <ClCompile Include="source\utility\byte_buffer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
+    <ClCompile Include="source\core\math\vector.cpp">
+      <Filter>source\core\math</Filter>
+    </ClCompile>
     <ClCompile Include="source\io\graphics\vulkan\vulkan_api.cpp">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="source\io\graphics\vulkan\vulkan_device.cpp">
+    <ClCompile Include="source\io\graphics\vulkan\vulkan_bootstrap.cpp">
+      <Filter>source\io\graphics\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="source\io\graphics\vulkan\vulkan_render_pass.cpp">
+      <Filter>source\io\graphics\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="source\io\graphics\vulkan\vulkan_attachment.cpp">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="source\io\graphics\vulkan\vulkan_pipeline.cpp">
       <Filter>source\io\graphics\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="source\io\graphics\vulkan\vulkan_swapchain.cpp">
-      <Filter>source\io\graphics\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="source\core\math\vector.cpp">
-      <Filter>source\core\math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -217,5 +227,13 @@
     <None Include="tool\shader_compiler\config.ini">
       <Filter>tool\shader_compiler</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="docs\code_convention.txt">
+      <Filter>docs</Filter>
+    </Text>
+    <Text Include="docs\note_vulkan.txt">
+      <Filter>docs</Filter>
+    </Text>
   </ItemGroup>
 </Project>

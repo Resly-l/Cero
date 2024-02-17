@@ -38,10 +38,40 @@ HelloTriangle::HelloTriangle()
 		vertex->Get<math::Vec3<float>>("color") = math::Vec3(0.69f, 0.22f, 0.25f);
 	}
 
-	pipeline_ = renderer_->CreatePipeline(pipelineState);
+	io::graphics::RenderPassLayout renderPassLayout;
+	io::graphics::AttachmentDescription attachmentDescription{};
+	attachmentDescription.format_ = io::graphics::ImageFormat::ifB8G8R8A8_UNORM;
+	attachmentDescription.usage_ = io::graphics::ImageUsage::iuCOLOR_ATTACHMENT;
+	attachmentDescription.loadOperation_ = io::graphics::ImageOperation::ioCLEAR;
+	attachmentDescription.storeOperation_ = io::graphics::ImageOperation::ioSTORE;
+	attachmentDescription.initialLayout_ = io::graphics::ImageLayout::ilUNDEFINED;
+	attachmentDescription.finalLayout_ = io::graphics::ImageLayout::ilSHADER_READ;
+	attachmentDescription.width_ = 1600;
+	attachmentDescription.height_ = 900;
+	renderPassLayout.attachmentDescriptions_.push_back(attachmentDescription);
+	renderPassLayout.attachmentDescriptions_.push_back(attachmentDescription);
+	renderPassLayout.attachmentDescriptions_.push_back(attachmentDescription);
+
+	attachmentDescription.format_ = io::graphics::ImageFormat::ifD32_SFLOAT;
+	attachmentDescription.usage_ = io::graphics::ImageUsage::iuDEPTH_STENCIL_ATTACHMENT;
+	attachmentDescription.initialLayout_ = io::graphics::ImageLayout::ilUNDEFINED;
+	attachmentDescription.finalLayout_ = io::graphics::ImageLayout::ilDEPTH_STENCIL;
+	renderPassLayout.attachmentDescriptions_.push_back(attachmentDescription);
+
+	io::graphics::SubpassDescription subpassDescription{};
+	subpassDescription.numColorReferences_ = 3;
+	renderPassLayout.subpassDescriptions_.push_back(subpassDescription);
+
+	io::graphics::DependencyDescription dependencyDescription{};
+	renderPassLayout.dependencyDescriptions_.push_back(dependencyDescription);
+
+	renderPass_ = renderer_->GetGraphicsAPI().CreateRenderPass(renderPassLayout, 1600, 900);
+	pipeline_ = renderer_->GetGraphicsAPI().CreatePipeline(pipelineState, *renderPass_);
+	renderer_->GetGraphicsAPI().BindRenderPass(renderPass_);
+	renderer_->GetGraphicsAPI().BindPipeline(pipeline_);
 }
 
 void HelloTriangle::Update()
 {
-	renderer_->Render(pipeline_);
+	renderer_->GetGraphicsAPI().Draw();
 }

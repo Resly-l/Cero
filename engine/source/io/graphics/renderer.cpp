@@ -8,24 +8,8 @@ namespace io::graphics
 	{
 	}
 
-	void Renderer::BeginFrame()
+	GraphicsAPI& Renderer::GetGraphicsAPI()
 	{
-		graphicsAPI_->BeginFrame();
-	}
-
-	std::shared_ptr<Pipeline> Renderer::CreatePipeline(const PipelineState& _pipelineState)
-	{
-		return graphicsAPI_->CreatePipeline(_pipelineState);
-	}
-
-	void Renderer::Render(std::shared_ptr<Pipeline> _pipeline)
-	{
-		graphicsAPI_->BindPipeline(_pipeline);
-		graphicsAPI_->Draw();
-	}
-
-	void Renderer::EndFrame()
-	{
-		graphicsAPI_->EndFrame();
+		return *graphicsAPI_;
 	}
 }

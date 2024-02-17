@@ -12,9 +12,9 @@ namespace io::window
 	{
 		while (Window::ProcessMessage())
 		{
-			renderer_->BeginFrame();
+			renderer_->GetGraphicsAPI().BeginFrame();
 			Update();
-			renderer_->EndFrame();
+			renderer_->GetGraphicsAPI().EndFrame();
 		}
 	}
 }

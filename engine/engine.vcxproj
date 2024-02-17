@@ -160,10 +160,10 @@
     <ClInclude Include="source\io\graphics\pipeline_state.h" />
     <ClInclude Include="source\io\graphics\renderer.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_api.h" />
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_attachment.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_bootstrap.h" />
-    <ClInclude Include="source\io\graphics\vulkan\vulkan_device.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_pipeline.h" />
-    <ClInclude Include="source\io\graphics\vulkan\vulkan_swapchain.h" />
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_render_pass.h" />
     <ClInclude Include="source\io\window\application.h" />
     <ClInclude Include="source\io\window\window.h" />
     <ClInclude Include="source\io\window\window_min.h" />
@@ -200,10 +200,10 @@
     <ClCompile Include="source\core\math\vector.cpp" />
     <ClCompile Include="source\io\graphics\renderer.cpp" />
     <ClCompile Include="source\io\graphics\vulkan\vulkan_api.cpp" />
+    <ClCompile Include="source\io\graphics\vulkan\vulkan_attachment.cpp" />
     <ClCompile Include="source\io\graphics\vulkan\vulkan_bootstrap.cpp" />
-    <ClCompile Include="source\io\graphics\vulkan\vulkan_device.cpp" />
     <ClCompile Include="source\io\graphics\vulkan\vulkan_pipeline.cpp" />
-    <ClCompile Include="source\io\graphics\vulkan\vulkan_swapchain.cpp" />
+    <ClCompile Include="source\io\graphics\vulkan\vulkan_render_pass.cpp" />
     <ClCompile Include="source\io\window\application.cpp" />
     <ClCompile Include="source\io\window\window.cpp" />
     <ClCompile Include="source\utility\byte_buffer.cpp" />
@@ -213,6 +213,10 @@
     <None Include="asset\shader\source\hello_triangle.vert" />
     <None Include="tool\shader_compiler\compile_shaders.bat" />
     <None Include="tool\shader_compiler\config.ini" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="docs\code_convention.txt" />
+    <Text Include="docs\note_vulkan.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

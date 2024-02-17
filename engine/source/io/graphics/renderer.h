@@ -15,10 +15,6 @@ namespace io::graphics
 		Renderer(GLFWwindow& _window);
 
 	public:
-		std::shared_ptr<Pipeline> CreatePipeline(const PipelineState& _pipelineState);
-
-		void BeginFrame();
-		void Render(std::shared_ptr<Pipeline> _pipeline);
-		void EndFrame();
+		GraphicsAPI& GetGraphicsAPI();
 	};
 }

@@ -1,0 +1,6 @@
+
+
+
+classes having Vk~ types as members and destroying Vk~ objects in destructor
+must consider implementation of copy constructor
+
