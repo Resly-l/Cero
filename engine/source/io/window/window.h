@@ -2,21 +2,24 @@
 #include "utility/stl.h"
 #include "window_min.h"
 
-struct GLFWwindow;
-
 namespace io::window
 {
 	class Window
 	{
 	private:
+		HINSTANCE instance_;
+		const std::string className_;
 		std::string title_;
 
 	protected:
-		GLFWwindow* window_ = nullptr;
+		HWND wnd_;
 
 	public:
-		Window(int _width, int _height, std::string_view _title);
+		Window(uint32_t _width, uint32_t _height, std::string_view _title, std::string_view _className = "default class name");
 		virtual ~Window();
+
+		// returns previous visibility
+		bool SetVisibility(bool _visible);
 
 	protected:
 		bool ProcessMessage();
@@ -27,6 +30,9 @@ namespace io::window
 		void SetTitle(std::string_view _title);
 
 	private:
+		void RegisterWindowClass(std::string_view _className, std::string_view _iconPath) const;
+		void Instantiate(uint32_t _width, uint32_t _height);
+
 		static LRESULT WindowProc(HWND, UINT, WPARAM, LPARAM);
 	};
 }

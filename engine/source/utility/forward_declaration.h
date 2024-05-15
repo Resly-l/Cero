@@ -9,13 +9,17 @@ namespace io
 
 	namespace graphics
 	{
-		enum class PrimitiveTopology;
-		enum class ComparisonFunc;
-		enum class RasterizerState;
-		enum class BlendState;
-		struct PipelineState;
-
 		class GraphicsAPI;
-		class Renderer;
+		class Framebuffer;
+		class Pipeline;
+
+		class VulkanAPI;
+		class VulkanPipeline;
+		class VulkanRenderTarget;
+	}
+
+	namespace file
+	{
+		class FileInterface;
 	}
 }

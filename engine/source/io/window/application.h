@@ -1,6 +1,6 @@
 #pragma once
 #include "io/window/window.h"
-#include "io/graphics/renderer.h"
+#include "io/graphics/graphics_api.h"
 
 namespace io::window
 {
@@ -11,10 +11,10 @@ namespace io::window
 		static constexpr uint32_t defaultWindowHeight = 900;
 
 	protected:
-		std::unique_ptr<graphics::Renderer> renderer_;
+		std::unique_ptr<graphics::GraphicsAPI> graphicsAPI_;
 
 	public:
-		Application();
+		Application(graphics::GraphicsAPIType _apiType);
 		virtual ~Application() = default;
 
 	public:

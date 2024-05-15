@@ -1,16 +1,18 @@
 #include "hello_triangle.h"
+#include "utility/string_utility.h"
 
-//#define TRY_CATCH
+#define TRY_CATCH 1
 
-int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ PWSTR, _In_ int)
+int main()
 {
-#ifdef TRY_CATCH
+#if TRY_CATCH
 	try
 	{
 		HelloTriangle{}.Run();
 	}
 	catch (const std::exception& _exception)
 	{
+		MessageBox(nullptr, utility::ToWide(_exception.what()).c_str(), L"Exception occured", MB_OK);
 		return 1;
 	}
 #else

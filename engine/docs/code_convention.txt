@@ -12,3 +12,7 @@ nameing
 		- user types must start with cappital letter.
 		- each words are separated by capital letter of following word.
 			- use '_' when necessary.
+	variable
+		- local variable : none
+		- member variable : put '_' at the end
+		- parameter variable : put '_' at the front

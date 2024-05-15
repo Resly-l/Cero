@@ -1,66 +1,57 @@
 #pragma once
 #include "io/graphics/graphics_api.h"
-#include "vulkan/vulkan.h"
-
-struct GLFWwindow;
+#include "thirdparty/vk_bootstrap/VkBootstrap.h"
+#include "utility/forward_declaration.h"
 
 namespace io::graphics
 {
-	class VulkanPipeline;
-	class VulkanRenderPass;
-
 	class VulkanAPI : public GraphicsAPI
 	{
 	private:
-		static constexpr uint32_t frameConcurrency_ = 3;
+		struct Frame
+		{
+			VkCommandBuffer commandBuffer_;
+			VkSemaphore imageAcquiringSemaphore_;
+			VkSemaphore commandExecutionSemaphore_;
+			VkFence frameFence_;
+		};
 
-		VkInstance instance_;
-		VkSurfaceKHR surface_;
-		VkPhysicalDevice physicalDevice_;
-		VkDevice logicalDevice_;
-		uint32_t graphicsQueueFamilyIndex_;
-		uint32_t presentQueueFamilyIndex_;
-		VkQueue graphicsQueue_;
-		VkQueue presentQueue_;
+	private:
+		vkb::Instance instance_;
+		vkb::PhysicalDevice physicalDevice_;
+		vkb::Device logicalDevice_;
+		vkb::Swapchain swapchain_;
+		std::unique_ptr<VulkanPipeline> presentationPipeline_;
+
 		VkCommandPool commandPool_;
-		std::vector<VkCommandBuffer> commandBuffers_;
-		std::vector<VkSemaphore> imageAvailableSemaphores_;
-		std::vector<VkSemaphore> renderFinishedSemaphores_;
-		std::vector<VkFence> fences_;
-		uint32_t currentFrame_ = 0;
-		uint32_t currentImageIndex_ = 0;
-
-		VkSwapchainKHR swapChain_;
-		VkSurfaceFormatKHR swapChainFormat_;
-		VkExtent2D swapChainExtent_{};
-		VkRenderPass swapChainRenderPass_;
-		std::vector<VkImageView> swapChainImageViews_;
-		std::vector<VkFramebuffer> swapChainFramebuffers_;
-
-		std::unique_ptr<VulkanPipeline> swapChainPipeline_;
-		std::shared_ptr<VulkanRenderPass> renderPass_;
-		std::shared_ptr<VulkanPipeline> pipeline_;
-
-		// Currently wating semaphore
-		VkSemaphore waitingSemaphore_{};
-		// Semaphore of last draw call that needs to be wait signal before queueing new one
-		VkSemaphore lastSemaphore_{};
-		// Semaphores created during multiple render pass draw calls
-		// Needs to be destroyed after signaled
-		std::vector<std::pair<uint32_t, VkSemaphore>> renderPassSemaphores_;
+		static constexpr uint32_t numFrameConcurrency_ = 2;
+		std::array<Frame, numFrameConcurrency_> frames_;
+		uint32_t swapChainImageIndex_ = 0;
+		uint32_t frameIndex_ = 0;
 
 	public:
-		VulkanAPI(GLFWwindow& _window);
+		VulkanAPI(void* _window);
 		~VulkanAPI();
 
 	public:
-		virtual std::shared_ptr<RenderPass> CreateRenderPass(const RenderPassLayout& _renderPassLayout, uint32_t _width, uint32_t _height) override;
-		virtual std::shared_ptr<Pipeline> CreatePipeline(const PipelineState& _pipelineState, const RenderPass& _renderPass) override;
-		virtual void BindRenderPass(std::shared_ptr<RenderPass> _renderPass) override;
+		virtual std::shared_ptr<Pipeline> CreatePipeline(const Pipeline::Layout& _pipelineLayout) override;
+		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(const RenderTargetLayout& _renderTargetLayout) override;
+
 		virtual void BindPipeline(std::shared_ptr<Pipeline> _pipeline) override;
+		virtual void BindRenderTargets(std::vector<std::shared_ptr<RenderTarget>> _renderTargets) override;
 
 		virtual void BeginFrame() override;
 		virtual void Draw() override;
 		virtual void EndFrame() override;
+
+	private:
+		void CreateInstance();
+		void SelectPhysicalDevice(void* _window);
+		void CreateLogicalDevice();
+		void CreateSwapchain();
+		void CreatePresentationPipeline();
+		void CreateCommandPool();
+		void CreateCommandBuffers();
+		void CreateSyncObjects();
 	};
 }

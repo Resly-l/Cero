@@ -1,15 +1,11 @@
 #pragma once
 #include "io/window/application.h"
 
-namespace io::graphics
-{
-	struct PipelineState;
-}
 
 class HelloTriangle : public io::window::Application
 {
 private:
-	std::shared_ptr<io::graphics::RenderPass> renderPass_;
+	std::shared_ptr<io::graphics::RenderTarget> renderTarget_;
 	std::shared_ptr<io::graphics::Pipeline> pipeline_;
 
 public:

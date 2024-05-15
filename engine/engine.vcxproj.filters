@@ -55,15 +55,12 @@
     <Filter Include="docs">
       <UniqueIdentifier>{96190bec-90fb-4d4b-9a67-a185ccf4c7d1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\thirdparty\vk_bootstrap">
+      <UniqueIdentifier>{80dad7e6-5df4-4f2e-b156-c02bc3c85647}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\io\graphics\graphics_api.h">
-      <Filter>source\io\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="source\io\graphics\pipeline_state.h">
-      <Filter>source\io\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="source\io\graphics\renderer.h">
       <Filter>source\io\graphics</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\stl.h">
@@ -169,23 +166,30 @@
     <ClInclude Include="source\io\graphics\vulkan\vulkan_api.h">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="source\io\graphics\vulkan\vulkan_bootstrap.h">
-      <Filter>source\io\graphics\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="source\io\graphics\vulkan\vulkan_render_pass.h">
-      <Filter>source\io\graphics\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="source\io\graphics\vulkan\vulkan_attachment.h">
-      <Filter>source\io\graphics\vulkan</Filter>
-    </ClInclude>
     <ClInclude Include="source\io\graphics\vulkan\vulkan_pipeline.h">
+      <Filter>source\io\graphics\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\mesh.h" />
+    <ClInclude Include="source\thirdparty\vk_bootstrap\VkBootstrap.h">
+      <Filter>source\thirdparty\vk_bootstrap</Filter>
+    </ClInclude>
+    <ClInclude Include="source\thirdparty\vk_bootstrap\VkBootstrapDispatch.h">
+      <Filter>source\thirdparty\vk_bootstrap</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\string_utility.h">
+      <Filter>source\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_validation.hpp">
+      <Filter>source\io\graphics\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\graphics_pipeline.h">
+      <Filter>source\io\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_utility.h">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\io\graphics\renderer.cpp">
-      <Filter>source\io\graphics</Filter>
-    </ClCompile>
     <ClCompile Include="source\io\window\window.cpp">
       <Filter>source\io\window</Filter>
     </ClCompile>
@@ -201,16 +205,16 @@
     <ClCompile Include="source\io\graphics\vulkan\vulkan_api.cpp">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="source\io\graphics\vulkan\vulkan_bootstrap.cpp">
-      <Filter>source\io\graphics\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="source\io\graphics\vulkan\vulkan_render_pass.cpp">
-      <Filter>source\io\graphics\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="source\io\graphics\vulkan\vulkan_attachment.cpp">
-      <Filter>source\io\graphics\vulkan</Filter>
-    </ClCompile>
     <ClCompile Include="source\io\graphics\vulkan\vulkan_pipeline.cpp">
+      <Filter>source\io\graphics\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="source\thirdparty\vk_bootstrap\VkBootstrap.cpp">
+      <Filter>source\thirdparty\vk_bootstrap</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\string_utility.cpp">
+      <Filter>source\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="source\io\graphics\vulkan\vulkan_utility.cpp">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClCompile>
   </ItemGroup>
@@ -226,6 +230,12 @@
     </None>
     <None Include="tool\shader_compiler\config.ini">
       <Filter>tool\shader_compiler</Filter>
+    </None>
+    <None Include="asset\shader\source\fullscreen.frag">
+      <Filter>asset\shader\source</Filter>
+    </None>
+    <None Include="asset\shader\source\fullscreen.vert">
+      <Filter>asset\shader\source</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

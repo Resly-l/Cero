@@ -4,3 +4,49 @@
 classes having Vk~ types as members and destroying Vk~ objects in destructor
 must consider implementation of copy constructor
 
+there is no guarantee that command buffers will be executed in the order they have been submitted by the application
+framebuffer object references all of the VkImageView objects that represent the attachments
+Subpasses are subsequent rendering operations that depend on the contents of framebuffers in previous passes
+
+2024/05/14---------------------------------------------------------------------------------------------------------------------------
+renderpass specifies how many attachments there will be during gfx operation and how their layout, sampler state set
+
+framebuffers are dependent on renderpasses (= create info takes renderpass)
+the thing is, swapchain images have framebuffers individually meaning in each every frame, different framebuffer must be bound.
+
+- framebuffer is render target
+- ?? is it possible to pair n framebuffers with 1 renderpass ??
+	- if so, make single pipeline with multiple render targets -> guesssing it has to be possible
+- pipeline cannot own framebuffers ? -> re-think
+- if pipeline owns renderpass, then framebuffer(render target) must be made depending on the pipeline
+	-> but then again, regardless of vulkan, pipeline must know how input&output attachments are configured which is
+		 exactly what vulkan renderpass is for. meaning it's neccessary
+- 
+
+2024/05/15---------------------------------------------------------------------------------------------------------------------------
+framebuffer is just a buffer which holds render target information
+it can specify how each render targets will be used during redering that frame
+image used by framebuffer is the actual render target
+
+pipeline knows shader layout
+	-> shader knows number of attachments and thier layouts
+		-> pipline has render targets
+			-> how do we draw to a render target which was not created by pipline
+			render target = image & framebuffer can be composed when we decide which pipeline will be drawing to which render target
+
+shader pair 1 : pipeline 1 : renderpass 1 : framebuffer n
+framebuffer 1 : attachments(render target) n
+
+1 pipline -> 3 swap chain images -> 3 framebuffers with each different attachments
+
+synchronization
+	semaphore
+		semaphore is used to add order between queue operations
+		are used both to order work inside the same queue and between different queues
+
+	fences
+		fences must be reset manually to put them back into the unsignaled state
+		they block cpu
+
+	In summary, semaphores are used to specify the execution order of operations on the GPU while fences are used to keep the CPU and GPU in sync with each-other.
+
