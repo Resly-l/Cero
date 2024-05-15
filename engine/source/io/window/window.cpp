@@ -8,7 +8,6 @@ namespace io::window
 		, instance_(GetModuleHandle(nullptr))
 	{
 		RegisterWindowClass(_title, std::string_view{});
-
 		Instantiate(_width, _height);
 		SetVisibility(true);
 	}
@@ -52,6 +51,20 @@ namespace io::window
 		return ShowWindow(wnd_, _visible ? SW_SHOW : SW_HIDE);
 	}
 
+	void Window::SetResizability(bool _resizable)
+	{
+		DWORD windowStyle = GetWindowLongPtrA(wnd_, GWL_STYLE);
+
+		if (_resizable)
+		{
+			SetWindowLongPtrA(wnd_, GWL_STYLE, windowStyle | WS_THICKFRAME | WS_MAXIMIZEBOX);
+		}
+		else
+		{
+			SetWindowLongPtrA(wnd_, GWL_STYLE, (windowStyle & ~WS_THICKFRAME) & ~WS_MAXIMIZEBOX);
+		}
+	}
+
 	void Window::Close() const
 	{
 		PostQuitMessage(0);
@@ -62,7 +75,7 @@ namespace io::window
 		WNDCLASSEXA wc = {};
 		wc.cbSize = sizeof(WNDCLASSEXA);
 		wc.style = CS_HREDRAW | CS_VREDRAW;
-		wc.lpfnWndProc = WindowProc;
+		wc.lpfnWndProc = SetupWindowProc;
 		wc.hInstance = instance_;
 		wc.hIcon = (HICON)LoadImageA(0, _iconPath.data(), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 		wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
@@ -73,26 +86,65 @@ namespace io::window
 
 	void Window::Instantiate(uint32_t _width, uint32_t _height)
 	{
-		RECT windowRect = { 0, 0, (LONG)_width, (LONG)_height };
-		AdjustWindowRect(&windowRect, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE);
+		DWORD windowStyle = WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_OVERLAPPEDWINDOW;
 
-		wnd_ = CreateWindowExA(0, className_.c_str(), title_.c_str(), WS_SYSMENU | WS_MINIMIZEBOX,
+		RECT windowRect = { 0, 0, (LONG)_width, (LONG)_height };
+		AdjustWindowRect(&windowRect,windowStyle, FALSE);
+
+		wnd_ = CreateWindowExA(0, className_.c_str(), title_.c_str(), windowStyle,
 			GetSystemMetrics(SM_CXSCREEN) / 2 - (windowRect.right - windowRect.left) / 2,
 			GetSystemMetrics(SM_CYSCREEN) / 2 - (windowRect.bottom - windowRect.top) / 2,
 			windowRect.right - windowRect.left, windowRect.bottom - windowRect.top,
-			nullptr, nullptr, instance_, nullptr
+			nullptr, nullptr, instance_, this
 		);
 	}
 
-	LRESULT Window::WindowProc(HWND window, UINT msg, WPARAM wParam, LPARAM lParam)
+	LRESULT Window::SetupWindowProc(HWND _window, UINT _msg, WPARAM _wParam, LPARAM _lParam)
 	{
-		switch (msg)
+		if (_msg == WM_NCCREATE)
 		{
+			CREATESTRUCTW* createStruct = reinterpret_cast<CREATESTRUCTW*>(_lParam);
+			Window* window = createStruct ? static_cast<Window*>(createStruct->lpCreateParams) : nullptr;
+			if (window == nullptr)
+			{
+				throw std::exception("failed to setup window proc");
+			}
+
+			SetWindowLongPtrA(_window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
+			SetWindowLongPtrA(_window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Window::WindowProc));
+
+			return window->HandleMessage(_window, _msg, _wParam, _lParam);
+		}
+
+		return DefWindowProcA(_window, _msg, _wParam, _lParam);
+	}
+
+	LRESULT Window::WindowProc(HWND _window, UINT _msg, WPARAM _wParam, LPARAM _lParam)
+	{
+		Window* window = reinterpret_cast<Window*>(GetWindowLongPtrA(_window, GWLP_USERDATA));
+		if (window == nullptr)
+		{
+			return S_FALSE;
+		}
+
+		return window->HandleMessage(_window, _msg, _wParam, _lParam);
+	}
+
+	LRESULT Window::HandleMessage(HWND _window, UINT _msg, WPARAM _wParam, LPARAM _lParam)
+	{
+		uint32_t highWord = HIWORD(_lParam);
+		uint32_t lowWord = LOWORD(_lParam);
+
+		switch (_msg)
+		{
+		case WM_SIZE:
+			Resize(lowWord, highWord);
+			break;
 		case WM_CLOSE:
 			PostQuitMessage(S_OK);
 			return S_OK;
 		}
 
-		return DefWindowProcA(window, msg, wParam, lParam);
+		return DefWindowProcA(_window, _msg, _wParam, _lParam);
 	}
 }

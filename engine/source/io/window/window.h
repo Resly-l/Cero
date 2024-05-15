@@ -18,21 +18,23 @@ namespace io::window
 		Window(uint32_t _width, uint32_t _height, std::string_view _title, std::string_view _className = "default class name");
 		virtual ~Window();
 
-		// returns previous visibility
+		std::string_view GetTitle() const;
+		void SetTitle(std::string_view _title);
 		bool SetVisibility(bool _visible);
+		void SetResizability(bool _resizable);
+		void Close() const;
 
 	protected:
 		bool ProcessMessage();
 		virtual void Update() = 0;
-		void Close() const;
-
-		std::string_view GetTitle() const;
-		void SetTitle(std::string_view _title);
+		virtual void Resize(uint32_t _width, uint32_t _height) {};
 
 	private:
 		void RegisterWindowClass(std::string_view _className, std::string_view _iconPath) const;
 		void Instantiate(uint32_t _width, uint32_t _height);
 
-		static LRESULT WindowProc(HWND, UINT, WPARAM, LPARAM);
+		static LRESULT SetupWindowProc(HWND _window, UINT _msg, WPARAM _wParam, LPARAM _lParam);
+		static LRESULT WindowProc(HWND _window, UINT _msg, WPARAM _wParam, LPARAM _lParam);
+		LRESULT HandleMessage(HWND _window, UINT _msg, WPARAM _wParam, LPARAM _lParam);
 	};
 }

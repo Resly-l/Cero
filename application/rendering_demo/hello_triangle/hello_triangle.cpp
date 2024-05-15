@@ -8,7 +8,7 @@ HelloTriangle::HelloTriangle()
 	: Application(GraphicsAPIType::Vulkan)
 {
 	Window::SetTitle("Hello Triangle");
-	
+	Window::SetResizability(false);
 }
 
 void HelloTriangle::Update()

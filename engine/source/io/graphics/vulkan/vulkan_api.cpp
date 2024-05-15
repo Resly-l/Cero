@@ -8,7 +8,10 @@
 namespace io::graphics
 {
 	VulkanAPI::VulkanAPI(void* _window)
+		: windowHandle_(_window)
 	{
+		frames_.resize(config_.numFrameConcurrency_);
+
 		CreateInstance();
 		SelectPhysicalDevice(_window);
 		CreateLogicalDevice();
@@ -71,9 +74,19 @@ namespace io::graphics
 
 	void VulkanAPI::EndFrame()
 	{
+		if (pendingSwapchainCreation_ && !RecreateSwapchain())
+		{
+			return;
+		}
+
 		vkWaitForFences(logicalDevice_, 1, &frames_[frameIndex_].frameFence_, VK_TRUE, UINT64_MAX);
+		VkResult result = vkAcquireNextImageKHR(logicalDevice_, swapchain_, UINT64_MAX, frames_[frameIndex_].imageAcquiringSemaphore_, VK_NULL_HANDLE, &swapChainImageIndex_);
+		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			RecreateSwapchain();
+			return;
+		}
 		vkResetFences(logicalDevice_, 1, &frames_[frameIndex_].frameFence_);
-		vkAcquireNextImageKHR(logicalDevice_, swapchain_, UINT64_MAX, frames_[frameIndex_].imageAcquiringSemaphore_, VK_NULL_HANDLE, &swapChainImageIndex_);
 
 		VkCommandBufferBeginInfo commandBufferBeginInfo{};
 		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -136,8 +149,13 @@ namespace io::graphics
 		presentInfo.pSwapchains = swapchains;
 		presentInfo.pImageIndices = &swapChainImageIndex_;
 
-		vkQueuePresentKHR(logicalDevice_.get_queue(vkb::QueueType::present).value(), &presentInfo);
-		frameIndex_ = (frameIndex_ + 1) % numFrameConcurrency_;
+		result = vkQueuePresentKHR(logicalDevice_.get_queue(vkb::QueueType::present).value(), &presentInfo);
+		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			RecreateSwapchain();
+		}
+
+		frameIndex_ = (frameIndex_ + 1) % config_.numFrameConcurrency_;
 	}
 
 	void VulkanAPI::CreateInstance()
@@ -244,5 +262,25 @@ namespace io::graphics
 			fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 			vkCreateFence(logicalDevice_, &fenceCreateInfo, nullptr, &frame.frameFence_);
 		}
+	}
+
+	bool VulkanAPI::RecreateSwapchain()
+	{
+		while (IsIconic((HWND)windowHandle_))
+		{
+			pendingSwapchainCreation_ = true;
+			return false;
+		}
+
+		pendingSwapchainCreation_ = false;
+		vkDeviceWaitIdle(logicalDevice_);
+
+		presentationPipeline_ = nullptr;
+		vkb::destroy_swapchain(swapchain_);
+
+		CreateSwapchain();
+		CreatePresentationPipeline();
+
+		return true;
 	}
 }

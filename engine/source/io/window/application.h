@@ -19,5 +19,8 @@ namespace io::window
 
 	public:
 		void Run();
+
+	protected:
+		virtual void Resize(uint32_t _width, uint32_t _height) override;
 	};
 }

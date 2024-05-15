@@ -27,4 +27,9 @@ namespace io::window
 			graphicsAPI_->EndFrame();
 		}
 	}
+
+	void Application::Resize(uint32_t _width, uint32_t _height)
+	{
+		graphicsAPI_->Resize(_width, _height);
+	}
 }

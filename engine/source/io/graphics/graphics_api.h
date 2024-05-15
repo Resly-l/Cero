@@ -6,8 +6,22 @@ namespace io::graphics
 	class RenderTarget {};
 	struct RenderTargetLayout {};
 
+	enum class GraphicsAPIType
+	{
+		Vulkan,
+	};
+
 	class GraphicsAPI
 	{
+	public:
+		struct Config
+		{
+			uint32_t numFrameConcurrency_ = 2;
+		};
+
+	protected:
+		Config config_;
+
 	public:
 		virtual ~GraphicsAPI() = default;
 
@@ -21,10 +35,7 @@ namespace io::graphics
 		virtual void BeginFrame() = 0;
 		virtual void Draw() = 0;
 		virtual void EndFrame() = 0;
-	};
 
-	enum class GraphicsAPIType
-	{
-		Vulkan,
+		virtual void Resize(uint32_t _width, uint32_t _height) = 0;
 	};
 }

@@ -17,17 +17,19 @@ namespace io::graphics
 		};
 
 	private:
+		void* windowHandle_ = nullptr;
 		vkb::Instance instance_;
 		vkb::PhysicalDevice physicalDevice_;
 		vkb::Device logicalDevice_;
 		vkb::Swapchain swapchain_;
-		std::unique_ptr<VulkanPipeline> presentationPipeline_;
 
+		std::unique_ptr<VulkanPipeline> presentationPipeline_;
+		std::vector<Frame> frames_;
 		VkCommandPool commandPool_;
-		static constexpr uint32_t numFrameConcurrency_ = 2;
-		std::array<Frame, numFrameConcurrency_> frames_;
 		uint32_t swapChainImageIndex_ = 0;
 		uint32_t frameIndex_ = 0;
+
+		bool pendingSwapchainCreation_ = false;
 
 	public:
 		VulkanAPI(void* _window);
@@ -44,6 +46,8 @@ namespace io::graphics
 		virtual void Draw() override;
 		virtual void EndFrame() override;
 
+		virtual void Resize(uint32_t _width, uint32_t _height) override {};
+
 	private:
 		void CreateInstance();
 		void SelectPhysicalDevice(void* _window);
@@ -53,5 +57,6 @@ namespace io::graphics
 		void CreateCommandPool();
 		void CreateCommandBuffers();
 		void CreateSyncObjects();
+		bool RecreateSwapchain();
 	};
 }
