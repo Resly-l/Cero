@@ -26,10 +26,13 @@ namespace io::graphics
 		std::unique_ptr<VulkanPipeline> presentationPipeline_;
 		std::vector<Frame> frames_;
 		VkCommandPool commandPool_;
+		VkCommandPool transfereCommandPool_;
 		uint32_t swapChainImageIndex_ = 0;
 		uint32_t frameIndex_ = 0;
 
-		bool pendingSwapchainCreation_ = false;
+		bool pendingSwapchainRecreation_ = false;
+
+		std::shared_ptr<VulkanMesh> testMesh_;
 
 	public:
 		VulkanAPI(void* _window);
@@ -38,9 +41,11 @@ namespace io::graphics
 	public:
 		virtual std::shared_ptr<Pipeline> CreatePipeline(const Pipeline::Layout& _pipelineLayout) override;
 		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(const RenderTargetLayout& _renderTargetLayout) override;
+		virtual std::shared_ptr<Mesh> CreateMesh(const Mesh::Layout& _meshLayout) override;
 
 		virtual void BindPipeline(std::shared_ptr<Pipeline> _pipeline) override;
 		virtual void BindRenderTargets(std::vector<std::shared_ptr<RenderTarget>> _renderTargets) override;
+		virtual void BindMesh(std::shared_ptr<Mesh> _mesh) override;
 
 		virtual void BeginFrame() override;
 		virtual void Draw() override;
@@ -54,7 +59,7 @@ namespace io::graphics
 		void CreateLogicalDevice();
 		void CreateSwapchain();
 		void CreatePresentationPipeline();
-		void CreateCommandPool();
+		void CreateCommandPools();
 		void CreateCommandBuffers();
 		void CreateSyncObjects();
 		bool RecreateSwapchain();

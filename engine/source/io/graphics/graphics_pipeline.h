@@ -83,23 +83,33 @@ namespace io::graphics
 		};
 	};
 
+	class Mesh
+	{
+	public:
+		struct Layout
+		{
+			utility::ByteBuffer vertices_;
+			std::vector<uint32_t> indices_;
+		};
+	};
+
 	class Pipeline
 	{
 	public:
 		struct Layout
 		{
-			PrimitiveTopology primitiveTopology = PrimitiveTopology::NONE;
-			ComparisonFunc depthFunc = ComparisonFunc::NONE;
-			ComparisonFunc stencilFunc = ComparisonFunc::NONE;
-			bool depthStencilReadOnly = false;
-			RasterizerState rasterizerState = RasterizerState::NONE;
-			BlendState blendState = BlendState::NONE;
+			PrimitiveTopology primitiveTopology_ = PrimitiveTopology::NONE;
+			ComparisonFunc depthFunc_ = ComparisonFunc::NONE;
+			ComparisonFunc stencilFunc_ = ComparisonFunc::NONE;
+			bool depthStencilReadOnly_ = false;
+			RasterizerState rasterizerState_ = RasterizerState::NONE;
+			BlendState blendState_ = BlendState::NONE;
 			Viewport viewport_;
-			std::vector<Framebuffer::Layout> frameBufferLayouts;
+			std::vector<Framebuffer::Layout> frameBufferLayouts_;
 
-			std::wstring_view vertexShaderPath;
-			std::wstring_view pixelShaderPath;
-			utility::ByteBuffer::Layout vertexInputLayout;
+			std::wstring_view vertexShaderPath_;
+			std::wstring_view pixelShaderPath_;
+			utility::ByteBuffer::Layout vertexInputLayout_;
 		};
 	};
 }

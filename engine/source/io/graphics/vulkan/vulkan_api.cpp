@@ -1,9 +1,11 @@
 #include "vulkan_api.h"
 #include "vulkan_pipeline.h"
+#include "vulkan_mesh.h"
 #include "vulkan_validation.hpp"
 #include "io/window/window_min.h"
 #include <vulkan/vulkan_win32.h>
 #include "thirdparty/glfw/glfw3.h"
+#include "core/math/vector.h"
 
 namespace io::graphics
 {
@@ -17,14 +19,46 @@ namespace io::graphics
 		CreateLogicalDevice();
 		CreateSwapchain();
 		CreatePresentationPipeline();
-		CreateCommandPool();
+		CreateCommandPools();
 		CreateCommandBuffers();
 		CreateSyncObjects();
+
+		Mesh::Layout meshLayout;
+
+		utility::ByteBuffer::Layout vertexBufferLayout;
+		vertexBufferLayout.AddAttribute<math::Vec2<float>>("position");
+		vertexBufferLayout.AddAttribute<math::Vec3<float>>("color");
+		meshLayout.vertices_.SetLayout(vertexBufferLayout);
+		if (auto vertex = meshLayout.vertices_.Add())
+		{
+			vertex->Get<math::Vec2<float>>("position") = math::Vec2(-0.35f, -0.5f);
+			vertex->Get<math::Vec3<float>>("color") = math::Vec3(0.98f, 0.75f, 0.85f);
+		}
+		if (auto vertex = meshLayout.vertices_.Add())
+		{
+			vertex->Get<math::Vec2<float>>("position") = math::Vec2(0.35f, -0.5f);
+			vertex->Get<math::Vec3<float>>("color") = math::Vec3(0.69f, 0.22f, 0.25f);
+		}
+		if (auto vertex = meshLayout.vertices_.Add())
+		{
+			vertex->Get<math::Vec2<float>>("position") = math::Vec2(0.35f, 0.5f);
+			vertex->Get<math::Vec3<float>>("color") = math::Vec3(0.98f, 0.75f, 0.85f);
+		}
+		if (auto vertex = meshLayout.vertices_.Add())
+		{
+			vertex->Get<math::Vec2<float>>("position") = math::Vec2(-0.35f, 0.5f);
+			vertex->Get<math::Vec3<float>>("color") = math::Vec3(0.15f, 0.15f, 0.15f);
+		}
+		meshLayout.indices_ = { 0,1,2,2,3,0 };
+
+		testMesh_ = std::make_shared<VulkanMesh>(logicalDevice_, physicalDevice_, logicalDevice_.get_queue(vkb::QueueType::transfer).value(), transfereCommandPool_, meshLayout);
 	}
 
 	VulkanAPI::~VulkanAPI()
 	{
 		vkDeviceWaitIdle(logicalDevice_);
+
+		testMesh_ = nullptr;
 
 		for (Frame& frame : frames_)
 		{
@@ -34,6 +68,7 @@ namespace io::graphics
 			vkFreeCommandBuffers(logicalDevice_, commandPool_, 1, &frame.commandBuffer_);
 		}
 
+		vkDestroyCommandPool(logicalDevice_, transfereCommandPool_, nullptr);
 		vkDestroyCommandPool(logicalDevice_, commandPool_, nullptr);
 		presentationPipeline_ = nullptr;
 
@@ -53,12 +88,22 @@ namespace io::graphics
 		return nullptr;
 	}
 
+	std::shared_ptr<Mesh> VulkanAPI::CreateMesh(const Mesh::Layout& _meshLayout)
+	{
+		return nullptr;
+	}
+
 	void VulkanAPI::BindPipeline(std::shared_ptr<Pipeline> _pipeline)
 	{
 
 	}
 
 	void VulkanAPI::BindRenderTargets(std::vector<std::shared_ptr<RenderTarget>> _renderTargets)
+	{
+
+	}
+
+	void VulkanAPI::BindMesh(std::shared_ptr<Mesh> _mesh)
 	{
 
 	}
@@ -74,7 +119,7 @@ namespace io::graphics
 
 	void VulkanAPI::EndFrame()
 	{
-		if (pendingSwapchainCreation_ && !RecreateSwapchain())
+		if (pendingSwapchainRecreation_ && !RecreateSwapchain())
 		{
 			return;
 		}
@@ -107,6 +152,11 @@ namespace io::graphics
 		vkCmdBeginRenderPass(frames_[frameIndex_].commandBuffer_, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 		vkCmdBindPipeline(frames_[frameIndex_].commandBuffer_, VK_PIPELINE_BIND_POINT_GRAPHICS, presentationPipeline_->GetInstance());
 
+		VkBuffer vertexBuffers[] = { testMesh_->GetVertexBuffer()};
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers(frames_[frameIndex_].commandBuffer_, 0, 1, vertexBuffers, offsets);
+		vkCmdBindIndexBuffer(frames_[frameIndex_].commandBuffer_, testMesh_->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
@@ -121,7 +171,7 @@ namespace io::graphics
 		scissor.extent = swapchain_.extent;
 		vkCmdSetScissor(frames_[frameIndex_].commandBuffer_, 0, 1, &scissor);
 
-		vkCmdDraw(frames_[frameIndex_].commandBuffer_, 3, 1, 0, 0);
+		vkCmdDrawIndexed(frames_[frameIndex_].commandBuffer_, testMesh_->GetNumIndices(), 1, 0, 0, 0);
 		vkCmdEndRenderPass(frames_[frameIndex_].commandBuffer_);
 		vkEndCommandBuffer(frames_[frameIndex_].commandBuffer_) >> VulkanResultChecker::GetInstance();
 
@@ -202,8 +252,8 @@ namespace io::graphics
 	void VulkanAPI::CreatePresentationPipeline()
 	{
 		Pipeline::Layout pipelineLayout{};
-		pipelineLayout.vertexShaderPath = L"../../../engine/asset/shader/bin/hello_triangle.vert.spv";
-		pipelineLayout.pixelShaderPath = L"../../../engine/asset/shader/bin/hello_triangle.frag.spv";
+		pipelineLayout.vertexShaderPath_ = L"../../../engine/asset/shader/bin/hello_triangle.vert.spv";
+		pipelineLayout.pixelShaderPath_ = L"../../../engine/asset/shader/bin/hello_triangle.frag.spv";
 
 		Framebuffer::Layout framebufferLayout;
 		framebufferLayout.width_ = swapchain_.extent.width;
@@ -220,19 +270,26 @@ namespace io::graphics
 			framebufferLayout.attachments_.clear();
 			attachmentDescription.attachmentHandle_ = imageView;
 			framebufferLayout.attachments_.push_back(attachmentDescription);
-			pipelineLayout.frameBufferLayouts.push_back(framebufferLayout);
+			pipelineLayout.frameBufferLayouts_.push_back(framebufferLayout);
 		}
+
+		pipelineLayout.vertexInputLayout_.AddAttribute<math::Vec2<float>>("position");
+		pipelineLayout.vertexInputLayout_.AddAttribute<math::Vec3<float>>("color");
 
 		presentationPipeline_ = std::make_unique<VulkanPipeline>(logicalDevice_, physicalDevice_, pipelineLayout);
 	}
 
-	void VulkanAPI::CreateCommandPool()
+	void VulkanAPI::CreateCommandPools()
 	{
 		VkCommandPoolCreateInfo commandPoolCreateInfo{};
 		commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		commandPoolCreateInfo.queueFamilyIndex = logicalDevice_.get_queue_index(vkb::QueueType::graphics).value();
 		vkCreateCommandPool(logicalDevice_, &commandPoolCreateInfo, nullptr, &commandPool_) >> VulkanResultChecker::GetInstance();
+
+		commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+		commandPoolCreateInfo.queueFamilyIndex = logicalDevice_.get_queue_index(vkb::QueueType::transfer).value();
+		vkCreateCommandPool(logicalDevice_, &commandPoolCreateInfo, nullptr, &transfereCommandPool_) >> VulkanResultChecker::GetInstance();
 	}
 
 	void VulkanAPI::CreateCommandBuffers()
@@ -268,11 +325,11 @@ namespace io::graphics
 	{
 		while (IsIconic((HWND)windowHandle_))
 		{
-			pendingSwapchainCreation_ = true;
+			pendingSwapchainRecreation_ = true;
 			return false;
 		}
 
-		pendingSwapchainCreation_ = false;
+		pendingSwapchainRecreation_ = false;
 		vkDeviceWaitIdle(logicalDevice_);
 
 		presentationPipeline_ = nullptr;

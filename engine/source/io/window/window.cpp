@@ -53,7 +53,7 @@ namespace io::window
 
 	void Window::SetResizability(bool _resizable)
 	{
-		DWORD windowStyle = GetWindowLongPtrA(wnd_, GWL_STYLE);
+		DWORD windowStyle = (DWORD)GetWindowLongPtrA(wnd_, GWL_STYLE);
 
 		if (_resizable)
 		{

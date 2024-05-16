@@ -21,7 +21,8 @@ the thing is, swapchain images have framebuffers individually meaning in each ev
 - if pipeline owns renderpass, then framebuffer(render target) must be made depending on the pipeline
 	-> but then again, regardless of vulkan, pipeline must know how input&output attachments are configured which is
 		 exactly what vulkan renderpass is for. meaning it's neccessary
-- 
+
+
 
 2024/05/15---------------------------------------------------------------------------------------------------------------------------
 framebuffer is just a buffer which holds render target information
@@ -49,4 +50,13 @@ synchronization
 		they block cpu
 
 	In summary, semaphores are used to specify the execution order of operations on the GPU while fences are used to keep the CPU and GPU in sync with each-other.
+
+
+
+	2024/05/16---------------------------------------------------------------------------------------------------------------------------
+	why would i need render target interface
+	- to bind pipline and render target separatly
+		- 
+
+
 

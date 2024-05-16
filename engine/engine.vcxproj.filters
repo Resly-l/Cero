@@ -188,6 +188,12 @@
     <ClInclude Include="source\io\graphics\vulkan\vulkan_utility.h">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_framebuffer.h">
+      <Filter>source\io\graphics\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_mesh.h">
+      <Filter>source\io\graphics\vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\io\window\window.cpp">
@@ -215,6 +221,12 @@
       <Filter>source\utility</Filter>
     </ClCompile>
     <ClCompile Include="source\io\graphics\vulkan\vulkan_utility.cpp">
+      <Filter>source\io\graphics\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="source\io\graphics\vulkan\vulkan_framebuffer.cpp">
+      <Filter>source\io\graphics\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="source\io\graphics\vulkan\vulkan_mesh.cpp">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClCompile>
   </ItemGroup>

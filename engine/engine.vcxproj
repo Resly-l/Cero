@@ -112,7 +112,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -160,6 +160,8 @@
     <ClInclude Include="source\io\graphics\mesh.h" />
     <ClInclude Include="source\io\graphics\graphics_pipeline.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_api.h" />
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_framebuffer.h" />
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_mesh.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_pipeline.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_utility.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_validation.hpp" />
@@ -201,6 +203,8 @@
   <ItemGroup>
     <ClCompile Include="source\core\math\vector.cpp" />
     <ClCompile Include="source\io\graphics\vulkan\vulkan_api.cpp" />
+    <ClCompile Include="source\io\graphics\vulkan\vulkan_framebuffer.cpp" />
+    <ClCompile Include="source\io\graphics\vulkan\vulkan_mesh.cpp" />
     <ClCompile Include="source\io\graphics\vulkan\vulkan_pipeline.cpp" />
     <ClCompile Include="source\io\graphics\vulkan\vulkan_utility.cpp" />
     <ClCompile Include="source\io\window\application.cpp" />
