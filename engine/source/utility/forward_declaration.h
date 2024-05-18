@@ -15,7 +15,7 @@ namespace io
 
 		class VulkanAPI;
 		class VulkanPipeline;
-		class VulkanFramebuffer;
+		class VulkanRenderTarget;
 		class VulkanMesh;
 	}
 

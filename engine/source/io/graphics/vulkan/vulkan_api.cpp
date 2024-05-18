@@ -1,10 +1,11 @@
 #include "vulkan_api.h"
 #include "vulkan_pipeline.h"
+#include "vulkan_render_target.h"
 #include "vulkan_mesh.h"
 #include "vulkan_validation.hpp"
+#include "vulkan_utility.h"
 #include "io/window/window_min.h"
 #include <vulkan/vulkan_win32.h>
-#include "thirdparty/glfw/glfw3.h"
 #include "core/math/vector.h"
 
 namespace io::graphics
@@ -19,6 +20,7 @@ namespace io::graphics
 		CreateLogicalDevice();
 		CreateSwapchain();
 		CreatePresentationPipeline();
+		CreateSwapchainRenderTargets();
 		CreateCommandPools();
 		CreateCommandBuffers();
 		CreateSyncObjects();
@@ -52,12 +54,18 @@ namespace io::graphics
 		meshLayout.indices_ = { 0,1,2,2,3,0 };
 
 		testMesh_ = std::make_shared<VulkanMesh>(logicalDevice_, physicalDevice_, logicalDevice_.get_queue(vkb::QueueType::transfer).value(), transfereCommandPool_, meshLayout);
+
+		for (auto& renderTarget : swapchainRenderTargets_)
+		{
+			renderTarget->Bind(presentationPipeline_->GetRenderPass());
+		}
 	}
 
 	VulkanAPI::~VulkanAPI()
 	{
 		vkDeviceWaitIdle(logicalDevice_);
 
+		swapchainRenderTargets_.clear();
 		testMesh_ = nullptr;
 
 		for (Frame& frame : frames_)
@@ -83,7 +91,7 @@ namespace io::graphics
 		return nullptr;
 	}
 
-	std::shared_ptr<RenderTarget> VulkanAPI::CreateRenderTarget(const RenderTargetLayout& _renderTargetLayout)
+	std::shared_ptr<RenderTarget> VulkanAPI::CreateRenderTarget(const RenderTarget::Layout& _renderTargetLayout)
 	{
 		return nullptr;
 	}
@@ -98,7 +106,7 @@ namespace io::graphics
 
 	}
 
-	void VulkanAPI::BindRenderTargets(std::vector<std::shared_ptr<RenderTarget>> _renderTargets)
+	void VulkanAPI::BindRenderTarget(std::shared_ptr<RenderTarget> _renderTarget)
 	{
 
 	}
@@ -125,37 +133,31 @@ namespace io::graphics
 		}
 
 		vkWaitForFences(logicalDevice_, 1, &frames_[frameIndex_].frameFence_, VK_TRUE, UINT64_MAX);
-		VkResult result = vkAcquireNextImageKHR(logicalDevice_, swapchain_, UINT64_MAX, frames_[frameIndex_].imageAcquiringSemaphore_, VK_NULL_HANDLE, &swapChainImageIndex_);
+		vkResetFences(logicalDevice_, 1, &frames_[frameIndex_].frameFence_) >> VulkanResultChecker::GetInstance();
+
+		VkResult result = vkAcquireNextImageKHR(logicalDevice_, swapchain_, UINT64_MAX, frames_[frameIndex_].imageAcquiringSemaphore_, VK_NULL_HANDLE, &swapchainImageIndex_);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			RecreateSwapchain();
 			return;
 		}
-		vkResetFences(logicalDevice_, 1, &frames_[frameIndex_].frameFence_);
 
 		VkCommandBufferBeginInfo commandBufferBeginInfo{};
 		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		commandBufferBeginInfo.flags = 0;
-		commandBufferBeginInfo.pInheritanceInfo = nullptr;
 		vkResetCommandBuffer(frames_[frameIndex_].commandBuffer_, VkCommandBufferResetFlags{});
 		vkBeginCommandBuffer(frames_[frameIndex_].commandBuffer_, &commandBufferBeginInfo);
 
+		VkClearValue clearValues[2];
+		clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+		clearValues[1].depthStencil = { 1.0f, 0 };
 		VkRenderPassBeginInfo renderPassBeginInfo{};
-		VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassBeginInfo.renderPass = presentationPipeline_->GetRenderPass();
-		renderPassBeginInfo.framebuffer = presentationPipeline_->GetFramebuffer(swapChainImageIndex_);
-		renderPassBeginInfo.renderArea.offset = {0, 0};
+		renderPassBeginInfo.framebuffer = swapchainRenderTargets_[swapchainImageIndex_]->GetFramebuffer();
 		renderPassBeginInfo.renderArea.extent = swapchain_.extent;
-		renderPassBeginInfo.clearValueCount = 1;
-		renderPassBeginInfo.pClearValues = &clearColor;
+		renderPassBeginInfo.clearValueCount = 2;
+		renderPassBeginInfo.pClearValues = clearValues;
 		vkCmdBeginRenderPass(frames_[frameIndex_].commandBuffer_, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-		vkCmdBindPipeline(frames_[frameIndex_].commandBuffer_, VK_PIPELINE_BIND_POINT_GRAPHICS, presentationPipeline_->GetInstance());
-
-		VkBuffer vertexBuffers[] = { testMesh_->GetVertexBuffer()};
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(frames_[frameIndex_].commandBuffer_, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(frames_[frameIndex_].commandBuffer_, testMesh_->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
 		VkViewport viewport{};
 		viewport.x = 0.0f;
@@ -165,39 +167,41 @@ namespace io::graphics
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 		vkCmdSetViewport(frames_[frameIndex_].commandBuffer_, 0, 1, &viewport);
-
 		VkRect2D scissor{};
 		scissor.offset = { 0, 0 };
 		scissor.extent = swapchain_.extent;
 		vkCmdSetScissor(frames_[frameIndex_].commandBuffer_, 0, 1, &scissor);
 
+		VkBuffer vertexBuffers[] = { testMesh_->GetVertexBuffer()};
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindPipeline(frames_[frameIndex_].commandBuffer_, VK_PIPELINE_BIND_POINT_GRAPHICS, presentationPipeline_->GetInstance());
+		vkCmdBindVertexBuffers(frames_[frameIndex_].commandBuffer_, 0, 1, vertexBuffers, offsets);
+		vkCmdBindIndexBuffer(frames_[frameIndex_].commandBuffer_, testMesh_->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
 		vkCmdDrawIndexed(frames_[frameIndex_].commandBuffer_, testMesh_->GetNumIndices(), 1, 0, 0, 0);
 		vkCmdEndRenderPass(frames_[frameIndex_].commandBuffer_);
 		vkEndCommandBuffer(frames_[frameIndex_].commandBuffer_) >> VulkanResultChecker::GetInstance();
 
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		VkSemaphore waitSemaphores[] = { frames_[frameIndex_].imageAcquiringSemaphore_ };
-		VkSemaphore signalSemaphores[] = { frames_[frameIndex_].commandExecutionSemaphore_ };
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &frames_[frameIndex_].commandBuffer_;
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = &frames_[frameIndex_].imageAcquiringSemaphore_;
 		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = signalSemaphores;
+		submitInfo.pSignalSemaphores = &frames_[frameIndex_].commandExecutionSemaphore_;
 		vkQueueSubmit(logicalDevice_.get_queue(vkb::QueueType::graphics).value(), 1, &submitInfo, frames_[frameIndex_].frameFence_) >> VulkanResultChecker::GetInstance();
 
+		VkSwapchainKHR swapchains[] = { swapchain_ };
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = signalSemaphores;
-
-		VkSwapchainKHR swapchains[] = { swapchain_ };
+		presentInfo.pWaitSemaphores = &frames_[frameIndex_].commandExecutionSemaphore_;
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = swapchains;
-		presentInfo.pImageIndices = &swapChainImageIndex_;
+		presentInfo.pImageIndices = &swapchainImageIndex_;
 
 		result = vkQueuePresentKHR(logicalDevice_.get_queue(vkb::QueueType::present).value(), &presentInfo);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
@@ -254,29 +258,26 @@ namespace io::graphics
 		Pipeline::Layout pipelineLayout{};
 		pipelineLayout.vertexShaderPath_ = L"../../../engine/asset/shader/bin/hello_triangle.vert.spv";
 		pipelineLayout.pixelShaderPath_ = L"../../../engine/asset/shader/bin/hello_triangle.frag.spv";
-
-		Framebuffer::Layout framebufferLayout;
-		framebufferLayout.width_ = swapchain_.extent.width;
-		framebufferLayout.height_ = swapchain_.extent.height;
-
-		Framebuffer::AttachmentDescription attachmentDescription;
-		attachmentDescription.format_ = ImageFormat::B8G8R8A8_UNORM;
-		attachmentDescription.usage_ = ImageUsage::COLOR_ATTACHMENT;
-		attachmentDescription.width_ = swapchain_.extent.width;
-		attachmentDescription.height_ = swapchain_.extent.height;
-
-		for (VkImageView& imageView : swapchain_.get_image_views().value())
-		{
-			framebufferLayout.attachments_.clear();
-			attachmentDescription.attachmentHandle_ = imageView;
-			framebufferLayout.attachments_.push_back(attachmentDescription);
-			pipelineLayout.frameBufferLayouts_.push_back(framebufferLayout);
-		}
-
 		pipelineLayout.vertexInputLayout_.AddAttribute<math::Vec2<float>>("position");
 		pipelineLayout.vertexInputLayout_.AddAttribute<math::Vec3<float>>("color");
-
 		presentationPipeline_ = std::make_unique<VulkanPipeline>(logicalDevice_, physicalDevice_, pipelineLayout);
+	}
+
+	void VulkanAPI::CreateSwapchainRenderTargets()
+	{
+		swapchainRenderTargets_.clear();
+
+		for (VkImageView swapchainImageView : swapchain_.get_image_views().value())
+		{
+			auto renderTarget = std::make_unique<VulkanRenderTarget>(logicalDevice_, swapchain_.extent.width, swapchain_.extent.height, swapchainImageView);
+			RenderTarget::AttachmentDescription depthStencilDescription{};
+			depthStencilDescription.width_ = swapchain_.extent.width;
+			depthStencilDescription.height_ = swapchain_.extent.height;
+			depthStencilDescription.format_ = ImageFormat::D32_SFLOAT_U8_UINT;
+			depthStencilDescription.usage_ = ImageUsage::DEPTH_STENCIL;
+			renderTarget->AddAttachment(depthStencilDescription);
+			swapchainRenderTargets_.push_back(std::move(renderTarget));
+		}
 	}
 
 	void VulkanAPI::CreateCommandPools()
@@ -337,6 +338,12 @@ namespace io::graphics
 
 		CreateSwapchain();
 		CreatePresentationPipeline();
+		CreateSwapchainRenderTargets();
+
+		for (auto& renderTarget : swapchainRenderTargets_)
+		{
+			renderTarget->Bind(presentationPipeline_->GetRenderPass());
+		}
 
 		return true;
 	}

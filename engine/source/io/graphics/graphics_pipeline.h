@@ -53,6 +53,8 @@ namespace io::graphics
 		B8G8R8_NORM,
 		B8G8R8A8_UNORM,
 		B8G8R8A8_NORM,
+		D32_SFLOAT,
+		D32_SFLOAT_U8_UINT,
 	};
 
 	enum class ImageUsage
@@ -62,7 +64,7 @@ namespace io::graphics
 		DEPTH_STENCIL
 	};
 
-	class Framebuffer
+	class RenderTarget
 	{
 	public:
 		struct AttachmentDescription
@@ -71,8 +73,6 @@ namespace io::graphics
 			ImageUsage usage_ = ImageUsage::NONE;
 			uint32_t width_ = 0;
 			uint32_t height_ = 0;
-			// using exist attachment (ex, when using swapchain images, don't need to create new image)
-			void* attachmentHandle_ = nullptr;
 		};
 
 		struct Layout
@@ -105,7 +105,6 @@ namespace io::graphics
 			RasterizerState rasterizerState_ = RasterizerState::NONE;
 			BlendState blendState_ = BlendState::NONE;
 			Viewport viewport_;
-			std::vector<Framebuffer::Layout> frameBufferLayouts_;
 
 			std::wstring_view vertexShaderPath_;
 			std::wstring_view pixelShaderPath_;

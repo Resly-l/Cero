@@ -7,22 +7,26 @@ namespace io::graphics
 	{
 		switch (_format)
 		{
-		case io::graphics::ImageFormat::R8G8B8_UNORM:
+		case ImageFormat::R8G8B8_UNORM:
 			return VK_FORMAT_R8G8B8_UNORM;
-		case io::graphics::ImageFormat::R8G8B8_NORM:
+		case ImageFormat::R8G8B8_NORM:
 			return VK_FORMAT_R8G8B8_SNORM;
-		case io::graphics::ImageFormat::R8G8B8A8_UNORM:
+		case ImageFormat::R8G8B8A8_UNORM:
 			return VK_FORMAT_R8G8B8A8_UNORM;
-		case io::graphics::ImageFormat::R8G8B8A8_NORM:
+		case ImageFormat::R8G8B8A8_NORM:
 			return VK_FORMAT_R8G8B8A8_SNORM;
-		case io::graphics::ImageFormat::B8G8R8_UNORM:
+		case ImageFormat::B8G8R8_UNORM:
 			return VK_FORMAT_B8G8R8_UNORM;
-		case io::graphics::ImageFormat::B8G8R8_NORM:
+		case ImageFormat::B8G8R8_NORM:
 			return VK_FORMAT_B8G8R8_SNORM;
-		case io::graphics::ImageFormat::B8G8R8A8_UNORM:
+		case ImageFormat::B8G8R8A8_UNORM:
 			return VK_FORMAT_B8G8R8A8_UNORM;
-		case io::graphics::ImageFormat::B8G8R8A8_NORM:
+		case ImageFormat::B8G8R8A8_NORM:
 			return VK_FORMAT_B8G8R8A8_SNORM;
+			case ImageFormat::D32_SFLOAT:
+			return VK_FORMAT_D32_SFLOAT;
+		case ImageFormat::D32_SFLOAT_U8_UINT:
+			return VK_FORMAT_D32_SFLOAT_S8_UINT;
 		}
 
 		return VK_FORMAT_UNDEFINED;
@@ -32,9 +36,9 @@ namespace io::graphics
 	{
 		switch (_usage)
 		{
-		case io::graphics::ImageUsage::COLOR_ATTACHMENT:
+		case ImageUsage::COLOR_ATTACHMENT:
 			return VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-		case io::graphics::ImageUsage::DEPTH_STENCIL:
+		case ImageUsage::DEPTH_STENCIL:
 			return VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 		}
 

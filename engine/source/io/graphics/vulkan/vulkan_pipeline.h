@@ -13,7 +13,6 @@ namespace io::graphics
 		VkRenderPass renderPass_;
 		VkShaderModule vertexShaderModule_;
 		VkShaderModule pixelShaderModule_;
-		std::vector<std::unique_ptr<VulkanFramebuffer>> framebuffers_;
 
 	public:
 		VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const Pipeline::Layout& _pipelineLayout);
@@ -22,11 +21,9 @@ namespace io::graphics
 	public:
 		VkPipeline GetInstance() const;
 		VkRenderPass GetRenderPass() const;
-		VkFramebuffer GetFramebuffer(uint32_t _index) const;
 
 	private:
 		void LoadShaders(std::wstring_view _vsPath, std::wstring_view _fsPath);
 		void CreateInstance(VkPhysicalDevice _physicalDevice, const Pipeline::Layout& _pipelineLayout);
-		void CreateFramebuffers(const std::vector<Framebuffer::Layout>& _framebufferLayouts);
 	};
 }

@@ -1,6 +1,5 @@
 #include "vulkan_pipeline.h"
 #include "vulkan_validation.hpp"
-#include "vulkan_framebuffer.h"
 #include "io/file/file_interface.h"
 
 namespace io::graphics
@@ -23,12 +22,10 @@ namespace io::graphics
 	{
 		LoadShaders(_pipelineLayout.vertexShaderPath_, _pipelineLayout.pixelShaderPath_);
 		CreateInstance(_physicalDevice, _pipelineLayout);
-		CreateFramebuffers(_pipelineLayout.frameBufferLayouts_);
 	}
 
 	VulkanPipeline::~VulkanPipeline()
 	{
-		framebuffers_.clear();
 		vkDestroyRenderPass(logicalDevice_, renderPass_, nullptr);
 		vkDestroyPipeline(logicalDevice_, instance_, nullptr);
 	}
@@ -41,16 +38,6 @@ namespace io::graphics
 	VkRenderPass VulkanPipeline::GetRenderPass() const
 	{
 		return renderPass_;
-	}
-
-	VkFramebuffer VulkanPipeline::GetFramebuffer(uint32_t _index) const
-	{
-		if (framebuffers_.size() <= _index)
-		{
-			return VK_NULL_HANDLE;
-		}
-
-		return framebuffers_[_index]->GetInstance();
 	}
 
 	void VulkanPipeline::LoadShaders(std::wstring_view _vsPath, std::wstring_view _fsPath)
@@ -202,19 +189,39 @@ namespace io::graphics
 		pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 		vkCreatePipelineLayout(logicalDevice_, &pipelineLayoutCreateInfo, nullptr, &layout) >> VulkanResultChecker::GetInstance();
 
-		VkAttachmentDescription colorAttachment{};
-		colorAttachment.format = VK_FORMAT_B8G8R8A8_UNORM;
-		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		std::vector<VkAttachmentDescription> attachments;
+		{
+			VkAttachmentDescription colorAttachment{};
+			colorAttachment.format = VK_FORMAT_B8G8R8A8_UNORM;
+			colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+			colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+			colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+			colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+			VkAttachmentDescription depthAttachment{};
+			depthAttachment.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
+			depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+			depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+			depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+			attachments.push_back(colorAttachment);
+			attachments.push_back(depthAttachment);
+		}
 
 		VkAttachmentReference colorAttachmentRef{};
 		colorAttachmentRef.attachment = 0;
 		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+		VkAttachmentReference depthAttachmentRef{};
+		depthAttachmentRef.attachment = 1;
+		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 		VkSubpassDescription subpassDescription{};
 		subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -222,7 +229,7 @@ namespace io::graphics
 		subpassDescription.pInputAttachments = nullptr;
 		subpassDescription.colorAttachmentCount = 1;
 		subpassDescription.pColorAttachments = &colorAttachmentRef;
-		subpassDescription.pDepthStencilAttachment;
+		subpassDescription.pDepthStencilAttachment = &depthAttachmentRef;
 
 		VkSubpassDependency dependency{};
 		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -234,13 +241,25 @@ namespace io::graphics
 
 		VkRenderPassCreateInfo renderPassCreateInfo{};
 		renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassCreateInfo.attachmentCount = 1;
-		renderPassCreateInfo.pAttachments = &colorAttachment;
+		renderPassCreateInfo.attachmentCount = (uint32_t)attachments.size();
+		renderPassCreateInfo.pAttachments = attachments.data();
 		renderPassCreateInfo.subpassCount = 1;
 		renderPassCreateInfo.pSubpasses = &subpassDescription;
 		renderPassCreateInfo.dependencyCount = 1;
 		renderPassCreateInfo.pDependencies = &dependency;
 		vkCreateRenderPass(logicalDevice_, &renderPassCreateInfo, nullptr, &renderPass_) >> VulkanResultChecker::GetInstance();
+
+		VkPipelineDepthStencilStateCreateInfo depthStencilState{};
+		depthStencilState.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		depthStencilState.depthTestEnable = VK_TRUE;
+		depthStencilState.depthWriteEnable = VK_TRUE;
+		depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+		depthStencilState.depthBoundsTestEnable = VK_FALSE;
+		depthStencilState.back.failOp = VK_STENCIL_OP_KEEP;
+		depthStencilState.back.passOp = VK_STENCIL_OP_KEEP;
+		depthStencilState.back.compareOp = VK_COMPARE_OP_ALWAYS;
+		depthStencilState.stencilTestEnable = VK_FALSE;
+		depthStencilState.front = depthStencilState.back;
 
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo{};
 		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -251,7 +270,7 @@ namespace io::graphics
 		pipelineCreateInfo.pViewportState = &viewportState;
 		pipelineCreateInfo.pRasterizationState = &rasterizerState;
 		pipelineCreateInfo.pMultisampleState = &multisampleState;
-		pipelineCreateInfo.pDepthStencilState = nullptr; // transient
+		pipelineCreateInfo.pDepthStencilState = &depthStencilState;
 		pipelineCreateInfo.pColorBlendState = &colorBlendState;
 		pipelineCreateInfo.pDynamicState = &dynamicState;
 		pipelineCreateInfo.layout = layout;
@@ -264,13 +283,5 @@ namespace io::graphics
 		vkDestroyPipelineLayout(logicalDevice_, layout, nullptr);
 		vkDestroyShaderModule(logicalDevice_, vertexShaderModule_, nullptr);
 		vkDestroyShaderModule(logicalDevice_, pixelShaderModule_, nullptr);
-	}
-
-	void VulkanPipeline::CreateFramebuffers(const std::vector<Framebuffer::Layout>& _framebufferLayouts)
-	{
-		for (auto& layout : _framebufferLayouts)
-		{
-			framebuffers_.push_back(std::make_unique<VulkanFramebuffer>(logicalDevice_, renderPass_, layout));
-		}
 	}
 }
