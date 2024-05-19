@@ -169,7 +169,6 @@
     <ClInclude Include="source\io\graphics\vulkan\vulkan_pipeline.h">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="source\io\graphics\mesh.h" />
     <ClInclude Include="source\thirdparty\vk_bootstrap\VkBootstrap.h">
       <Filter>source\thirdparty\vk_bootstrap</Filter>
     </ClInclude>
@@ -182,7 +181,7 @@
     <ClInclude Include="source\io\graphics\vulkan\vulkan_validation.hpp">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="source\io\graphics\graphics_pipeline.h">
+    <ClInclude Include="source\io\graphics\pipeline.h">
       <Filter>source\io\graphics</Filter>
     </ClInclude>
     <ClInclude Include="source\io\graphics\vulkan\vulkan_utility.h">
@@ -193,6 +192,15 @@
     </ClInclude>
     <ClInclude Include="source\io\graphics\vulkan\vulkan_render_target.h">
       <Filter>source\io\graphics\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\render_target.h">
+      <Filter>source\io\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\mesh.h">
+      <Filter>source\io\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\common.h">
+      <Filter>source\io\graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

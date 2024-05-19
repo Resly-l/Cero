@@ -70,6 +70,11 @@ namespace io::window
 		PostQuitMessage(0);
 	}
 
+	bool Window::IsMinimized() const
+	{
+		return IsIconic(wnd_);
+	}
+
 	void Window::RegisterWindowClass(std::string_view _className, std::string_view _iconPath) const
 	{
 		WNDCLASSEXA wc = {};

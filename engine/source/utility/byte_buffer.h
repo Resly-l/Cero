@@ -12,8 +12,8 @@ namespace utility
 			struct Attribute final
 			{
 				std::string name_;
-				size_t size_;
-				size_t offset_;
+				size_t size_ = 0;
+				size_t offset_ = 0;
 			};
 
 		private:

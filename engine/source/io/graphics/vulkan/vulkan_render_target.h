@@ -18,7 +18,8 @@ namespace io::graphics
 		uint32_t width_;
 		uint32_t height_;
 		std::vector <VulkanAttachment> attachments_;
-		VkFramebuffer framebuffer_;
+		VkRenderPass renderPass_ = VK_NULL_HANDLE;
+		VkFramebuffer framebuffer_ = VK_NULL_HANDLE;
 
 	public:
 		VulkanRenderTarget(VkDevice _logicalDevice, const RenderTarget::Layout& _renderTargetLayout);

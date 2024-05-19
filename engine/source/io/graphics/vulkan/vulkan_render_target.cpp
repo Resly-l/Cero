@@ -59,7 +59,7 @@ namespace io::graphics
 		imageCreateInfo.arrayLayers = 1;
 		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageCreateInfo.usage = VulkanTypeConverter::Convert(_description.usage_) | VK_IMAGE_USAGE_SAMPLED_BIT;
+		imageCreateInfo.usage = VulkanTypeConverter::Convert(_description.usage_);
 		vkCreateImage(logicalDevice_, &imageCreateInfo, nullptr, &*attachment.image_) >> VulkanResultChecker::GetInstance();
 
 		VkMemoryRequirements memoryRequirements{};
@@ -104,6 +104,11 @@ namespace io::graphics
 
 	void VulkanRenderTarget::Bind(VkRenderPass _renderPass)
 	{
+		if (renderPass_ == _renderPass)
+		{
+			return;
+		}
+
 		if (framebuffer_)
 		{
 			vkDestroyFramebuffer(logicalDevice_, framebuffer_, nullptr);
@@ -124,6 +129,8 @@ namespace io::graphics
 		framebufferCreateInfo.layers = 1;
 		framebufferCreateInfo.pAttachments = imageViews.data();
 		vkCreateFramebuffer(logicalDevice_, &framebufferCreateInfo, nullptr, &framebuffer_) >> VulkanResultChecker::GetInstance();
+
+		renderPass_ = _renderPass;
 	}
 
 	VkFramebuffer VulkanRenderTarget::GetFramebuffer() const

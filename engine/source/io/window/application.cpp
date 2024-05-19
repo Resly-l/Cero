@@ -21,10 +21,20 @@ namespace io::window
 	{
 		while (Window::ProcessMessage())
 		{
-			graphicsAPI_->BeginFrame();
+			const bool minimized = IsMinimized();
+
+			if (!minimized)
+			{
+				graphicsAPI_->BeginFrame();
+			}
+
 			Update();
-			graphicsAPI_->Draw();
-			graphicsAPI_->EndFrame();
+
+			if (!minimized)
+			{
+				Render();
+				graphicsAPI_->EndFrame();
+			}
 		}
 	}
 

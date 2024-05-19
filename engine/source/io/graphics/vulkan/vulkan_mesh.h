@@ -22,8 +22,8 @@ namespace io::graphics
 	public:
 		VkBuffer GetVertexBuffer() const;
 		VkBuffer GetIndexBuffer() const;
-		uint32_t GetNumVertices() const;
-		uint32_t GetNumIndices() const;
+		virtual uint32_t GetNumVertices() const override;
+		virtual uint32_t GetNumIndices() const override;
 
 	private:
 		void CreateVertexBuffer(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkQueue _transferQueue, VkCommandPool _transferCommandPool,  const utility::ByteBuffer& _vertices);

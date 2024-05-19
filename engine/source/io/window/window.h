@@ -23,10 +23,12 @@ namespace io::window
 		bool SetVisibility(bool _visible);
 		void SetResizability(bool _resizable);
 		void Close() const;
+		bool IsMinimized() const;
 
 	protected:
 		bool ProcessMessage();
 		virtual void Update() = 0;
+		virtual void Render() = 0;
 		virtual void Resize(uint32_t _width, uint32_t _height) {};
 
 	private:

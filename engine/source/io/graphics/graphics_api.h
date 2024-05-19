@@ -1,13 +1,10 @@
 #pragma once
-#include "graphics_pipeline.h"
+#include "pipeline.h"
+#include "render_target.h"
+#include "mesh.h"
 
 namespace io::graphics
 {
-	enum class GraphicsAPIType
-	{
-		Vulkan,
-	};
-
 	class GraphicsAPI
 	{
 	public:
@@ -26,6 +23,8 @@ namespace io::graphics
 		virtual std::shared_ptr<Pipeline> CreatePipeline(const Pipeline::Layout& _pipelineLayout) = 0;
 		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(const RenderTarget::Layout& _renderTargetLayout) = 0;
 		virtual std::shared_ptr<Mesh> CreateMesh(const Mesh::Layout& _meshLayout) = 0;
+
+		virtual std::shared_ptr<RenderTarget> GetSwapchainRenderTarget() const = 0;
 
 		virtual void BindPipeline(std::shared_ptr<Pipeline> _pipeline) = 0;
 		virtual void BindRenderTarget(std::shared_ptr<RenderTarget> _renderTarget) = 0;
