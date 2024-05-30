@@ -16,10 +16,10 @@ namespace io::graphics
 			RasterizerState rasterizerState_ = RasterizerState::NONE;
 			BlendState blendState_ = BlendState::NONE;
 			Viewport viewport_;
-
 			std::wstring_view vertexShaderPath_;
 			std::wstring_view pixelShaderPath_;
 			utility::ByteBuffer::Layout vertexInputLayout_;
+			std::vector<ShaderDescriptor> descriptors_;
 		};
 
 	public:

@@ -67,4 +67,28 @@ namespace io::graphics
 	{
 		Vulkan,
 	};
+
+	struct ShaderDescriptor
+	{
+		enum class Type
+		{
+			UNIFORM,
+			TEXTURE,
+		};
+		enum BindingStage : uint32_t
+		{
+			VERTEX = 1 << 0,
+			PIXEL = 1 << 1,
+		};
+		enum class Direction
+		{
+			INPUT,
+			OUTPUT
+		};
+
+		Type type_;
+		BindingStage bindingStage_;
+		Direction direction_;
+		uint32_t elementCount_; // 1 if not an array
+	};
 }

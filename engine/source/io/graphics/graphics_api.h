@@ -30,10 +30,11 @@ namespace io::graphics
 		virtual void BindRenderTarget(std::shared_ptr<RenderTarget> _renderTarget) = 0;
 		virtual void BindMesh(std::shared_ptr<Mesh> _mesh) = 0;
 
-		virtual void BeginFrame() = 0;
+		virtual bool BeginFrame() = 0;
 		virtual void Draw() = 0;
 		virtual void EndFrame() = 0;
 
 		virtual void Resize(uint32_t _width, uint32_t _height) = 0;
+		virtual void WaitIdle() = 0;
 	};
 }

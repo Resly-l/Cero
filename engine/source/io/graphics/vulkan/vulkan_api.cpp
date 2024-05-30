@@ -21,8 +21,8 @@ namespace io::graphics
 		CreateSwapchain();
 		CreateCommandPools();
 		CreateCommandBuffers();
-		CreateSyncObjects();
 		CreateSwapchainRenderTargets();
+		CreateSyncObjects();
 	}
 
 	VulkanAPI::~VulkanAPI()
@@ -93,22 +93,24 @@ namespace io::graphics
 		mesh_ = std::static_pointer_cast<VulkanMesh>(_mesh);
 	}
 
-	void VulkanAPI::BeginFrame()
+	bool VulkanAPI::BeginFrame()
 	{
 		vkWaitForFences(logicalDevice_, 1, &frames_[frameIndex_].frameFence_, VK_TRUE, UINT64_MAX);
-		vkResetFences(logicalDevice_, 1, &frames_[frameIndex_].frameFence_) >> VulkanResultChecker::GetInstance();
 
 		VkResult result = vkAcquireNextImageKHR(logicalDevice_, swapchain_, UINT64_MAX, frames_[frameIndex_].imageAcquiringSemaphore_, VK_NULL_HANDLE, &swapchainImageIndex_);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			RecreateSwapchain();
-			return;
+			return false;
 		}
+
+		vkResetFences(logicalDevice_, 1, &frames_[frameIndex_].frameFence_) >> VulkanResultChecker::GetInstance();
 
 		VkCommandBufferBeginInfo commandBufferBeginInfo{};
 		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		vkResetCommandBuffer(frames_[frameIndex_].commandBuffer_, VkCommandBufferResetFlags{});
 		vkBeginCommandBuffer(frames_[frameIndex_].commandBuffer_, &commandBufferBeginInfo);
+		return true;
 	}
 
 	void VulkanAPI::Draw()
@@ -188,6 +190,11 @@ namespace io::graphics
 		frameIndex_ = (frameIndex_ + 1) % config_.numFrameConcurrency_;
 	}
 
+	void VulkanAPI::WaitIdle()
+	{
+		vkDeviceWaitIdle(logicalDevice_);
+	}
+
 	void VulkanAPI::CreateInstance()
 	{
 		vkb::InstanceBuilder builder;
@@ -229,23 +236,6 @@ namespace io::graphics
 		swapchain_ = Build(swapchainBuilder, &vkb::SwapchainBuilder::build);
 	}
 
-	void VulkanAPI::CreateSwapchainRenderTargets()
-	{
-		swapchainRenderTargets_.clear();
-
-		for (VkImageView swapchainImageView : swapchain_.get_image_views().value())
-		{
-			auto renderTarget = std::make_shared<VulkanRenderTarget>(logicalDevice_, swapchain_.extent.width, swapchain_.extent.height, swapchainImageView);
-			RenderTarget::AttachmentDescription depthStencilDescription{};
-			depthStencilDescription.width_ = swapchain_.extent.width;
-			depthStencilDescription.height_ = swapchain_.extent.height;
-			depthStencilDescription.format_ = ImageFormat::D32_SFLOAT_U8_UINT;
-			depthStencilDescription.usage_ = ImageUsage::DEPTH_STENCIL;
-			renderTarget->AddAttachment(depthStencilDescription);
-			swapchainRenderTargets_.push_back(std::move(renderTarget));
-		}
-	}
-
 	void VulkanAPI::CreateCommandPools()
 	{
 		VkCommandPoolCreateInfo commandPoolCreateInfo{};
@@ -270,6 +260,23 @@ namespace io::graphics
 		for (Frame& frame : frames_)
 		{
 			vkAllocateCommandBuffers(logicalDevice_, &allocateInfo, &frame.commandBuffer_) >> VulkanResultChecker::GetInstance();
+		}
+	}
+
+	void VulkanAPI::CreateSwapchainRenderTargets()
+	{
+		swapchainRenderTargets_.clear();
+
+		for (VkImageView swapchainImageView : swapchain_.get_image_views().value())
+		{
+			auto renderTarget = std::make_shared<VulkanRenderTarget>(logicalDevice_, swapchain_.extent.width, swapchain_.extent.height, swapchainImageView);
+			RenderTarget::AttachmentDescription depthStencilDescription{};
+			depthStencilDescription.width_ = swapchain_.extent.width;
+			depthStencilDescription.height_ = swapchain_.extent.height;
+			depthStencilDescription.format_ = ImageFormat::D32_SFLOAT_U8_UINT;
+			depthStencilDescription.usage_ = ImageUsage::DEPTH_STENCIL;
+			renderTarget->AddAttachment(depthStencilDescription);
+			swapchainRenderTargets_.push_back(std::move(renderTarget));
 		}
 	}
 

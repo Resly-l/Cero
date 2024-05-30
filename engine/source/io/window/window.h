@@ -24,12 +24,12 @@ namespace io::window
 		void SetResizability(bool _resizable);
 		void Close() const;
 		bool IsMinimized() const;
+		virtual void Resize(uint32_t _width, uint32_t _height) {};
 
 	protected:
 		bool ProcessMessage();
 		virtual void Update() = 0;
 		virtual void Render() = 0;
-		virtual void Resize(uint32_t _width, uint32_t _height) {};
 
 	private:
 		void RegisterWindowClass(std::string_view _className, std::string_view _iconPath) const;

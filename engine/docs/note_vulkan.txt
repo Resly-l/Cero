@@ -53,10 +53,12 @@ synchronization
 
 
 
-	2024/05/16---------------------------------------------------------------------------------------------------------------------------
-	why would i need render target interface
-	- to bind pipline and render target separatly
-		- 
+2024/05/16---------------------------------------------------------------------------------------------------------------------------
+why would i need render target interface
+- to bind pipline and render target separatly
+- can render to the same target using different pipelines
 
+
+2024/05/19---------------------------------------------------------------------------------------------------------------------------
 
 

@@ -49,11 +49,12 @@ namespace io::graphics
 		virtual void BindRenderTarget(std::shared_ptr<RenderTarget> _renderTarget) override;
 		virtual void BindMesh(std::shared_ptr<Mesh> _mesh) override;
 
-		virtual void BeginFrame() override;
+		virtual bool BeginFrame() override;
 		virtual void Draw() override;
 		virtual void EndFrame() override;
 
 		virtual void Resize(uint32_t _width, uint32_t _height) override {};
+		virtual void WaitIdle() override;
 
 	private:
 		void CreateInstance();
@@ -62,8 +63,8 @@ namespace io::graphics
 		void CreateSwapchain();
 		void CreateCommandPools();
 		void CreateCommandBuffers();
-		void CreateSyncObjects();
 		void CreateSwapchainRenderTargets();
+		void CreateSyncObjects();
 		void RecreateSwapchain();
 	};
 }

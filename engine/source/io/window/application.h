@@ -15,12 +15,9 @@ namespace io::window
 
 	public:
 		Application(graphics::GraphicsAPIType _apiType);
-		virtual ~Application() = default;
 
 	public:
 		void Run();
-
-	protected:
 		virtual void Resize(uint32_t _width, uint32_t _height) override;
 	};
 }

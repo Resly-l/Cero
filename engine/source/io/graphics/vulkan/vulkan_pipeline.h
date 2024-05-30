@@ -11,6 +11,8 @@ namespace io::graphics
 		VkDevice logicalDevice_;
 		VkPipeline instance_;
 		VkRenderPass renderPass_;
+		VkDescriptorPool descriptorPool_;
+		std::vector<VkDescriptorSet> descriptorSets_;
 		VkShaderModule vertexShaderModule_;
 		VkShaderModule pixelShaderModule_;
 
