@@ -178,6 +178,37 @@ namespace math
 			_33 = _matrix3d._33;
 			return *this;
 		}
+		
+		Matrix operator *(const Matrix& _other) const
+		{
+			Matrix m;
+			m._11 = (_11 * _other._11) + (_12 * _other._21) + (_13 * _other._31) + (_14 * _other._41);
+			m._12 = (_11 * _other._12) + (_12 * _other._22) + (_13 * _other._32) + (_14 * _other._42);
+			m._13 = (_11 * _other._13) + (_12 * _other._23) + (_13 * _other._33) + (_14 * _other._43);
+			m._14 = (_11 * _other._14) + (_12 * _other._24) + (_13 * _other._34) + (_14 * _other._44);
+
+			m._21 = (_21 * _other._11) + (_22 * _other._21) + (_23 * _other._31) + (_24 * _other._41);
+			m._22 = (_21 * _other._12) + (_22 * _other._22) + (_23 * _other._32) + (_24 * _other._42);
+			m._23 = (_21 * _other._13) + (_22 * _other._23) + (_23 * _other._33) + (_24 * _other._43);
+			m._24 = (_21 * _other._14) + (_22 * _other._24) + (_23 * _other._34) + (_24 * _other._44);
+
+			m._31 = (_31 * _other._11) + (_32 * _other._21) + (_33 * _other._31) + (_34 * _other._41);
+			m._32 = (_31 * _other._12) + (_32 * _other._22) + (_33 * _other._32) + (_34 * _other._42);
+			m._33 = (_31 * _other._13) + (_32 * _other._23) + (_33 * _other._33) + (_34 * _other._43);
+			m._34 = (_31 * _other._14) + (_32 * _other._24) + (_33 * _other._34) + (_34 * _other._44);
+
+			m._41 = (_41 * _other._11) + (_42 * _other._21) + (_43 * _other._31) + (_44 * _other._41);
+			m._42 = (_41 * _other._12) + (_42 * _other._22) + (_43 * _other._32) + (_44 * _other._42);
+			m._43 = (_41 * _other._13) + (_42 * _other._23) + (_43 * _other._33) + (_44 * _other._43);
+			m._44 = (_41 * _other._14) + (_42 * _other._24) + (_43 * _other._34) + (_44 * _other._44);
+
+			return m;
+		}
+
+		Matrix& operator *=(const Matrix& _other)
+		{
+			return *this = *this * _other;
+		}
 
 		static Matrix Identity()
 		{
@@ -206,6 +237,20 @@ namespace math
 			Matrix<T> mat = Identity();
 			mat = Matrix3x3<T>::RotationZ(_angle);
 			return mat;
+		}
+
+		static Matrix Rotation(const Vector<T>& _pitchYawRoll)
+		{
+			return RotationZ(_pitchYawRoll.z) * RotationX(_pitchYawRoll.x) * RotationY(_pitchYawRoll.y);
+		}
+
+		static Matrix Translation(const Vector<T>& _offset)
+		{
+			Matrix translation = Identity();
+			translation._41 = _offset.x_;
+			translation._42 = _offset.y_;
+			translation._43 = _offset.z_;
+			return translation;
 		}
 
 		static Matrix Projection(const T _near, const T _far, const T _horizontalFoV, const T _aspectRatio)

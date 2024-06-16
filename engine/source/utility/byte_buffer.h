@@ -11,7 +11,6 @@ namespace utility
 		private:
 			struct Attribute final
 			{
-				std::string name_;
 				size_t size_ = 0;
 				size_t offset_ = 0;
 			};
@@ -20,14 +19,16 @@ namespace utility
 			std::vector<Attribute> attributes_;
 
 		public:
+			Layout() = default;
+			Layout(const Layout&) = default;
+			Layout& operator=(const Layout&) = default;
+
+		public:
 			template<typename T>
-			bool AddAttribute(std::string_view _name);
-			const Attribute& GetAttribute(std::string_view _name) const;
+			void AddAttribute();
 			const Attribute& GetAttribute(size_t _index) const;
 
-			size_t GetAttributeOffset(std::string_view _name) const;
 			size_t GetAttributeOffset(size_t _index) const;
-			size_t GetAttributeSize(std::string_view _name) const;
 			size_t GetAttributeSize(size_t _index) const;
 			size_t GetNumAttibutes() const;
 			size_t GetSizeInBytes() const;
@@ -37,15 +38,15 @@ namespace utility
 		class Element final
 		{
 		private:
-			const Layout layout_;
+			Layout layout_;
 			const uint8_t* rawData_ = nullptr;
 
 		public:
 			Element(const Layout& _layout, const uint8_t* _rawData);
 
 		public:
-			template <typename ReturnTy>
-			ReturnTy& Get(std::string_view _element);
+			template <typename T>
+			T& Get(size_t _index);
 		};
 
 	private:
@@ -60,8 +61,8 @@ namespace utility
 		size_t GetNumElements() const;
 		size_t GetSizeInBytes() const;
 
-		std::optional<Element> Add();
-		std::optional<Element> At(size_t _index) const;
+		Element Add();
+		Element At(size_t _index) const;
 
 		const uint8_t* GetRawBufferAddress() const;
 	};
@@ -69,37 +70,18 @@ namespace utility
 
 namespace utility
 {
-	template <typename ReturnTy>
-	inline ReturnTy& ByteBuffer::Element::Get(std::string_view _attributeName)
+	template <typename T>
+	inline T& ByteBuffer::Element::Get(size_t _index)
 	{
-		if (layout_.GetAttributeSize(_attributeName) != sizeof(ReturnTy))
-		{
-			throw std::exception("attribute size mismatch");
-		}
-
-		return *(ReturnTy*)(rawData_ + layout_.GetAttributeOffset(_attributeName));
+		return *(T*)(rawData_ + layout_.GetAttributeOffset(_index));
 	}
 
 	template<typename T>
-	inline bool ByteBuffer::Layout::AddAttribute(std::string_view _name)
+	inline void ByteBuffer::Layout::AddAttribute()
 	{
-		auto it = std::find_if(attributes_.begin(), attributes_.end(),
-			[&_name](const Attribute& _attribute)
-			{
-				return _attribute.name_ == _name;
-			});
-
-		if (it != attributes_.end())
-		{
-			return false;
-		}
-
 		Attribute attribute;
-		attribute.name_ = _name;
 		attribute.offset_ = attributes_.empty() ? 0 : (attributes_.back().offset_ + attributes_.back().size_);
 		attribute.size_ = sizeof(T);
 		attributes_.push_back(attribute);
-
-		return true;
 	}
 }

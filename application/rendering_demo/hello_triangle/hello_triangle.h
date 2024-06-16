@@ -10,6 +10,10 @@ private:
 	std::shared_ptr<io::graphics::Mesh> mesh_;
 	std::shared_ptr<io::graphics::Mesh> mesh2_;
 
+	utility::ByteBuffer mvBuffer_;
+	utility::ByteBuffer pBuffer_;
+	float yaw_ = 0.0f;
+
 	utility::Timer<double> timer;
 
 public:

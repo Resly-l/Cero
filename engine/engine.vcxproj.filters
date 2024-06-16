@@ -133,6 +133,9 @@
     <ClInclude Include="source\utility\timer.hpp">
       <Filter>source\utility</Filter>
     </ClInclude>
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_image.h">
+      <Filter>source\io\graphics\vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\io\window\window.cpp">

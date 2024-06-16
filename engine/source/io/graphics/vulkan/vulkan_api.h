@@ -10,10 +10,11 @@ namespace io::graphics
 	private:
 		struct Frame
 		{
-			VkCommandBuffer commandBuffer_;
-			VkSemaphore imageAcquiringSemaphore_;
-			VkSemaphore commandExecutionSemaphore_;
-			VkFence frameFence_;
+			VkCommandBuffer commandBuffer_ = VK_NULL_HANDLE;
+			VkSemaphore imageAcquiringSemaphore_ = VK_NULL_HANDLE;
+			VkSemaphore commandExecutionSemaphore_ = VK_NULL_HANDLE;
+			VkFence frameFence_ = VK_NULL_HANDLE;
+			std::map<std::shared_ptr<VulkanPipeline>, VkDescriptorSet> descriptorSets_;
 		};
 
 	private:
@@ -24,6 +25,7 @@ namespace io::graphics
 		vkb::Swapchain swapchain_;
 		VkCommandPool commandPool_;
 		VkCommandPool transfereCommandPool_;
+		VkDescriptorPool descriptorPool_;
 
 		std::vector<std::shared_ptr<VulkanRenderTarget>> swapchainRenderTargets_;
 		std::vector<Frame> frames_;
@@ -40,10 +42,8 @@ namespace io::graphics
 
 	public:
 		virtual std::shared_ptr<Pipeline> CreatePipeline(const Pipeline::Layout& _pipelineLayout) override;
-		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(const RenderTarget::Layout& _renderTargetLayout) override;
 		virtual std::shared_ptr<Mesh> CreateMesh(const Mesh::Layout& _meshLayout) override;
-
-		virtual std::shared_ptr<RenderTarget> GetSwapchainRenderTarget() const override;
+		virtual std::shared_ptr<RenderTarget> GetSwapchainRenderTarget() override;
 
 		virtual void BindPipeline(std::shared_ptr<Pipeline> _pipeline) override;
 		virtual void BindRenderTarget(std::shared_ptr<RenderTarget> _renderTarget) override;
@@ -62,9 +62,10 @@ namespace io::graphics
 		void CreateLogicalDevice();
 		void CreateSwapchain();
 		void CreateCommandPools();
+		void CreateDescriptorPool();
 		void CreateCommandBuffers();
-		void CreateSwapchainRenderTargets();
 		void CreateSyncObjects();
+		void CreateSwapchainRenderTargets();
 		void RecreateSwapchain();
 	};
 }

@@ -27,7 +27,7 @@ namespace io::graphics
 		~VulkanRenderTarget();
 
 	public:
-		void AddAttachment(RenderTarget::AttachmentDescription _description);
+		void AddAttachment(ShaderDescriptor::Output _description);
 		void Bind(VkRenderPass _renderPass);
 
 		uint32_t GetNumAttachments() const;

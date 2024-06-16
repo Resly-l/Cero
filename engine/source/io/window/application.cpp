@@ -4,12 +4,12 @@
 
 namespace io::window
 {
-	Application::Application(graphics::GraphicsAPIType _apiType)
+	Application::Application(graphics::GraphicsAPI::Type _apiType)
 		: Window(defaultWindowWidth, defaultWindowHeight, "Window Application")
 	{
 		switch (_apiType)
 		{
-		case graphics::GraphicsAPIType::Vulkan:
+		case graphics::GraphicsAPI::Type::VULKAN:
 			graphicsAPI_ = std::make_unique<graphics::VulkanAPI>(wnd_);
 			return;
 		default:

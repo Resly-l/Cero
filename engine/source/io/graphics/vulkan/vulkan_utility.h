@@ -4,11 +4,15 @@
 
 namespace io::graphics
 {
-	class VulkanTypeConverter
+	class VkTypeConverter
 	{
 	public:
 		static VkFormat Convert(ImageFormat _format);
 		static VkImageUsageFlags Convert(ImageUsage _usage);
 		static VkImageAspectFlags GetAspectMask(VkFormat _format, VkImageUsageFlags _usage);
+		static VkAttachmentLoadOp ConvertLoadOp(ImageOperation _operation);
+		static VkAttachmentStoreOp ConvertStoreOp(ImageOperation _operation);
+		static VkDescriptorType Convert(ShaderDescriptor::Binding::Type _type);
+		static VkShaderStageFlags Convert(ShaderDescriptor::Binding::Stage _stage);
 	};
 }

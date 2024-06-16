@@ -1,5 +1,5 @@
 #pragma once
-#include <stdint.h>
+#include "utility/stl.h"
 
 namespace io::graphics
 {
@@ -63,32 +63,45 @@ namespace io::graphics
 		DEPTH_STENCIL
 	};
 
-	enum class GraphicsAPIType
+	enum class ImageOperation
 	{
-		Vulkan,
+		NONE,
+		CLEAR,
+		STORE,
 	};
 
 	struct ShaderDescriptor
 	{
-		enum class Type
+		struct Binding
 		{
-			UNIFORM,
-			TEXTURE,
-		};
-		enum BindingStage : uint32_t
-		{
-			VERTEX = 1 << 0,
-			PIXEL = 1 << 1,
-		};
-		enum class Direction
-		{
-			INPUT,
-			OUTPUT
+			enum class Type
+			{
+				UNIFORM,
+				TEXTURE,
+			};
+			enum Stage : uint32_t
+			{
+				VERTEX = 1 << 0,
+				PIXEL = 1 << 1,
+			};
+
+			Type type_;
+			Stage stage_;
+			uint32_t size_ = 0;
+			uint32_t elementCount_ = 1; // 1 if not an array
 		};
 
-		Type type_;
-		BindingStage bindingStage_;
-		Direction direction_;
-		uint32_t elementCount_; // 1 if not an array
+		struct Output
+		{
+			ImageFormat format_;
+			ImageUsage usage_;
+			ImageOperation loadOp_;
+			ImageOperation storeOp_;
+			uint32_t width_;
+			uint32_t height_;
+		};
+
+		std::vector<Binding> bindings_;
+		std::vector<Output> outputs;
 	};
 }

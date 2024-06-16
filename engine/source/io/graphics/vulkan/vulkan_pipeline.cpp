@@ -1,4 +1,8 @@
 #include "vulkan_pipeline.h"
+#include "vulkan_image.h"
+#include "vulkan_render_target.h"
+#include "vulkan_uniform_buffer.h"
+#include "vulkan_utility.h"
 #include "vulkan_validation.hpp"
 #include "io/file/file_interface.h"
 
@@ -17,8 +21,12 @@ namespace io::graphics
 		return shaderModule;
 	}
 
-	VulkanPipeline::VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const Pipeline::Layout& _pipelineLayout)
+	VulkanPipeline::VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const Pipeline::Layout& _pipelineLayout, VkDescriptorPool _descriptorPool)
 		: logicalDevice_(_logicalDevice)
+		, physicalDevice_(_physicalDevice)
+		, useDepthStencil_(_pipelineLayout.depthFunc_ != ComparisonFunc::NONE)
+		, shaderDescriptor_(_pipelineLayout.descriptor_)
+		, descriptorPool_(_descriptorPool)
 	{
 		LoadShaders(_pipelineLayout.vertexShaderPath_, _pipelineLayout.pixelShaderPath_);
 		CreateInstance(_physicalDevice, _pipelineLayout);
@@ -26,8 +34,38 @@ namespace io::graphics
 
 	VulkanPipeline::~VulkanPipeline()
 	{
+		uniformBuffers_.clear();
+		vkDestroyDescriptorSetLayout(logicalDevice_, descriptorSetLayout_, nullptr);
 		vkDestroyRenderPass(logicalDevice_, renderPass_, nullptr);
+		vkDestroyPipelineLayout(logicalDevice_, layout_, nullptr);
 		vkDestroyPipeline(logicalDevice_, instance_, nullptr);
+	}
+
+	std::shared_ptr<RenderTarget> VulkanPipeline::CreateRenderTarget(uint32_t _width, uint32_t _height) const
+	{
+		RenderTarget::Layout renderTargetLayout;
+		renderTargetLayout.width_ = _width;
+		renderTargetLayout.height_ = _height;
+		renderTargetLayout.attachments_ = shaderDescriptor_.outputs;
+
+		return std::make_shared<VulkanRenderTarget>(logicalDevice_, renderTargetLayout);
+	}
+
+	std::shared_ptr<RenderTarget> VulkanPipeline::CreateRenderTarget(uint32_t _width, uint32_t _height, std::shared_ptr<ImageView> _imageView) const
+	{
+		auto renderTarget = std::make_shared<VulkanRenderTarget>(logicalDevice_, _width, _height, std::static_pointer_cast<VulkanImageView>(_imageView)->imageView_);
+
+		if (useDepthStencil_)
+		{
+			ShaderDescriptor::Output depthStencil{};
+			depthStencil.width_ = _width;
+			depthStencil.height_ = _height;
+			depthStencil.usage_ = ImageUsage::DEPTH_STENCIL;
+			depthStencil.format_ = ImageFormat::D32_SFLOAT_U8_UINT;
+			renderTarget->AddAttachment(depthStencil);
+		}
+
+		return renderTarget;
 	}
 
 	VkPipeline VulkanPipeline::GetInstance() const
@@ -35,9 +73,53 @@ namespace io::graphics
 		return instance_;
 	}
 
+	VkPipelineLayout VulkanPipeline::GetLayout() const
+	{
+		return layout_;
+	}
+
 	VkRenderPass VulkanPipeline::GetRenderPass() const
 	{
 		return renderPass_;
+	}
+
+	VkDescriptorSetLayout VulkanPipeline::GetDescriptorSetLayout() const
+	{
+		return descriptorSetLayout_;
+	}
+
+	void VulkanPipeline::UpdateDescriptorSet(VkDescriptorSet _descriptorSet)
+	{
+		for (auto& uniformBuffer : uniformBuffers_)
+		{
+			VkDescriptorBufferInfo bufferInfo{};
+			bufferInfo.buffer = uniformBuffer->GetBuffer();
+			bufferInfo.offset = 0;
+			bufferInfo.range = uniformBuffer->GetBufferSize();
+
+			VkWriteDescriptorSet descriptorWrite{};
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = _descriptorSet;
+			descriptorWrite.dstBinding = uniformBuffer->GetIndex();
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptorWrite.descriptorCount = 1;
+			descriptorWrite.pBufferInfo = &bufferInfo;
+			descriptorWrite.pImageInfo = nullptr; // Optional
+			descriptorWrite.pTexelBufferView = nullptr; // Optional
+
+			vkUpdateDescriptorSets(logicalDevice_, 1, &descriptorWrite, 0, nullptr);
+		}
+	}
+
+	void VulkanPipeline::UpdateUniformBuffer(uint32_t _index, const utility::ByteBuffer& _buffer)
+	{
+		uniformBuffers_[_index]->UpdateBuffer(_buffer.GetRawBufferAddress());
+	}
+
+	uint32_t VulkanPipeline::GetNumBindings() const
+	{
+		return (uint32_t)shaderDescriptor_.bindings_.size();
 	}
 
 	void VulkanPipeline::LoadShaders(std::wstring_view _vsPath, std::wstring_view _fsPath)
@@ -155,7 +237,7 @@ namespace io::graphics
 			rasterizerState.rasterizerDiscardEnable = VK_FALSE;
 			rasterizerState.polygonMode = VK_POLYGON_MODE_FILL;
 			rasterizerState.lineWidth = 1.0f;
-			rasterizerState.cullMode = VK_CULL_MODE_BACK_BIT;
+			rasterizerState.cullMode = VK_CULL_MODE_NONE;
 			rasterizerState.frontFace = VK_FRONT_FACE_CLOCKWISE;
 			rasterizerState.depthBiasEnable = VK_FALSE;
 			rasterizerState.depthClampEnable = VK_FALSE;
@@ -216,31 +298,32 @@ namespace io::graphics
 			colorBlendState.blendConstants[3] = 0.0f;
 		}
 
-		//
+		// output attachments
 		std::vector<VkAttachmentDescription> attachments;
 		{
-			VkAttachmentDescription colorAttachment{};
-			colorAttachment.format = VK_FORMAT_B8G8R8A8_UNORM;
-			colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-			colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-			colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-			colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-			colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-			colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+			for (const ShaderDescriptor::Output& output : shaderDescriptor_.outputs)
+			{
+				VkAttachmentDescription attachment{};
+				attachment.format = VkTypeConverter::Convert(output.format_);
+				attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+				attachment.loadOp = VkTypeConverter::ConvertLoadOp(output.loadOp_);
+				attachment.storeOp = VkTypeConverter::ConvertStoreOp(output.storeOp_);
+				attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+				attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-			VkAttachmentDescription depthAttachment{};
-			depthAttachment.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
-			depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-			depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-			depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-			depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-			depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-			depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+				switch (output.usage_)
+				{
+				case ImageUsage::COLOR_ATTACHMENT:
+					attachment.finalLayout =  VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+					break;
+				case ImageUsage::DEPTH_STENCIL:
+					attachment.finalLayout =  VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+					break;
+				}
 
-			attachments.push_back(colorAttachment);
-			attachments.push_back(depthAttachment);
+				attachments.push_back(attachment);
+			}
 		}
 
 		// render pass
@@ -284,92 +367,68 @@ namespace io::graphics
 			vkCreateRenderPass(logicalDevice_, &renderPassCreateInfo, nullptr, &renderPass_) >> VulkanResultChecker::GetInstance();
 		}
 
-		// descriptor set
-		VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+		// descriptor
 		{
-			constexpr uint32_t maxDescriptorCount = 2; // transient
-			std::vector<VkDescriptorPoolSize> poolSizes{};
-			std::vector<VkDescriptorSetLayoutBinding> descriptorBindings;
-			VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
-
-			for (size_t i = 0; i < _pipelineLayout.descriptors_.size(); i++)
+			std::vector<VkDescriptorSetLayoutBinding> descriptorBindings(shaderDescriptor_.bindings_.size());
+			uniformBuffers_.resize(shaderDescriptor_.bindings_.size());
+			for (size_t i = 0; i < shaderDescriptor_.bindings_.size(); i++)
 			{
-				const ShaderDescriptor& shaderDescriptor = _pipelineLayout.descriptors_[i];
+				VkDescriptorSetLayoutBinding vkBinding{};
+				vkBinding.binding = (uint32_t)(i);
+				vkBinding.descriptorCount = shaderDescriptor_.bindings_[i].elementCount_;
+				vkBinding.pImmutableSamplers = nullptr;
+				vkBinding.descriptorType = VkTypeConverter::Convert(shaderDescriptor_.bindings_[i].type_);
+				vkBinding.stageFlags = VkTypeConverter::Convert(shaderDescriptor_.bindings_[i].stage_);
+				descriptorBindings[i] = vkBinding;
 
-				VkDescriptorPoolSize poolSize{};
-				if (shaderDescriptor.type_ == ShaderDescriptor::Type::UNIFORM)
+				if (shaderDescriptor_.bindings_[i].size_ == 0 || shaderDescriptor_.bindings_[i].size_ % 16 != 0)
 				{
-					poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				}
-				else if (shaderDescriptor.type_ == ShaderDescriptor::Type::TEXTURE)
-				{
-					poolSize.type = VK_DESCRIPTOR_TYPE_SAMPLER;
-				}
-				poolSize.descriptorCount = maxDescriptorCount;
-				poolSizes.push_back(poolSize);
-
-				VkDescriptorSetLayoutBinding binding{};
-				if (shaderDescriptor.bindingStage_ & ShaderDescriptor::BindingStage::VERTEX)
-				{
-					binding.stageFlags | VK_SHADER_STAGE_VERTEX_BIT;
-				}
-				if (shaderDescriptor.bindingStage_ & ShaderDescriptor::BindingStage::PIXEL)
-				{
-					binding.stageFlags | VK_SHADER_STAGE_FRAGMENT_BIT;
+					throw std::exception("wrong shader binding size");
 				}
 
-				binding.binding = (uint32_t)i;
-				binding.descriptorCount = shaderDescriptor.elementCount_;
-				binding.pImmutableSamplers = nullptr;
-				binding.descriptorType = poolSize.type;
-				descriptorBindings.push_back(binding);
+				uniformBuffers_[i] = std::make_unique<VulkanUniformBuffer>(logicalDevice_, _physicalDevice, shaderDescriptor_.bindings_[i].size_, (uint32_t)i);
 			}
 
-			descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-			descriptorPoolCreateInfo.poolSizeCount = (uint32_t)poolSizes.size();
-			descriptorPoolCreateInfo.pPoolSizes = poolSizes.data();
-			descriptorPoolCreateInfo.maxSets = maxDescriptorCount;
-			descriptorPoolCreateInfo.flags = 0; //VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-			vkCreateDescriptorPool(logicalDevice_, &descriptorPoolCreateInfo, nullptr, &descriptorPool_) >> VulkanResultChecker::GetInstance();
-
-			VkDescriptorSetLayoutCreateInfo descriptorCreateInfo{};
-			descriptorCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			descriptorCreateInfo.bindingCount = (uint32_t)descriptorBindings.size();
-			descriptorCreateInfo.pBindings = descriptorBindings.data();
-			vkCreateDescriptorSetLayout(logicalDevice_, &descriptorCreateInfo, nullptr, &descriptorSetLayout) >> VulkanResultChecker::GetInstance();
+			VkDescriptorSetLayoutCreateInfo dslCreateInfo{};
+			dslCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+			dslCreateInfo.bindingCount = (uint32_t)descriptorBindings.size();
+			dslCreateInfo.pBindings = descriptorBindings.data();
+			vkCreateDescriptorSetLayout(logicalDevice_, &dslCreateInfo, nullptr, &descriptorSetLayout_) >> VulkanResultChecker::GetInstance();
 		}
 
-		VkPipelineLayout layout = VK_NULL_HANDLE;
-		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
-		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutCreateInfo.setLayoutCount = 1;
-		pipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
-		pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-		pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
-		vkCreatePipelineLayout(logicalDevice_, &pipelineLayoutCreateInfo, nullptr, &layout) >> VulkanResultChecker::GetInstance();
+		// layout
+		{
+			VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
+			pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+			pipelineLayoutCreateInfo.setLayoutCount = 1;
+			pipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout_;
+			pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
+			pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
+			vkCreatePipelineLayout(logicalDevice_, &pipelineLayoutCreateInfo, nullptr, &layout_) >> VulkanResultChecker::GetInstance();
+		}
 
-		VkGraphicsPipelineCreateInfo pipelineCreateInfo{};
-		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		pipelineCreateInfo.stageCount = 2;
-		pipelineCreateInfo.pStages = shaderStages;
-		pipelineCreateInfo.pVertexInputState = &vertexInputInfo;
-		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyInfo;
-		pipelineCreateInfo.pViewportState = &viewportState;
-		pipelineCreateInfo.pRasterizationState = &rasterizerState;
-		pipelineCreateInfo.pMultisampleState = &multisampleState;
-		pipelineCreateInfo.pDepthStencilState = &depthStencilState;
-		pipelineCreateInfo.pColorBlendState = &colorBlendState;
-		pipelineCreateInfo.pDynamicState = &dynamicState;
-		pipelineCreateInfo.layout = layout;
-		pipelineCreateInfo.renderPass = renderPass_;
-		pipelineCreateInfo.subpass = 0;
-		pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
-		pipelineCreateInfo.basePipelineIndex = -1;
-		vkCreateGraphicsPipelines(logicalDevice_, VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &instance_) >> VulkanResultChecker::GetInstance();
-
-		vkDestroyDescriptorPool(logicalDevice_, descriptorPool_, nullptr);
-		vkDestroyDescriptorSetLayout(logicalDevice_, descriptorSetLayout, nullptr);
-		vkDestroyPipelineLayout(logicalDevice_, layout, nullptr);
+		// instance
+		{
+			VkGraphicsPipelineCreateInfo pipelineCreateInfo{};
+			pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+			pipelineCreateInfo.stageCount = 2;
+			pipelineCreateInfo.pStages = shaderStages;
+			pipelineCreateInfo.pVertexInputState = &vertexInputInfo;
+			pipelineCreateInfo.pInputAssemblyState = &inputAssemblyInfo;
+			pipelineCreateInfo.pViewportState = &viewportState;
+			pipelineCreateInfo.pRasterizationState = &rasterizerState;
+			pipelineCreateInfo.pMultisampleState = &multisampleState;
+			pipelineCreateInfo.pDepthStencilState = &depthStencilState;
+			pipelineCreateInfo.pColorBlendState = &colorBlendState;
+			pipelineCreateInfo.pDynamicState = &dynamicState;
+			pipelineCreateInfo.layout = layout_;
+			pipelineCreateInfo.renderPass = renderPass_;
+			pipelineCreateInfo.subpass = 0;
+			pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
+			pipelineCreateInfo.basePipelineIndex = -1;
+			vkCreateGraphicsPipelines(logicalDevice_, VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &instance_) >> VulkanResultChecker::GetInstance();
+		}
+		
 		vkDestroyShaderModule(logicalDevice_, vertexShaderModule_, nullptr);
 		vkDestroyShaderModule(logicalDevice_, pixelShaderModule_, nullptr);
 	}

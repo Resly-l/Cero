@@ -1,5 +1,6 @@
 #include "vulkan_api.h"
 #include "vulkan_pipeline.h"
+#include "vulkan_image.h"
 #include "vulkan_render_target.h"
 #include "vulkan_mesh.h"
 #include "vulkan_validation.hpp"
@@ -20,6 +21,7 @@ namespace io::graphics
 		CreateLogicalDevice();
 		CreateSwapchain();
 		CreateCommandPools();
+		CreateDescriptorPool();
 		CreateCommandBuffers();
 		CreateSwapchainRenderTargets();
 		CreateSyncObjects();
@@ -37,12 +39,14 @@ namespace io::graphics
 
 		for (Frame& frame : frames_)
 		{
+			frame.descriptorSets_.clear();
 			vkDestroySemaphore(logicalDevice_, frame.imageAcquiringSemaphore_, nullptr);
 			vkDestroySemaphore(logicalDevice_, frame.commandExecutionSemaphore_, nullptr);
 			vkDestroyFence(logicalDevice_, frame.frameFence_, nullptr);
 			vkFreeCommandBuffers(logicalDevice_, commandPool_, 1, &frame.commandBuffer_);
 		}
 
+		vkDestroyDescriptorPool(logicalDevice_, descriptorPool_, nullptr);
 		vkDestroyCommandPool(logicalDevice_, transfereCommandPool_, nullptr);
 		vkDestroyCommandPool(logicalDevice_, commandPool_, nullptr);
 
@@ -54,12 +58,24 @@ namespace io::graphics
 
 	std::shared_ptr<Pipeline> VulkanAPI::CreatePipeline(const Pipeline::Layout& _pipelineLayout)
 	{
-		return std::make_shared<VulkanPipeline>(logicalDevice_, physicalDevice_, _pipelineLayout);
-	}
+		auto pipeline = std::make_shared<VulkanPipeline>(logicalDevice_, physicalDevice_, _pipelineLayout, descriptorPool_);
 
-	std::shared_ptr<RenderTarget> VulkanAPI::CreateRenderTarget(const RenderTarget::Layout& _renderTargetLayout)
-	{
-		return std::make_shared<VulkanRenderTarget>(logicalDevice_, _renderTargetLayout);
+		std::vector<VkDescriptorSetLayout> descriptorSetLayouts(frames_.size(), pipeline->GetDescriptorSetLayout());
+		std::vector<VkDescriptorSet> descriptorSets(frames_.size());
+		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
+		descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		descriptorSetAllocateInfo.descriptorPool = descriptorPool_;
+		descriptorSetAllocateInfo.descriptorSetCount = (uint32_t)descriptorSets.size();
+		descriptorSetAllocateInfo.pSetLayouts = descriptorSetLayouts.data();
+		vkAllocateDescriptorSets(logicalDevice_, &descriptorSetAllocateInfo, descriptorSets.data());
+
+		for (size_t i = 0; i < frames_.size(); i++)
+		{
+			frames_[i].descriptorSets_[pipeline] = descriptorSets[i];
+			pipeline->UpdateDescriptorSet(descriptorSets[i]);
+		}
+
+		return pipeline;
 	}
 
 	std::shared_ptr<Mesh> VulkanAPI::CreateMesh(const Mesh::Layout& _meshLayout)
@@ -67,7 +83,7 @@ namespace io::graphics
 		return std::make_shared<VulkanMesh>(logicalDevice_, physicalDevice_, *logicalDevice_.get_queue(vkb::QueueType::transfer), transfereCommandPool_,  _meshLayout);
 	}
 
-	std::shared_ptr<RenderTarget> VulkanAPI::GetSwapchainRenderTarget() const
+	std::shared_ptr<RenderTarget> VulkanAPI::GetSwapchainRenderTarget()
 	{
 		return swapchainRenderTargets_[swapchainImageIndex_];
 	}
@@ -95,21 +111,22 @@ namespace io::graphics
 
 	bool VulkanAPI::BeginFrame()
 	{
-		vkWaitForFences(logicalDevice_, 1, &frames_[frameIndex_].frameFence_, VK_TRUE, UINT64_MAX);
+		Frame& currentFrame = frames_[frameIndex_];
+		vkWaitForFences(logicalDevice_, 1, &currentFrame.frameFence_, VK_TRUE, UINT64_MAX);
 
-		VkResult result = vkAcquireNextImageKHR(logicalDevice_, swapchain_, UINT64_MAX, frames_[frameIndex_].imageAcquiringSemaphore_, VK_NULL_HANDLE, &swapchainImageIndex_);
+		VkResult result = vkAcquireNextImageKHR(logicalDevice_, swapchain_, UINT64_MAX, currentFrame.imageAcquiringSemaphore_, VK_NULL_HANDLE, &swapchainImageIndex_);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			RecreateSwapchain();
 			return false;
 		}
 
-		vkResetFences(logicalDevice_, 1, &frames_[frameIndex_].frameFence_) >> VulkanResultChecker::GetInstance();
+		vkResetFences(logicalDevice_, 1, &currentFrame.frameFence_) >> VulkanResultChecker::GetInstance();
 
 		VkCommandBufferBeginInfo commandBufferBeginInfo{};
 		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		vkResetCommandBuffer(frames_[frameIndex_].commandBuffer_, VkCommandBufferResetFlags{});
-		vkBeginCommandBuffer(frames_[frameIndex_].commandBuffer_, &commandBufferBeginInfo);
+		vkResetCommandBuffer(currentFrame.commandBuffer_, VkCommandBufferResetFlags{});
+		vkBeginCommandBuffer(currentFrame.commandBuffer_, &commandBufferBeginInfo);
 		return true;
 	}
 
@@ -119,6 +136,8 @@ namespace io::graphics
 		{
 			return;
 		}
+
+		Frame& currentFrame = frames_[frameIndex_];
 
 		VkClearValue clearValues[2]{};
 		clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -131,7 +150,7 @@ namespace io::graphics
 		renderPassBeginInfo.renderArea.extent = swapchain_.extent;
 		renderPassBeginInfo.clearValueCount = 2;
 		renderPassBeginInfo.pClearValues = clearValues;
-		vkCmdBeginRenderPass(frames_[frameIndex_].commandBuffer_, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdBeginRenderPass(currentFrame.commandBuffer_, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 		VkViewport viewport{};
 		viewport.x = 0.0f;
@@ -140,43 +159,49 @@ namespace io::graphics
 		viewport.height = static_cast<float>(swapchain_.extent.height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(frames_[frameIndex_].commandBuffer_, 0, 1, &viewport);
+		vkCmdSetViewport(currentFrame.commandBuffer_, 0, 1, &viewport);
 
 		VkRect2D scissor{};
 		scissor.offset = { 0, 0 };
 		scissor.extent = swapchain_.extent;
-		vkCmdSetScissor(frames_[frameIndex_].commandBuffer_, 0, 1, &scissor);
+		vkCmdSetScissor(currentFrame.commandBuffer_, 0, 1, &scissor);
 
 		VkBuffer vertexBuffers[] = { mesh_->GetVertexBuffer()};
 		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindPipeline(frames_[frameIndex_].commandBuffer_, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->GetInstance());
-		vkCmdBindVertexBuffers(frames_[frameIndex_].commandBuffer_, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(frames_[frameIndex_].commandBuffer_, mesh_->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(frames_[frameIndex_].commandBuffer_, mesh_->GetNumIndices(), 1, 0, 0, 0);
-		vkCmdEndRenderPass(frames_[frameIndex_].commandBuffer_);
+		vkCmdBindPipeline(currentFrame.commandBuffer_, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->GetInstance());
+		vkCmdBindVertexBuffers(currentFrame.commandBuffer_, 0, 1, vertexBuffers, offsets);
+		vkCmdBindIndexBuffer(currentFrame.commandBuffer_, mesh_->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+		if (pipeline_->GetNumBindings() > 0)
+		{
+			auto descriptorSet = currentFrame.descriptorSets_[pipeline_];
+			vkCmdBindDescriptorSets(currentFrame.commandBuffer_, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->GetLayout(), 0, 1, &descriptorSet, 0, nullptr);
+		}
+		vkCmdDrawIndexed(currentFrame.commandBuffer_, mesh_->GetNumIndices(), 1, 0, 0, 0);
+		vkCmdEndRenderPass(currentFrame.commandBuffer_);
 	}
 
 	void VulkanAPI::EndFrame()
 	{
-		vkEndCommandBuffer(frames_[frameIndex_].commandBuffer_) >> VulkanResultChecker::GetInstance();
+		Frame& currentFrame = frames_[frameIndex_];
+		vkEndCommandBuffer(currentFrame.commandBuffer_) >> VulkanResultChecker::GetInstance();
 
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &frames_[frameIndex_].commandBuffer_;
+		submitInfo.pCommandBuffers = &currentFrame.commandBuffer_;
 		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = &frames_[frameIndex_].imageAcquiringSemaphore_;
+		submitInfo.pWaitSemaphores = &currentFrame.imageAcquiringSemaphore_;
 		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &frames_[frameIndex_].commandExecutionSemaphore_;
-		vkQueueSubmit(logicalDevice_.get_queue(vkb::QueueType::graphics).value(), 1, &submitInfo, frames_[frameIndex_].frameFence_) >> VulkanResultChecker::GetInstance();
+		submitInfo.pSignalSemaphores = &currentFrame.commandExecutionSemaphore_;
+		vkQueueSubmit(logicalDevice_.get_queue(vkb::QueueType::graphics).value(), 1, &submitInfo, currentFrame.frameFence_) >> VulkanResultChecker::GetInstance();
 
 		VkSwapchainKHR swapchains[] = { swapchain_ };
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = &frames_[frameIndex_].commandExecutionSemaphore_;
+		presentInfo.pWaitSemaphores = &currentFrame.commandExecutionSemaphore_;
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = swapchains;
 		presentInfo.pImageIndices = &swapchainImageIndex_;
@@ -249,6 +274,25 @@ namespace io::graphics
 		vkCreateCommandPool(logicalDevice_, &commandPoolCreateInfo, nullptr, &transfereCommandPool_) >> VulkanResultChecker::GetInstance();
 	}
 
+    void VulkanAPI::CreateDescriptorPool()
+    {
+		std::vector<VkDescriptorPoolSize> poolSizes;
+		VkDescriptorPoolSize poolSize{};
+		poolSize.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER;
+		poolSize.descriptorCount = config_.numMaxSamplers_;
+		poolSizes.push_back(poolSize);
+		poolSize.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSize.descriptorCount = config_.numMaxUBuffers_;
+		poolSizes.push_back(poolSize);
+
+		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
+		descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		descriptorPoolCreateInfo.maxSets = config_.numFrameConcurrency_;
+		descriptorPoolCreateInfo.poolSizeCount = (uint32_t)poolSizes.size();
+		descriptorPoolCreateInfo.pPoolSizes = poolSizes.data();
+		vkCreateDescriptorPool(logicalDevice_, &descriptorPoolCreateInfo, nullptr, &descriptorPool_);
+    }
+
 	void VulkanAPI::CreateCommandBuffers()
 	{
 		VkCommandBufferAllocateInfo allocateInfo{};
@@ -260,23 +304,6 @@ namespace io::graphics
 		for (Frame& frame : frames_)
 		{
 			vkAllocateCommandBuffers(logicalDevice_, &allocateInfo, &frame.commandBuffer_) >> VulkanResultChecker::GetInstance();
-		}
-	}
-
-	void VulkanAPI::CreateSwapchainRenderTargets()
-	{
-		swapchainRenderTargets_.clear();
-
-		for (VkImageView swapchainImageView : swapchain_.get_image_views().value())
-		{
-			auto renderTarget = std::make_shared<VulkanRenderTarget>(logicalDevice_, swapchain_.extent.width, swapchain_.extent.height, swapchainImageView);
-			RenderTarget::AttachmentDescription depthStencilDescription{};
-			depthStencilDescription.width_ = swapchain_.extent.width;
-			depthStencilDescription.height_ = swapchain_.extent.height;
-			depthStencilDescription.format_ = ImageFormat::D32_SFLOAT_U8_UINT;
-			depthStencilDescription.usage_ = ImageUsage::DEPTH_STENCIL;
-			renderTarget->AddAttachment(depthStencilDescription);
-			swapchainRenderTargets_.push_back(std::move(renderTarget));
 		}
 	}
 
@@ -295,6 +322,23 @@ namespace io::graphics
 			vkCreateSemaphore(logicalDevice_, &semaphoreCreateInfo, nullptr, &frame.commandExecutionSemaphore_);
 
 			vkCreateFence(logicalDevice_, &fenceCreateInfo, nullptr, &frame.frameFence_);
+		}
+	}
+
+	void VulkanAPI::CreateSwapchainRenderTargets()
+	{
+		swapchainRenderTargets_.clear();
+
+		for (VkImageView swapchainImageView : swapchain_.get_image_views().value())
+		{
+			auto renderTarget = std::make_shared<VulkanRenderTarget>(logicalDevice_, swapchain_.extent.width, swapchain_.extent.height, swapchainImageView);
+			ShaderDescriptor::Output depthStencilDescription{};
+			depthStencilDescription.width_ = swapchain_.extent.width;
+			depthStencilDescription.height_ = swapchain_.extent.height;
+			depthStencilDescription.format_ = ImageFormat::D32_SFLOAT_U8_UINT;
+			depthStencilDescription.usage_ = ImageUsage::DEPTH_STENCIL;
+			renderTarget->AddAttachment(depthStencilDescription);
+			swapchainRenderTargets_.push_back(std::move(renderTarget));
 		}
 	}
 

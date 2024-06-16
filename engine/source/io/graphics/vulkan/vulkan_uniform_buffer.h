@@ -9,17 +9,18 @@ namespace io::graphics
 		VkDevice logicalDevice_;
 		VkBuffer buffer_;
 		VkDeviceMemory bufferMemory_;
+		VkDeviceSize bufferSize_;
+		uint32_t index_;
 		void* mapped_ = nullptr;
 
-		uint32_t bufferSize_;
-
 	public:
-		VulkanUniformBuffer(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, uint32_t _bufferSize, void* _data);
+		VulkanUniformBuffer(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkDeviceSize _bufferSize, uint32_t _index);
 		~VulkanUniformBuffer();
 
 	public:
 		VkBuffer GetBuffer() const;
-		uint32_t GetBufferSize() const;
-		void UpdateBuffer(void* _data);
+		VkDeviceSize GetBufferSize() const;
+		uint32_t GetIndex() const;
+		void UpdateBuffer(const void* _data);
 	};
 }

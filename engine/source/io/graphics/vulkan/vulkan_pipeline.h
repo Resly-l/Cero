@@ -9,20 +9,35 @@ namespace io::graphics
 	{
 	private:
 		VkDevice logicalDevice_;
+		VkPhysicalDevice physicalDevice_;
 		VkPipeline instance_;
-		VkRenderPass renderPass_;
-		VkDescriptorPool descriptorPool_;
-		std::vector<VkDescriptorSet> descriptorSets_;
 		VkShaderModule vertexShaderModule_;
 		VkShaderModule pixelShaderModule_;
+		VkRenderPass renderPass_;
+		ShaderDescriptor shaderDescriptor_;
+		VkPipelineLayout layout_;
+		const bool useDepthStencil_;
+
+		std::vector<std::unique_ptr<VulkanUniformBuffer>> uniformBuffers_;
+		VkDescriptorPool descriptorPool_;
+		VkDescriptorSetLayout descriptorSetLayout_;
 
 	public:
-		VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const Pipeline::Layout& _pipelineLayout);
+		VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const Pipeline::Layout& _pipelineLayout, VkDescriptorPool _descriptorPool);
 		~VulkanPipeline();
 
 	public:
+		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(uint32_t _width, uint32_t _height) const override;
+		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(uint32_t _width, uint32_t _height, std::shared_ptr<ImageView> _imageView) const override;
+
 		VkPipeline GetInstance() const;
+		VkPipelineLayout GetLayout() const;
 		VkRenderPass GetRenderPass() const;
+		VkDescriptorSetLayout GetDescriptorSetLayout() const;
+		uint32_t GetNumBindings() const;
+
+		void UpdateDescriptorSet(VkDescriptorSet _descriptorSet);
+		virtual void UpdateUniformBuffer(uint32_t _index, const utility::ByteBuffer& _buffer) override;
 
 	private:
 		void LoadShaders(std::wstring_view _vsPath, std::wstring_view _fsPath);

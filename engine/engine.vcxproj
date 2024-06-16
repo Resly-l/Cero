@@ -164,6 +164,7 @@
     <ClInclude Include="source\io\graphics\render_target.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_api.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_buffer.h" />
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_image.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_mesh.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_pipeline.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_render_target.h" />

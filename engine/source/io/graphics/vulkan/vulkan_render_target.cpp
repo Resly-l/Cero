@@ -9,7 +9,7 @@ namespace io::graphics
 		, width_(_renderTargetLayout.width_)
 		, height_(_renderTargetLayout.height_)
 	{
-		for (RenderTarget::AttachmentDescription attachmentDescription : _renderTargetLayout.attachments_)
+		for (const ShaderDescriptor::Output& attachmentDescription : _renderTargetLayout.attachments_)
 		{
 			AddAttachment(attachmentDescription);
 		}
@@ -42,7 +42,7 @@ namespace io::graphics
 		}
 	}
 
-	void VulkanRenderTarget::AddAttachment(RenderTarget::AttachmentDescription _description)
+	void VulkanRenderTarget::AddAttachment(ShaderDescriptor::Output _description)
 	{
 		VulkanAttachment attachment;
 		attachment.image_ = VK_NULL_HANDLE;
@@ -51,7 +51,7 @@ namespace io::graphics
 		VkImageCreateInfo imageCreateInfo{};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageCreateInfo.format = VulkanTypeConverter::Convert(_description.format_);
+		imageCreateInfo.format = VkTypeConverter::Convert(_description.format_);
 		imageCreateInfo.extent.width = _description.width_;
 		imageCreateInfo.extent.height = _description.height_;
 		imageCreateInfo.extent.depth = 1;
@@ -59,7 +59,7 @@ namespace io::graphics
 		imageCreateInfo.arrayLayers = 1;
 		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageCreateInfo.usage = VulkanTypeConverter::Convert(_description.usage_);
+		imageCreateInfo.usage = VkTypeConverter::Convert(_description.usage_);
 		vkCreateImage(logicalDevice_, &imageCreateInfo, nullptr, &*attachment.image_) >> VulkanResultChecker::GetInstance();
 
 		VkMemoryRequirements memoryRequirements{};
@@ -74,8 +74,8 @@ namespace io::graphics
 		VkImageViewCreateInfo imageViewCreateInfo{};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		imageViewCreateInfo.format = VulkanTypeConverter::Convert(_description.format_);
-		imageViewCreateInfo.subresourceRange.aspectMask = VulkanTypeConverter::GetAspectMask(imageCreateInfo.format, imageCreateInfo.usage);
+		imageViewCreateInfo.format = VkTypeConverter::Convert(_description.format_);
+		imageViewCreateInfo.subresourceRange.aspectMask = VkTypeConverter::GetAspectMask(imageCreateInfo.format, imageCreateInfo.usage);
 		imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
 		imageViewCreateInfo.subresourceRange.levelCount = 1;
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;

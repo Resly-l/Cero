@@ -3,7 +3,7 @@
 
 namespace io::graphics
 {
-	VkFormat VulkanTypeConverter::Convert(ImageFormat _format)
+	VkFormat VkTypeConverter::Convert(ImageFormat _format)
 	{
 		switch (_format)
 		{
@@ -32,7 +32,7 @@ namespace io::graphics
 		return VK_FORMAT_UNDEFINED;
 	}
 
-	VkImageUsageFlags VulkanTypeConverter::Convert(ImageUsage _usage)
+	VkImageUsageFlags VkTypeConverter::Convert(ImageUsage _usage)
 	{
 		switch (_usage)
 		{
@@ -45,7 +45,7 @@ namespace io::graphics
 		return VkImageUsageFlags{};
 	}
 
-	VkImageAspectFlags VulkanTypeConverter::GetAspectMask(VkFormat _format, VkImageUsageFlags _usage)
+	VkImageAspectFlags VkTypeConverter::GetAspectMask(VkFormat _format, VkImageUsageFlags _usage)
 	{
 		VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_NONE;
 
@@ -64,5 +64,59 @@ namespace io::graphics
 		}
 
 		return aspectMask;
+	}
+
+	VkAttachmentLoadOp VkTypeConverter::ConvertLoadOp(ImageOperation _operation)
+	{
+		switch (_operation)
+		{
+		case ImageOperation::STORE:
+			return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_LOAD;
+		case ImageOperation::CLEAR:
+			return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
+		}
+
+		return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	}
+
+    VkAttachmentStoreOp VkTypeConverter::ConvertStoreOp(ImageOperation _operation)
+    {
+        switch (_operation)
+		{
+		case ImageOperation::STORE:
+			return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
+		case ImageOperation::CLEAR:
+			return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		}
+
+		return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    }
+
+	VkDescriptorType VkTypeConverter::Convert(ShaderDescriptor::Binding::Type _type)
+	{
+		switch (_type)
+		{
+		case ShaderDescriptor::Binding::Type::TEXTURE:
+			return VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER;
+		case ShaderDescriptor::Binding::Type::UNIFORM:
+			return VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		}
+
+		return VkDescriptorType{};
+	}
+
+	VkShaderStageFlags VkTypeConverter::Convert(ShaderDescriptor::Binding::Stage _stage)
+	{
+		VkShaderStageFlags flags{};
+		if (_stage & ShaderDescriptor::Binding::Stage::VERTEX)
+		{
+			flags |= VK_SHADER_STAGE_VERTEX_BIT;
+		}
+		if (_stage & ShaderDescriptor::Binding::Stage::PIXEL)
+		{
+			flags |= VK_SHADER_STAGE_FRAGMENT_BIT;
+		}
+
+		return flags;
 	}
 }

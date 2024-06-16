@@ -1,41 +1,16 @@
 #include "byte_buffer.h"
+#include <cassert>
 
 namespace utility
 {
-	const ByteBuffer::Layout::Attribute& ByteBuffer::Layout::GetAttribute(std::string_view _name) const
-	{
-		auto it = std::find_if(attributes_.begin(), attributes_.end(),
-			[_name](const Attribute& _attribute)
-			{
-				return _attribute.name_ == _name;
-			});
-
-		if (it == attributes_.end())
-		{
-			throw std::exception("no attribute in layout");
-		}
-
-		return *it;
-	}
-
 	const ByteBuffer::Layout::Attribute& ByteBuffer::Layout::GetAttribute(size_t _index) const
 	{
 		return attributes_[_index];
 	}
 
-	size_t ByteBuffer::Layout::GetAttributeOffset(std::string_view _name) const
-	{
-		return GetAttribute(_name).offset_;
-	}
-
 	size_t ByteBuffer::Layout::GetAttributeOffset(size_t _index) const
 	{
 		return GetAttribute(_index).offset_;
-	}
-
-	size_t ByteBuffer::Layout::GetAttributeSize(std::string_view _name) const
-	{
-		return GetAttribute(_name).size_;
 	}
 
 	size_t ByteBuffer::Layout::GetAttributeSize(size_t _index) const
@@ -89,24 +64,18 @@ namespace utility
 		return rawBytes_.size();
 	}
 
-	std::optional<ByteBuffer::Element> ByteBuffer::Add()
+	ByteBuffer::Element ByteBuffer::Add()
 	{
-		if (!layout_)
-		{
-			return std::nullopt;
-		}
+		assert(layout_.has_value());
 
 		const size_t size = rawBytes_.size();
 		rawBytes_.resize(size + layout_->GetSizeInBytes());
 		return Element(*layout_, rawBytes_.data() + size);
 	}
 
-	std::optional<ByteBuffer::Element> ByteBuffer::At(size_t _index) const
+	ByteBuffer::Element ByteBuffer::At(size_t _index) const
 	{
-		if (!layout_)
-		{
-			return std::nullopt;
-		}
+		assert(layout_.has_value());
 
 		return Element(*layout_, rawBytes_.data() + (layout_->GetSizeInBytes() * _index));
 	}

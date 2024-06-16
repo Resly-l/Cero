@@ -14,7 +14,7 @@ namespace io::window
 		std::unique_ptr<graphics::GraphicsAPI> graphicsAPI_;
 
 	public:
-		Application(graphics::GraphicsAPIType _apiType);
+		Application(graphics::GraphicsAPI::Type _apiType);
 
 	public:
 		void Run();
