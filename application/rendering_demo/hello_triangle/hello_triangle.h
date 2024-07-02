@@ -2,6 +2,7 @@
 #include "io/window/application.h"
 #include "utility/timer.hpp"
 
+
 class HelloTriangle : public io::window::Application
 {
 private:
@@ -14,7 +15,7 @@ private:
 	utility::ByteBuffer pBuffer_;
 	float yaw_ = 0.0f;
 
-	utility::Timer<double> timer;
+	utility::Timer<double> timer_;
 
 public:
 	HelloTriangle();

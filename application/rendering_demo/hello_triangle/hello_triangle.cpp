@@ -4,6 +4,8 @@
 #include "core/math/matrix.h"
 #include <iostream>
 
+#include "io/file/shader_compiler.h"
+
 using namespace io::graphics;
 
 HelloTriangle::HelloTriangle()
@@ -11,6 +13,8 @@ HelloTriangle::HelloTriangle()
 {
 	Window::SetTitle("Hello Triangle");
 	Window::SetResizability(false);
+
+	ShaderCompiler::CompileShaders("shader/", "shader/bin/");
 
 	utility::ByteBuffer::Layout mvLayout;
 	mvLayout.AddAttribute<math::Matrix<float>>();
@@ -24,8 +28,8 @@ HelloTriangle::HelloTriangle()
 	pBuffer_.Add();
 
 	Pipeline::Layout pipelineLayout;
-	pipelineLayout.vertexShaderPath_ = L"../../../engine/asset/shader/bin/hello_triangle.vert.spv";
-	pipelineLayout.pixelShaderPath_ = L"../../../engine/asset/shader/bin/hello_triangle.frag.spv";
+	pipelineLayout.vertexShaderPath_ = L"shader/bin/hello_triangle.vert.spv";
+	pipelineLayout.pixelShaderPath_ = L"shader/bin/hello_triangle.frag.spv";
 	pipelineLayout.vertexInputLayout_.AddAttribute<math::Vector2d<float>>();
 	pipelineLayout.vertexInputLayout_.AddAttribute<math::Vector3d<float>>();
 	pipelineLayout.depthFunc_ = ComparisonFunc::LESS_EQUAL;
@@ -68,7 +72,7 @@ HelloTriangle::HelloTriangle()
 	vertex.Get<math::Vector2d<float>>(0) = math::Vector2d(-0.35f, 0.5f);
 	vertex.Get<math::Vector3d<float>>(1) = math::Vector3d(0.15f, 0.15f, 0.15f);
 
-	meshLayout.indices_ = { 0,1,2 };
+	meshLayout.indices_ = { 0, 1, 2, 2, 3, 0 };
 	mesh_ = graphicsAPI_->CreateMesh(meshLayout);
 	meshLayout.indices_ = { 2,3,0 };
 	mesh2_ = graphicsAPI_->CreateMesh(meshLayout);
@@ -81,7 +85,7 @@ HelloTriangle::~HelloTriangle()
 
 void HelloTriangle::Update()
 {
-	auto deltaSeconds = timer.Mark();
+	auto deltaSeconds = timer_.Mark();
 	yaw_ += (float)deltaSeconds;
 
 	math::Matrix<float> modelMatrix = math::Matrix<float>::RotationY(yaw_);
