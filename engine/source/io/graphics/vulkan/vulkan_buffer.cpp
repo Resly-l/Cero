@@ -3,6 +3,22 @@
 
 namespace io::graphics
 {
+	uint32_t FindMemoryTypeIndex(VkPhysicalDevice _physicalDevice, VkMemoryRequirements _memoryRequirements, VkMemoryPropertyFlags _requiredProperties)
+	{
+		VkPhysicalDeviceMemoryProperties memProperties;
+		vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &memProperties);
+
+		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+		{
+			if ((_memoryRequirements.memoryTypeBits & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & _requiredProperties) == _requiredProperties)
+			{
+				return i;
+			}
+		}
+
+		return std::numeric_limits<uint32_t>::max();
+	}
+
 	void CreateBuffer(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkBufferUsageFlags _usage, VkMemoryPropertyFlags _properties, VkDeviceSize _bufferSize, VkBuffer& _outBuffer, VkDeviceMemory& _outBufferMemory)
 	{
 		VkBufferCreateInfo bufferCreateInfo{};
@@ -15,20 +31,7 @@ namespace io::graphics
 		VkMemoryRequirements memRequirements;
 		vkGetBufferMemoryRequirements(_logicalDevice, _outBuffer, &memRequirements);
 
-		VkPhysicalDeviceMemoryProperties memProperties;
-		vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &memProperties);
-
-		// find memory type
-		uint32_t memoryTypeIndex = std::numeric_limits<uint32_t>::max();
-		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
-		{
-			if ((memRequirements.memoryTypeBits & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & _properties) == _properties)
-			{
-				memoryTypeIndex = i;
-				break;
-			}
-		}
-
+		uint32_t memoryTypeIndex = FindMemoryTypeIndex(_physicalDevice, memRequirements, _properties);
 		if (memoryTypeIndex == std::numeric_limits<uint32_t>::max())
 		{
 			throw std::exception("CreateBuffer() : failed to find required memory type");

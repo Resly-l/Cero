@@ -52,6 +52,9 @@
     <Filter Include="source\thirdparty\vk_bootstrap">
       <UniqueIdentifier>{80dad7e6-5df4-4f2e-b156-c02bc3c85647}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\thirdparty\stb">
+      <UniqueIdentifier>{8604d792-6976-40bc-9c14-c30a4b8d5ec6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\io\graphics\graphics_api.h">
@@ -133,11 +136,20 @@
     <ClInclude Include="source\utility\timer.hpp">
       <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\io\graphics\vulkan\vulkan_image.h">
-      <Filter>source\io\graphics\vulkan</Filter>
-    </ClInclude>
     <ClInclude Include="source\io\file\shader_compiler.h">
       <Filter>source\io\file</Filter>
+    </ClInclude>
+    <ClInclude Include="source\thirdparty\stb\stb_image.h">
+      <Filter>source\thirdparty\stb</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\texture.h">
+      <Filter>source\io\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\file\image.h">
+      <Filter>source\io\file</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_texture.h">
+      <Filter>source\io\graphics\vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -181,6 +193,12 @@
       <Filter>source\io\graphics\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="source\io\graphics\vulkan\vulkan_buffer.cpp">
+      <Filter>source\io\graphics\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="source\io\file\image.cpp">
+      <Filter>source\io\file</Filter>
+    </ClCompile>
+    <ClCompile Include="source\io\graphics\vulkan\vulkan_texture.cpp">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClCompile>
   </ItemGroup>

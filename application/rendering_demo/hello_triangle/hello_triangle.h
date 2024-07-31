@@ -21,7 +21,7 @@ public:
 	HelloTriangle();
 	~HelloTriangle() override;
 
-public:
+private:
 	virtual void Update() override;
 	virtual void Render() override;
 };

@@ -28,7 +28,6 @@ namespace io::graphics
 
 	public:
 		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(uint32_t _width, uint32_t _height) const override;
-		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(uint32_t _width, uint32_t _height, std::shared_ptr<ImageView> _imageView) const override;
 
 		VkPipeline GetInstance() const;
 		VkPipelineLayout GetLayout() const;

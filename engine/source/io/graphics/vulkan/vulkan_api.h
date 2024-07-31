@@ -43,6 +43,7 @@ namespace io::graphics
 	public:
 		virtual std::shared_ptr<Pipeline> CreatePipeline(const Pipeline::Layout& _pipelineLayout) override;
 		virtual std::shared_ptr<Mesh> CreateMesh(const Mesh::Layout& _meshLayout) override;
+		virtual std::shared_ptr<Texture> CreateTexture(const Texture::Layout& _textureLayout) override;
 		virtual std::shared_ptr<RenderTarget> GetSwapchainRenderTarget() override;
 
 		virtual void BindPipeline(std::shared_ptr<Pipeline> _pipeline) override;

@@ -1,8 +1,8 @@
 #include "vulkan_api.h"
 #include "vulkan_pipeline.h"
-#include "vulkan_image.h"
 #include "vulkan_render_target.h"
 #include "vulkan_mesh.h"
+#include "vulkan_texture.h"
 #include "vulkan_validation.hpp"
 #include "vulkan_utility.h"
 #include "io/window/window_min.h"
@@ -81,6 +81,11 @@ namespace io::graphics
 	std::shared_ptr<Mesh> VulkanAPI::CreateMesh(const Mesh::Layout& _meshLayout)
 	{
 		return std::make_shared<VulkanMesh>(logicalDevice_, physicalDevice_, *logicalDevice_.get_queue(vkb::QueueType::transfer), transfereCommandPool_,  _meshLayout);
+	}
+
+	std::shared_ptr<Texture> VulkanAPI::CreateTexture(const Texture::Layout& _textureLayout)
+	{
+		return std::make_shared<VulkanTexture>(logicalDevice_, physicalDevice_, *logicalDevice_.get_queue(vkb::QueueType::graphics), commandPool_, _textureLayout);
 	}
 
 	std::shared_ptr<RenderTarget> VulkanAPI::GetSwapchainRenderTarget()

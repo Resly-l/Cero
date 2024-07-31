@@ -11,9 +11,9 @@ namespace io
 	{
 		class GraphicsAPI;
 		class Pipeline;
-		class ImageView {};
 		class RenderTarget;
 		class Mesh;
+		class Texture;
 
 		struct Viewport;
 		enum class PrimitiveTopology;
@@ -25,7 +25,6 @@ namespace io
 
 		class VulkanAPI;
 		class VulkanPipeline;
-		class VulkanImageView;
 		class VulkanRenderTarget;
 		class VulkanMesh;
 		class VulkanUniformBuffer;
@@ -34,5 +33,6 @@ namespace io
 	namespace file
 	{
 		class FileInterface;
+		struct Image;
 	}
 }

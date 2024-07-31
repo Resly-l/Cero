@@ -44,12 +44,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>../../../_build/hello_triangle/</OutDir>
-    <IntDir>../../../_build/hello_triangle/</IntDir>
+    <OutDir>$(SolutionDir)_build\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)_build\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>../../../_build/hello_triangle/</OutDir>
-    <IntDir>../../../_build/hello_triangle/</IntDir>
+    <OutDir>$(SolutionDir)_build\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)_build\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -59,7 +59,7 @@
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>../../../engine/source/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\engine\source\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -76,7 +76,7 @@
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>../../../engine/source/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\engine\source\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

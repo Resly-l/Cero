@@ -15,7 +15,6 @@ namespace io::graphics
 	public:
 		virtual ~Mesh() {};
 
-	public:
 		virtual uint32_t GetNumVertices() const = 0;
 		virtual uint32_t GetNumIndices() const = 0;
 	};

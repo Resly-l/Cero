@@ -38,6 +38,7 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="EngineBaseline.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -60,7 +61,7 @@
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.268.0\Include;source/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.268.0\Include;$(SolutionDir)\engine\source\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -85,7 +86,7 @@
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.268.0\Include;source/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.268.0\Include;$(SolutionDir)\engine\source\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -107,24 +108,27 @@
     <ClInclude Include="source\core\math\matrix.h" />
     <ClInclude Include="source\core\math\vector.h" />
     <ClInclude Include="source\io\file\file_interface.h" />
+    <ClInclude Include="source\io\file\image.h" />
     <ClInclude Include="source\io\file\shader_compiler.h" />
     <ClInclude Include="source\io\graphics\common.h" />
     <ClInclude Include="source\io\graphics\graphics_api.h" />
     <ClInclude Include="source\io\graphics\pipeline.h" />
     <ClInclude Include="source\io\graphics\mesh.h" />
     <ClInclude Include="source\io\graphics\render_target.h" />
+    <ClInclude Include="source\io\graphics\texture.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_api.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_buffer.h" />
-    <ClInclude Include="source\io\graphics\vulkan\vulkan_image.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_mesh.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_pipeline.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_render_target.h" />
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_texture.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_uniform_buffer.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_utility.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_validation.hpp" />
     <ClInclude Include="source\io\window\application.h" />
     <ClInclude Include="source\io\window\window.h" />
     <ClInclude Include="source\io\window\window_min.h" />
+    <ClInclude Include="source\thirdparty\stb\stb_image.h" />
     <ClInclude Include="source\thirdparty\vk_bootstrap\VkBootstrap.h" />
     <ClInclude Include="source\thirdparty\vk_bootstrap\VkBootstrapDispatch.h" />
     <ClInclude Include="source\utility\byte_buffer.h" />
@@ -136,11 +140,13 @@
   <ItemGroup>
     <ClCompile Include="source\core\math\matrix.cpp" />
     <ClCompile Include="source\core\math\vector.cpp" />
+    <ClCompile Include="source\io\file\image.cpp" />
     <ClCompile Include="source\io\graphics\vulkan\vulkan_api.cpp" />
     <ClCompile Include="source\io\graphics\vulkan\vulkan_buffer.cpp" />
     <ClCompile Include="source\io\graphics\vulkan\vulkan_mesh.cpp" />
     <ClCompile Include="source\io\graphics\vulkan\vulkan_pipeline.cpp" />
     <ClCompile Include="source\io\graphics\vulkan\vulkan_render_target.cpp" />
+    <ClCompile Include="source\io\graphics\vulkan\vulkan_texture.cpp" />
     <ClCompile Include="source\io\graphics\vulkan\vulkan_uniform_buffer.cpp" />
     <ClCompile Include="source\io\graphics\vulkan\vulkan_utility.cpp" />
     <ClCompile Include="source\io\window\application.cpp" />

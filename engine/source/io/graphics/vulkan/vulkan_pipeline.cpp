@@ -1,5 +1,4 @@
 #include "vulkan_pipeline.h"
-#include "vulkan_image.h"
 #include "vulkan_render_target.h"
 #include "vulkan_uniform_buffer.h"
 #include "vulkan_utility.h"
@@ -49,23 +48,6 @@ namespace io::graphics
 		renderTargetLayout.attachments_ = shaderDescriptor_.outputs;
 
 		return std::make_shared<VulkanRenderTarget>(logicalDevice_, renderTargetLayout);
-	}
-
-	std::shared_ptr<RenderTarget> VulkanPipeline::CreateRenderTarget(uint32_t _width, uint32_t _height, std::shared_ptr<ImageView> _imageView) const
-	{
-		auto renderTarget = std::make_shared<VulkanRenderTarget>(logicalDevice_, _width, _height, std::static_pointer_cast<VulkanImageView>(_imageView)->imageView_);
-
-		if (useDepthStencil_)
-		{
-			ShaderDescriptor::Output depthStencil{};
-			depthStencil.width_ = _width;
-			depthStencil.height_ = _height;
-			depthStencil.usage_ = ImageUsage::DEPTH_STENCIL;
-			depthStencil.format_ = ImageFormat::D32_SFLOAT_U8_UINT;
-			renderTarget->AddAttachment(depthStencil);
-		}
-
-		return renderTarget;
 	}
 
 	VkPipeline VulkanPipeline::GetInstance() const

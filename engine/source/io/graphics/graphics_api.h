@@ -1,7 +1,8 @@
 #pragma once
 #include "pipeline.h"
-#include "render_target.h"
 #include "mesh.h"
+#include "texture.h"
+#include "render_target.h"
 
 namespace io::graphics
 {
@@ -30,6 +31,7 @@ namespace io::graphics
 	public:
 		virtual std::shared_ptr<Pipeline> CreatePipeline(const Pipeline::Layout& _pipelineLayout) = 0;
 		virtual std::shared_ptr<Mesh> CreateMesh(const Mesh::Layout& _meshLayout) = 0;
+		virtual std::shared_ptr<Texture> CreateTexture(const Texture::Layout& _textureLayout) = 0;
 		virtual std::shared_ptr<RenderTarget> GetSwapchainRenderTarget() = 0;
 
 		virtual void BindPipeline(std::shared_ptr<Pipeline> _pipeline) = 0;

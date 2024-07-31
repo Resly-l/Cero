@@ -26,9 +26,7 @@ namespace io::graphics
 	public:
 		virtual ~Pipeline() {};
 
-	public:
 		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(uint32_t _width, uint32_t _height) const = 0;
-		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(uint32_t _width, uint32_t _height, std::shared_ptr<ImageView> _imageView) const = 0;
 
 		virtual void UpdateUniformBuffer(uint32_t _index, const utility::ByteBuffer& _buffer) = 0;
 	};
