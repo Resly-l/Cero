@@ -2,6 +2,7 @@
 #include "vulkan_pipeline.h"
 #include "vulkan_render_target.h"
 #include "vulkan_mesh.h"
+#include "vulkan_uniform_buffer.h"
 #include "vulkan_texture.h"
 #include "vulkan_validation.hpp"
 #include "vulkan_utility.h"
@@ -58,7 +59,7 @@ namespace io::graphics
 
 	std::shared_ptr<Pipeline> VulkanAPI::CreatePipeline(const Pipeline::Layout& _pipelineLayout)
 	{
-		auto pipeline = std::make_shared<VulkanPipeline>(logicalDevice_, physicalDevice_, _pipelineLayout, descriptorPool_);
+		auto pipeline = std::make_shared<VulkanPipeline>(logicalDevice_, physicalDevice_, descriptorPool_, _pipelineLayout);
 
 		std::vector<VkDescriptorSetLayout> descriptorSetLayouts(frames_.size(), pipeline->GetDescriptorSetLayout());
 		std::vector<VkDescriptorSet> descriptorSets(frames_.size());
@@ -81,6 +82,11 @@ namespace io::graphics
 	std::shared_ptr<Mesh> VulkanAPI::CreateMesh(const Mesh::Layout& _meshLayout)
 	{
 		return std::make_shared<VulkanMesh>(logicalDevice_, physicalDevice_, *logicalDevice_.get_queue(vkb::QueueType::transfer), transfereCommandPool_,  _meshLayout);
+	}
+
+	std::shared_ptr<UniformBuffer> VulkanAPI::CreateUniformBuffer(const UniformBuffer::Layout& _layout)
+	{
+		return std::make_shared<VulkanUniformBuffer>(logicalDevice_, physicalDevice_, _layout);
 	}
 
 	std::shared_ptr<Texture> VulkanAPI::CreateTexture(const Texture::Layout& _textureLayout)
@@ -148,10 +154,11 @@ namespace io::graphics
 		clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
 		clearValues[1].depthStencil = { 1.0f, 0 };
 
+		VkRenderPass renderPass = pipeline_->GetRenderPass();
 		VkRenderPassBeginInfo renderPassBeginInfo{};
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassBeginInfo.renderPass = pipeline_->GetRenderPass();
-		renderPassBeginInfo.framebuffer = renderTarget_->GetFramebuffer();
+		renderPassBeginInfo.renderPass = renderPass;
+		renderPassBeginInfo.framebuffer = renderTarget_->GetFramebuffer(renderPass);
 		renderPassBeginInfo.renderArea.extent = swapchain_.extent;
 		renderPassBeginInfo.clearValueCount = 2;
 		renderPassBeginInfo.pClearValues = clearValues;
@@ -243,8 +250,12 @@ namespace io::graphics
 		surfaceCreateInfo.hwnd = (HWND)_window;
 		vkCreateWin32SurfaceKHR(instance_, &surfaceCreateInfo, nullptr, &surface) >> VulkanResultChecker::GetInstance();
 
+		VkPhysicalDeviceFeatures requiredFeatures{};
+		requiredFeatures.samplerAnisotropy = true;
+
 		vkb::PhysicalDeviceSelector deviceSelector(instance_);
 		deviceSelector.set_surface(surface);
+		deviceSelector.set_required_features(requiredFeatures);
 		physicalDevice_ = Build(deviceSelector, &vkb::PhysicalDeviceSelector::select, vkb::DeviceSelectionMode::partially_and_fully_suitable);
 	}
 
@@ -283,7 +294,7 @@ namespace io::graphics
     {
 		std::vector<VkDescriptorPoolSize> poolSizes;
 		VkDescriptorPoolSize poolSize{};
-		poolSize.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER;
+		poolSize.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		poolSize.descriptorCount = config_.numMaxSamplers_;
 		poolSizes.push_back(poolSize);
 		poolSize.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;

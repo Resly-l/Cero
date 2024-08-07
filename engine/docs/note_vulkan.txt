@@ -1,9 +1,4 @@
 
-
-
-classes having Vk~ types as members and destroying Vk~ objects in destructor
-must consider implementation of copy constructor
-
 there is no guarantee that command buffers will be executed in the order they have been submitted by the application
 framebuffer object references all of the VkImageView objects that represent the attachments
 Subpasses are subsequent rendering operations that depend on the contents of framebuffers in previous passes
@@ -62,3 +57,6 @@ why would i need render target interface
 2024/05/19---------------------------------------------------------------------------------------------------------------------------
 
 
+2024/08/07---------------------------------------------------------------------------------------------------------------------------
+managed to draw image.
+figuring out how to deal with binding interfaces (vk version of uniform buffer and texture & exposed version)

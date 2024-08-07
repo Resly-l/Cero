@@ -1,8 +1,10 @@
 #include "vulkan_pipeline.h"
-#include "vulkan_render_target.h"
-#include "vulkan_uniform_buffer.h"
 #include "vulkan_utility.h"
 #include "vulkan_validation.hpp"
+#include "vulkan_render_target.h"
+#include "vulkan_uniform_buffer.h"
+#include "vulkan_texture.h"
+#include "vulkan_shader_binding.h"
 #include "io/file/file_interface.h"
 
 namespace io::graphics
@@ -20,7 +22,7 @@ namespace io::graphics
 		return shaderModule;
 	}
 
-	VulkanPipeline::VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const Pipeline::Layout& _pipelineLayout, VkDescriptorPool _descriptorPool)
+	VulkanPipeline::VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkDescriptorPool _descriptorPool, const Pipeline::Layout& _pipelineLayout)
 		: logicalDevice_(_logicalDevice)
 		, physicalDevice_(_physicalDevice)
 		, useDepthStencil_(_pipelineLayout.depthFunc_ != ComparisonFunc::NONE)
@@ -33,7 +35,7 @@ namespace io::graphics
 
 	VulkanPipeline::~VulkanPipeline()
 	{
-		uniformBuffers_.clear();
+		shaderBindings_.clear();
 		vkDestroyDescriptorSetLayout(logicalDevice_, descriptorSetLayout_, nullptr);
 		vkDestroyRenderPass(logicalDevice_, renderPass_, nullptr);
 		vkDestroyPipelineLayout(logicalDevice_, layout_, nullptr);
@@ -72,31 +74,12 @@ namespace io::graphics
 
 	void VulkanPipeline::UpdateDescriptorSet(VkDescriptorSet _descriptorSet)
 	{
-		for (auto& uniformBuffer : uniformBuffers_)
+		std::vector< VkWriteDescriptorSet> descriptorWrites;
+		for (auto& binding : shaderBindings_)
 		{
-			VkDescriptorBufferInfo bufferInfo{};
-			bufferInfo.buffer = uniformBuffer->GetBuffer();
-			bufferInfo.offset = 0;
-			bufferInfo.range = uniformBuffer->GetBufferSize();
-
-			VkWriteDescriptorSet descriptorWrite{};
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = _descriptorSet;
-			descriptorWrite.dstBinding = uniformBuffer->GetIndex();
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descriptorWrite.descriptorCount = 1;
-			descriptorWrite.pBufferInfo = &bufferInfo;
-			descriptorWrite.pImageInfo = nullptr; // Optional
-			descriptorWrite.pTexelBufferView = nullptr; // Optional
-
-			vkUpdateDescriptorSets(logicalDevice_, 1, &descriptorWrite, 0, nullptr);
+			descriptorWrites.push_back(binding->GetDescriptorWrite(_descriptorSet));
 		}
-	}
-
-	void VulkanPipeline::UpdateUniformBuffer(uint32_t _index, const utility::ByteBuffer& _buffer)
-	{
-		uniformBuffers_[_index]->UpdateBuffer(_buffer.GetRawBufferAddress());
+		vkUpdateDescriptorSets(logicalDevice_, (uint32_t)descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
 	}
 
 	uint32_t VulkanPipeline::GetNumBindings() const
@@ -351,24 +334,21 @@ namespace io::graphics
 
 		// descriptor
 		{
-			std::vector<VkDescriptorSetLayoutBinding> descriptorBindings(shaderDescriptor_.bindings_.size());
-			uniformBuffers_.resize(shaderDescriptor_.bindings_.size());
-			for (size_t i = 0; i < shaderDescriptor_.bindings_.size(); i++)
-			{
-				VkDescriptorSetLayoutBinding vkBinding{};
-				vkBinding.binding = (uint32_t)(i);
-				vkBinding.descriptorCount = shaderDescriptor_.bindings_[i].elementCount_;
-				vkBinding.pImmutableSamplers = nullptr;
-				vkBinding.descriptorType = VkTypeConverter::Convert(shaderDescriptor_.bindings_[i].type_);
-				vkBinding.stageFlags = VkTypeConverter::Convert(shaderDescriptor_.bindings_[i].stage_);
-				descriptorBindings[i] = vkBinding;
+			std::vector<VkDescriptorSetLayoutBinding> descriptorBindings;
 
-				if (shaderDescriptor_.bindings_[i].size_ == 0 || shaderDescriptor_.bindings_[i].size_ % 16 != 0)
+			for (auto& binding : shaderDescriptor_.bindings_)
+			{
+				switch (binding->GetType())
 				{
-					throw std::exception("wrong shader binding size");
+				case ShaderBinding::Type::UNIFORM:
+					shaderBindings_.push_back(std::static_pointer_cast<VulkanUniformBuffer>(binding));
+					break;
+				case ShaderBinding::Type::TEXTURE:
+					shaderBindings_.push_back(std::static_pointer_cast<VulkanTexture>(binding));
+					break;
 				}
 
-				uniformBuffers_[i] = std::make_unique<VulkanUniformBuffer>(logicalDevice_, _physicalDevice, shaderDescriptor_.bindings_[i].size_, (uint32_t)i);
+				descriptorBindings.push_back(shaderBindings_.back()->GetDescriptorLayout());
 			}
 
 			VkDescriptorSetLayoutCreateInfo dslCreateInfo{};

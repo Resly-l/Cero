@@ -92,27 +92,27 @@ namespace io::graphics
 		return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
     }
 
-	VkDescriptorType VkTypeConverter::Convert(ShaderDescriptor::Binding::Type _type)
+	VkDescriptorType VkTypeConverter::Convert(ShaderBinding::Type _type)
 	{
 		switch (_type)
 		{
-		case ShaderDescriptor::Binding::Type::TEXTURE:
-			return VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER;
-		case ShaderDescriptor::Binding::Type::UNIFORM:
+		case ShaderBinding::Type::TEXTURE:
+			return VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		case ShaderBinding::Type::UNIFORM:
 			return VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		}
 
 		return VkDescriptorType{};
 	}
 
-	VkShaderStageFlags VkTypeConverter::Convert(ShaderDescriptor::Binding::Stage _stage)
+	VkShaderStageFlags VkTypeConverter::Convert(ShaderBinding::Stage _stage)
 	{
 		VkShaderStageFlags flags{};
-		if (_stage & ShaderDescriptor::Binding::Stage::VERTEX)
+		if (_stage & ShaderBinding::Stage::VERTEX)
 		{
 			flags |= VK_SHADER_STAGE_VERTEX_BIT;
 		}
-		if (_stage & ShaderDescriptor::Binding::Stage::PIXEL)
+		if (_stage & ShaderBinding::Stage::PIXEL)
 		{
 			flags |= VK_SHADER_STAGE_FRAGMENT_BIT;
 		}

@@ -13,7 +13,11 @@ namespace io
 		class Pipeline;
 		class RenderTarget;
 		class Mesh;
+		class UniformBuffer;
 		class Texture;
+
+		class ShaderBinding;
+		struct ShaderDescriptor;
 
 		struct Viewport;
 		enum class PrimitiveTopology;
@@ -27,7 +31,9 @@ namespace io
 		class VulkanPipeline;
 		class VulkanRenderTarget;
 		class VulkanMesh;
+		class VulkanShaderBinding;
 		class VulkanUniformBuffer;
+		class VulkanTexture;
 	}
 
 	namespace file

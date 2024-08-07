@@ -39,7 +39,7 @@ namespace utility
 	{
 	}
 
-	void ByteBuffer::SetLayout(const std::optional<Layout>& _layout)
+	void ByteBuffer::SetLayout(const Layout& _layout)
 	{
 		layout_ = _layout;
 	}

@@ -1,12 +1,15 @@
 #pragma once
-#include "utility/stl.h"
+#include <string_view>
 #include "path.generated.h"
 
-class ShaderCompiler
+namespace io::file
 {
-public:
-	static void CompileShaders(std::string_view _inputDirectory, std::string_view _outputDirectory)
+	class ShaderCompiler final
 	{
-		system((std::string(PATH_SHADER_COMPILER) + " " + std::string(_inputDirectory) + " " + std::string(_outputDirectory)).c_str());
-	}
-};
+	public:
+		static void CompileShaders(std::string_view _inputDirectory, std::string_view _outputDirectory)
+		{
+			system((std::string(PATH_SHADER_COMPILER) + " " + std::string(_inputDirectory) + " " + std::string(_outputDirectory)).c_str());
+		}
+	};
+}

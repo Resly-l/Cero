@@ -2,6 +2,8 @@
 #include "common.h"
 #include "utility/byte_buffer.h"
 #include "utility/forward_declaration.h"
+#include "shader.h"
+#include <string_view>
 
 namespace io::graphics
 {
@@ -27,7 +29,5 @@ namespace io::graphics
 		virtual ~Pipeline() {};
 
 		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(uint32_t _width, uint32_t _height) const = 0;
-
-		virtual void UpdateUniformBuffer(uint32_t _index, const utility::ByteBuffer& _buffer) = 0;
 	};
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "utility/stl.h"
+#include <cstdint>
 
 namespace io::graphics
 {
@@ -68,40 +68,5 @@ namespace io::graphics
 		NONE,
 		CLEAR,
 		STORE,
-	};
-
-	struct ShaderDescriptor
-	{
-		struct Binding
-		{
-			enum class Type
-			{
-				UNIFORM,
-				TEXTURE,
-			};
-			enum Stage : uint32_t
-			{
-				VERTEX = 1 << 0,
-				PIXEL = 1 << 1,
-			};
-
-			Type type_;
-			Stage stage_;
-			uint32_t size_ = 0;
-			uint32_t elementCount_ = 1; // 1 if not an array
-		};
-
-		struct Output
-		{
-			ImageFormat format_;
-			ImageUsage usage_;
-			ImageOperation loadOp_;
-			ImageOperation storeOp_;
-			uint32_t width_;
-			uint32_t height_;
-		};
-
-		std::vector<Binding> bindings_;
-		std::vector<Output> outputs;
 	};
 }

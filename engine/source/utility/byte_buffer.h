@@ -1,5 +1,6 @@
 #pragma once
-#include "utility/stl.h"
+#include <vector>
+#include <optional>
 
 namespace utility
 {
@@ -54,7 +55,7 @@ namespace utility
 		std::vector<uint8_t> rawBytes_;
 
 	public:
-		void SetLayout(const std::optional<Layout>& _layout);
+		void SetLayout(const Layout& _layout);
 		std::optional<Layout> GetLayout() const;
 
 		size_t GetElementSize() const;

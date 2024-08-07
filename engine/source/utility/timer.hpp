@@ -14,10 +14,7 @@ namespace utility
 		Clock::time_point timePoint_;
 
 	public:
-		Timer()
-		{
-			timePoint_ = Clock::now();
-		}
+		Timer() : timePoint_(Clock::now()) {}
 		virtual ~Timer() = default;
 
 	public:
@@ -28,8 +25,8 @@ namespace utility
 
 		T Mark()
 		{
-			const auto now = Clock::now();
-			T delta = std::chrono::duration_cast<Duration>(Clock::now() - timePoint_).count();
+			const Clock::time_point now = Clock::now();
+			const T delta = std::chrono::duration_cast<Duration>(Clock::now() - timePoint_).count();
 			timePoint_ = now;
 
 			return delta;

@@ -1,38 +1,45 @@
 #include "vulkan_texture.h"
 #include "vulkan_buffer.h"
 #include "vulkan_validation.hpp"
-#include "io/file/image.h"
+#include "vulkan_utility.h"
 
 namespace io::graphics
 {
-	VulkanTexture::VulkanTexture(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkQueue _graphicsQueue, VkCommandPool _commandPool, const Texture::Layout& _textureLayout)
+	VulkanTexture::VulkanTexture(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkQueue _graphicsQueue, VkCommandPool _commandPool, const Texture::Layout& _layout)
 		: logicalDevice_(_logicalDevice)
 	{
-		file::Image image;
-		image.Load(_textureLayout.imagePath_);
-		if (!image.IsLoaded())
-		{
-			throw std::runtime_error(std::string("failed to load image") + std::string(_textureLayout.imagePath_));
-		}
-		width_ = image.width_;
-		height_ = image.height_;
+		slot_ = _layout.slot_;
+		numElements_ = _layout.numElements_;
+		stage_ = VkTypeConverter::Convert(_layout.stage_);
+		format_ = VkTypeConverter::Convert(_layout.format_);
 
+		file::Image image = LoadImage(_layout.imagePath_);
 		VkBuffer stagingBuffer = VK_NULL_HANDLE;
 		VkDeviceMemory stagingBufferMemory = VK_NULL_HANDLE;
 
 		CreateStagingBuffer(_physicalDevice, image, stagingBuffer, stagingBufferMemory);
 		CreateImage(_physicalDevice);
-		TransitImageLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _graphicsQueue, _commandPool);
-		CopyBufferToImage(stagingBuffer, _graphicsQueue, _commandPool);
-		TransitImageLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, _graphicsQueue, _commandPool);
+		{
+			TransitImageLayout(format_, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _graphicsQueue, _commandPool);
+			CopyBufferToImage(stagingBuffer, _graphicsQueue, _commandPool);
+			TransitImageLayout(format_, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, _graphicsQueue, _commandPool);
+		}
+		CreateImageView();
+		CreateSampler(_physicalDevice);
 
 		vkFreeMemory(logicalDevice_, stagingBufferMemory, nullptr);
 		vkDestroyBuffer(logicalDevice_, stagingBuffer, nullptr);
+
+		imageInfo_.imageView = imageView_;
+		imageInfo_.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo_.sampler = sampler_;
 	}
 
 	VulkanTexture::~VulkanTexture()
 	{
+		vkDestroySampler(logicalDevice_, sampler_, nullptr);
 		vkFreeMemory(logicalDevice_, imageMemory_, nullptr);
+		vkDestroyImageView(logicalDevice_, imageView_, nullptr);
 		vkDestroyImage(logicalDevice_, image_, nullptr);
 	}
 
@@ -44,6 +51,45 @@ namespace io::graphics
 	uint32_t VulkanTexture::GetHeight() const
 	{
 		return height_;
+	}
+
+	VkDescriptorSetLayoutBinding VulkanTexture::GetDescriptorLayout() const
+	{
+		VkDescriptorSetLayoutBinding layout{};
+		layout.binding = slot_;
+		layout.descriptorCount = numElements_;
+		layout.pImmutableSamplers = nullptr;
+		layout.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		layout.stageFlags = stage_;
+		return layout;
+	}
+
+	VkWriteDescriptorSet VulkanTexture::GetDescriptorWrite(VkDescriptorSet _descriptorSet) const
+	{
+		VkWriteDescriptorSet descriptorWrite{};
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.dstSet = _descriptorSet;
+		descriptorWrite.dstBinding = slot_;
+		descriptorWrite.dstArrayElement = 0;
+		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorWrite.descriptorCount = 1;
+		descriptorWrite.pImageInfo = &imageInfo_;
+		return descriptorWrite;
+	}
+
+	file::Image VulkanTexture::LoadImage(std::string_view _path)
+	{
+		file::Image image;
+		image.Load(_path);
+		if (!image.IsLoaded())
+		{
+			throw std::runtime_error(std::string("failed to load image") + std::string(_path));
+		}
+
+		width_ = image.width_;
+		height_ = image.height_;
+
+		return image;
 	}
 
 	void VulkanTexture::CreateStagingBuffer(VkPhysicalDevice _physicalDevice, const file::Image& _image, VkBuffer& _outStagingBuffer, VkDeviceMemory& _outBufferMemory)
@@ -69,7 +115,7 @@ namespace io::graphics
 		imageCreateInfo.extent.depth = 1;
 		imageCreateInfo.mipLevels = 1;
 		imageCreateInfo.arrayLayers = 1;
-		imageCreateInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+		imageCreateInfo.format = format_;
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -88,6 +134,46 @@ namespace io::graphics
 
 		vkAllocateMemory(logicalDevice_, &allocInfo, nullptr, &imageMemory_) >> VulkanResultChecker::GetInstance();
 		vkBindImageMemory(logicalDevice_, image_, imageMemory_, 0);
+	}
+
+	void VulkanTexture::CreateImageView()
+	{
+		VkImageViewCreateInfo imageViewCreateInfo{};
+		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		imageViewCreateInfo.image = image_;
+		imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		imageViewCreateInfo.format = format_;
+		imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+		imageViewCreateInfo.subresourceRange.levelCount = 1;
+		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+		imageViewCreateInfo.subresourceRange.layerCount = 1;
+		vkCreateImageView(logicalDevice_, &imageViewCreateInfo, nullptr, &imageView_) >> VulkanResultChecker::GetInstance();
+	}
+
+	void VulkanTexture::CreateSampler(VkPhysicalDevice _physicalDevice)
+	{
+		VkPhysicalDeviceProperties properties{};
+		vkGetPhysicalDeviceProperties(_physicalDevice, &properties);
+
+		VkSamplerCreateInfo samplerCreateInfo{};
+		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
+		samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
+		samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerCreateInfo.anisotropyEnable = VK_TRUE;
+		samplerCreateInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+		samplerCreateInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
+		samplerCreateInfo.compareEnable = VK_FALSE;
+		samplerCreateInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+		samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		samplerCreateInfo.mipLodBias = 0.0f;
+		samplerCreateInfo.minLod = 0.0f;
+		samplerCreateInfo.maxLod = 0.0f;
+		vkCreateSampler(logicalDevice_, &samplerCreateInfo, nullptr, &sampler_) >> VulkanResultChecker::GetInstance();
 	}
 
 	VkCommandBuffer BeginDisposableCommandBuffer(VkDevice _logicalDevice, VkCommandPool _commandPool)

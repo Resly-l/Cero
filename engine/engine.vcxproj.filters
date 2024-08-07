@@ -60,9 +60,6 @@
     <ClInclude Include="source\io\graphics\graphics_api.h">
       <Filter>source\io\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\utility\stl.h">
-      <Filter>source\utility</Filter>
-    </ClInclude>
     <ClInclude Include="source\io\window\window.h">
       <Filter>source\io\window</Filter>
     </ClInclude>
@@ -96,9 +93,6 @@
     </ClInclude>
     <ClInclude Include="source\thirdparty\vk_bootstrap\VkBootstrapDispatch.h">
       <Filter>source\thirdparty\vk_bootstrap</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\string_utility.h">
-      <Filter>source\utility</Filter>
     </ClInclude>
     <ClInclude Include="source\io\graphics\vulkan\vulkan_validation.hpp">
       <Filter>source\io\graphics\vulkan</Filter>
@@ -151,6 +145,15 @@
     <ClInclude Include="source\io\graphics\vulkan\vulkan_texture.h">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_shader_binding.h">
+      <Filter>source\io\graphics\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\uniform_buffer.h">
+      <Filter>source\io\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\io\graphics\shader.h">
+      <Filter>source\io\graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\io\window\window.cpp">
@@ -173,9 +176,6 @@
     </ClCompile>
     <ClCompile Include="source\thirdparty\vk_bootstrap\VkBootstrap.cpp">
       <Filter>source\thirdparty\vk_bootstrap</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\string_utility.cpp">
-      <Filter>source\utility</Filter>
     </ClCompile>
     <ClCompile Include="source\io\graphics\vulkan\vulkan_utility.cpp">
       <Filter>source\io\graphics\vulkan</Filter>

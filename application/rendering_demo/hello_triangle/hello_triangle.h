@@ -10,6 +10,8 @@ private:
 	std::shared_ptr<io::graphics::RenderTarget> renderTarget_;
 	std::shared_ptr<io::graphics::Mesh> mesh_;
 	std::shared_ptr<io::graphics::Mesh> mesh2_;
+	std::shared_ptr<io::graphics::UniformBuffer> modelViewUniformBuffer_;
+	std::shared_ptr<io::graphics::UniformBuffer> projectionUniformBuffer_;
 
 	utility::ByteBuffer mvBuffer_;
 	utility::ByteBuffer pBuffer_;
@@ -19,7 +21,6 @@ private:
 
 public:
 	HelloTriangle();
-	~HelloTriangle() override;
 
 private:
 	virtual void Update() override;

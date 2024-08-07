@@ -115,12 +115,15 @@
     <ClInclude Include="source\io\graphics\pipeline.h" />
     <ClInclude Include="source\io\graphics\mesh.h" />
     <ClInclude Include="source\io\graphics\render_target.h" />
+    <ClInclude Include="source\io\graphics\shader.h" />
     <ClInclude Include="source\io\graphics\texture.h" />
+    <ClInclude Include="source\io\graphics\uniform_buffer.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_api.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_buffer.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_mesh.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_pipeline.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_render_target.h" />
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_shader_binding.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_texture.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_uniform_buffer.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_utility.h" />
@@ -133,8 +136,6 @@
     <ClInclude Include="source\thirdparty\vk_bootstrap\VkBootstrapDispatch.h" />
     <ClInclude Include="source\utility\byte_buffer.h" />
     <ClInclude Include="source\utility\forward_declaration.h" />
-    <ClInclude Include="source\utility\stl.h" />
-    <ClInclude Include="source\utility\string_utility.h" />
     <ClInclude Include="source\utility\timer.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -153,7 +154,6 @@
     <ClCompile Include="source\io\window\window.cpp" />
     <ClCompile Include="source\thirdparty\vk_bootstrap\VkBootstrap.cpp" />
     <ClCompile Include="source\utility\byte_buffer.cpp" />
-    <ClCompile Include="source\utility\string_utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="asset\shader\source\fullscreen.frag" />

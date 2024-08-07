@@ -2,6 +2,7 @@
 #include "utility/byte_buffer.h"
 #include "core/math/vector.h"
 #include "core/math/matrix.h"
+#include "io/graphics/uniform_buffer.h"
 #include <iostream>
 
 #include "io/file/shader_compiler.h"
@@ -14,18 +15,30 @@ HelloTriangle::HelloTriangle()
 	Window::SetTitle("Hello Triangle");
 	Window::SetResizability(false);
 
-	ShaderCompiler::CompileShaders("shader/", "shader/bin/");
+	io::file::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
 
-	utility::ByteBuffer::Layout mvLayout;
-	mvLayout.AddAttribute<math::Matrix<float>>();
-	mvLayout.AddAttribute<math::Matrix<float>>();
-	mvBuffer_.SetLayout(mvLayout);
+	utility::ByteBuffer::Layout modelViewMatrixLayout;
+	modelViewMatrixLayout.AddAttribute<math::Matrix<float>>();
+	modelViewMatrixLayout.AddAttribute<math::Matrix<float>>();
+	mvBuffer_.SetLayout(modelViewMatrixLayout);
 	mvBuffer_.Add();
 
-	utility::ByteBuffer::Layout pLayout;
-	pLayout.AddAttribute<math::Matrix<float>>();
-	pBuffer_.SetLayout(pLayout);
+	utility::ByteBuffer::Layout projectionMatrixLayout;
+	projectionMatrixLayout.AddAttribute<math::Matrix<float>>();
+	pBuffer_.SetLayout(projectionMatrixLayout);
 	pBuffer_.Add();
+
+	UniformBuffer::Layout modelViewUBLayout;
+	modelViewUBLayout.size_ = (uint32_t)modelViewMatrixLayout.GetSizeInBytes();
+	modelViewUBLayout.slot_ = 0;
+	modelViewUBLayout.stage_ = ShaderBinding::Stage::VERTEX;
+	modelViewUniformBuffer_ = graphicsAPI_->CreateUniformBuffer(modelViewUBLayout);
+
+	UniformBuffer::Layout projectionUBLayout;
+	projectionUBLayout.size_ = (uint32_t)projectionMatrixLayout.GetSizeInBytes();
+	projectionUBLayout.slot_ = 1;
+	projectionUBLayout.stage_ = ShaderBinding::Stage::VERTEX;
+	projectionUniformBuffer_ = graphicsAPI_->CreateUniformBuffer(projectionUBLayout);
 
 	Pipeline::Layout pipelineLayout;
 	pipelineLayout.vertexShaderPath_ = L"shader/bin/hello_triangle.vert.spv";
@@ -44,14 +57,8 @@ HelloTriangle::HelloTriangle()
 	output.format_ = ImageFormat::D32_SFLOAT_U8_UINT;
 	output.usage_ = ImageUsage::DEPTH_STENCIL;
 	pipelineLayout.descriptor_.outputs.push_back(output);
-
-	ShaderDescriptor::Binding binding{};
-	binding.stage_ = ShaderDescriptor::Binding::Stage::VERTEX;
-	binding.type_ = ShaderDescriptor::Binding::Type::UNIFORM;
-	binding.size_ = (uint32_t)mvBuffer_.GetSizeInBytes();
-	pipelineLayout.descriptor_.bindings_.push_back(binding);
-	binding.size_ = (uint32_t)pBuffer_.GetSizeInBytes();
-	pipelineLayout.descriptor_.bindings_.push_back(binding);
+	pipelineLayout.descriptor_.bindings_.push_back(modelViewUniformBuffer_);
+	pipelineLayout.descriptor_.bindings_.push_back(projectionUniformBuffer_);
 
 	pipeline_ = graphicsAPI_->CreatePipeline(pipelineLayout);
 	renderTarget_ = pipeline_->CreateRenderTarget(1600, 900);
@@ -78,11 +85,6 @@ HelloTriangle::HelloTriangle()
 	mesh2_ = graphicsAPI_->CreateMesh(meshLayout);
 }
 
-HelloTriangle::~HelloTriangle()
-{
-	graphicsAPI_->WaitIdle();
-} 
-
 void HelloTriangle::Update()
 {
 	auto deltaSeconds = timer_.Mark();
@@ -95,16 +97,16 @@ void HelloTriangle::Update()
 	mvBuffer_.At(0).Get<math::Matrix<float>>(1) = math::Matrix<float>::Identity();
 	pBuffer_.At(0).Get<math::Matrix<float>>(0) = math::Matrix<float>::Projection(0.1f, 100.0f, 90.0f, 1.777777f);
 
-	pipeline_->UpdateUniformBuffer(0, mvBuffer_);
-	pipeline_->UpdateUniformBuffer(1, pBuffer_);
+	modelViewUniformBuffer_->Update(mvBuffer_.GetRawBufferAddress());
+	projectionUniformBuffer_->Update(pBuffer_.GetRawBufferAddress());
 }
 
 void HelloTriangle::Render()
 {
 	graphicsAPI_->BindPipeline(pipeline_);
-	/*graphicsAPI_->BindRenderTarget(renderTarget_);
+	graphicsAPI_->BindRenderTarget(renderTarget_);
 	graphicsAPI_->BindMesh(mesh2_);
-	graphicsAPI_->Draw();*/
+	graphicsAPI_->Draw();
 
 	graphicsAPI_->BindRenderTarget(graphicsAPI_->GetSwapchainRenderTarget());
 	graphicsAPI_->BindMesh(mesh_);

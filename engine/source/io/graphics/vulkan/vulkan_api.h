@@ -2,6 +2,7 @@
 #include "io/graphics/graphics_api.h"
 #include "thirdparty/vk_bootstrap/VkBootstrap.h"
 #include "utility/forward_declaration.h"
+#include <unordered_map>
 
 namespace io::graphics
 {
@@ -14,7 +15,7 @@ namespace io::graphics
 			VkSemaphore imageAcquiringSemaphore_ = VK_NULL_HANDLE;
 			VkSemaphore commandExecutionSemaphore_ = VK_NULL_HANDLE;
 			VkFence frameFence_ = VK_NULL_HANDLE;
-			std::map<std::shared_ptr<VulkanPipeline>, VkDescriptorSet> descriptorSets_;
+			std::unordered_map<std::shared_ptr<VulkanPipeline>, VkDescriptorSet> descriptorSets_;
 		};
 
 	private:
@@ -43,6 +44,7 @@ namespace io::graphics
 	public:
 		virtual std::shared_ptr<Pipeline> CreatePipeline(const Pipeline::Layout& _pipelineLayout) override;
 		virtual std::shared_ptr<Mesh> CreateMesh(const Mesh::Layout& _meshLayout) override;
+		virtual std::shared_ptr<UniformBuffer> CreateUniformBuffer(const UniformBuffer::Layout& _layout) override;
 		virtual std::shared_ptr<Texture> CreateTexture(const Texture::Layout& _textureLayout) override;
 		virtual std::shared_ptr<RenderTarget> GetSwapchainRenderTarget() override;
 

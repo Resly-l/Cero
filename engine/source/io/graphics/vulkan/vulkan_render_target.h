@@ -1,6 +1,7 @@
 #pragma once
 #include "io/graphics/graphics_api.h"
 #include <vulkan/vulkan.h>
+#include <unordered_map>
 
 namespace io::graphics
 {
@@ -18,8 +19,7 @@ namespace io::graphics
 		uint32_t width_;
 		uint32_t height_;
 		std::vector <VulkanAttachment> attachments_;
-		VkRenderPass renderPass_ = VK_NULL_HANDLE;
-		VkFramebuffer framebuffer_ = VK_NULL_HANDLE;
+		std::unordered_map<VkRenderPass, VkFramebuffer> framebuffers_;
 
 	public:
 		VulkanRenderTarget(VkDevice _logicalDevice, const RenderTarget::Layout& _renderTargetLayout);
@@ -32,6 +32,6 @@ namespace io::graphics
 
 		uint32_t GetNumAttachments() const;
 		std::vector<VkImageView> GetImageViews() const;
-		VkFramebuffer GetFramebuffer() const;
+		VkFramebuffer GetFramebuffer(VkRenderPass _renderPass) const;
 	};
 }

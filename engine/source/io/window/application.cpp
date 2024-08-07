@@ -21,7 +21,7 @@ namespace io::window
 	{
 		while (Window::ProcessMessage())
 		{
-			bool minimized = IsMinimized();
+			const bool minimized = IsMinimized();
 			bool frameBegun = false;
 
 			if (!minimized)
@@ -37,6 +37,8 @@ namespace io::window
 				graphicsAPI_->EndFrame();
 			}
 		}
+
+		graphicsAPI_->WaitIdle();
 	}
 
 	void Application::Resize(uint32_t _width, uint32_t _height)

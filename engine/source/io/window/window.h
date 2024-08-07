@@ -1,6 +1,6 @@
 #pragma once
-#include "utility/stl.h"
 #include "window_min.h"
+#include <string_view>
 
 namespace io::window
 {

@@ -25,9 +25,9 @@ namespace io::graphics
 
 	VulkanRenderTarget::~VulkanRenderTarget()
 	{
-		if (framebuffer_)
+		for (auto& [renderPass, framebuffer] : framebuffers_)
 		{
-			vkDestroyFramebuffer(logicalDevice_, framebuffer_, nullptr);
+			vkDestroyFramebuffer(logicalDevice_, framebuffer, nullptr);
 		}
 
 		for (VulkanAttachment& attachment : attachments_)
@@ -104,14 +104,9 @@ namespace io::graphics
 
 	void VulkanRenderTarget::Bind(VkRenderPass _renderPass)
 	{
-		if (renderPass_ == _renderPass)
+		if (framebuffers_.find(_renderPass) != framebuffers_.end())
 		{
 			return;
-		}
-
-		if (framebuffer_)
-		{
-			vkDestroyFramebuffer(logicalDevice_, framebuffer_, nullptr);
 		}
 
 		std::vector<VkImageView> imageViews;
@@ -120,6 +115,7 @@ namespace io::graphics
 			imageViews.push_back(attachment.imageView_);
 		}
 
+		VkFramebuffer framebuffer = VK_NULL_HANDLE;
 		VkFramebufferCreateInfo framebufferCreateInfo{};
 		framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		framebufferCreateInfo.renderPass = _renderPass;
@@ -128,13 +124,13 @@ namespace io::graphics
 		framebufferCreateInfo.height = height_;
 		framebufferCreateInfo.layers = 1;
 		framebufferCreateInfo.pAttachments = imageViews.data();
-		vkCreateFramebuffer(logicalDevice_, &framebufferCreateInfo, nullptr, &framebuffer_) >> VulkanResultChecker::GetInstance();
+		vkCreateFramebuffer(logicalDevice_, &framebufferCreateInfo, nullptr, &framebuffer) >> VulkanResultChecker::GetInstance();
 
-		renderPass_ = _renderPass;
+		framebuffers_[_renderPass] = framebuffer;
 	}
 
-	VkFramebuffer VulkanRenderTarget::GetFramebuffer() const
+	VkFramebuffer VulkanRenderTarget::GetFramebuffer(VkRenderPass _renderPass) const
 	{
-		return framebuffer_;
+		return framebuffers_.at(_renderPass);
 	}
 }

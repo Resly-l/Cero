@@ -7,4 +7,17 @@
   <ItemGroup>
     <ClInclude Include="texture_demo.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Filter Include="shader">
+      <UniqueIdentifier>{1e5c1c27-aed2-4f4a-a995-37c9af09446e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\texture.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\texture.vert">
+      <Filter>shader</Filter>
+    </None>
+  </ItemGroup>
 </Project>

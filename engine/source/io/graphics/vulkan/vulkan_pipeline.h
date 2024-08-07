@@ -18,12 +18,12 @@ namespace io::graphics
 		VkPipelineLayout layout_;
 		const bool useDepthStencil_;
 
-		std::vector<std::unique_ptr<VulkanUniformBuffer>> uniformBuffers_;
+		std::vector<std::shared_ptr<VulkanShaderBinding>> shaderBindings_;
 		VkDescriptorPool descriptorPool_;
 		VkDescriptorSetLayout descriptorSetLayout_;
 
 	public:
-		VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const Pipeline::Layout& _pipelineLayout, VkDescriptorPool _descriptorPool);
+		VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkDescriptorPool _descriptorPool, const Pipeline::Layout& _pipelineLayout);
 		~VulkanPipeline();
 
 	public:
@@ -36,7 +36,6 @@ namespace io::graphics
 		uint32_t GetNumBindings() const;
 
 		void UpdateDescriptorSet(VkDescriptorSet _descriptorSet);
-		virtual void UpdateUniformBuffer(uint32_t _index, const utility::ByteBuffer& _buffer) override;
 
 	private:
 		void LoadShaders(std::wstring_view _vsPath, std::wstring_view _fsPath);

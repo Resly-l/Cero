@@ -1,5 +1,4 @@
 #include "hello_triangle.h"
-#include "utility/string_utility.h"
 
 #define TRY_CATCH 1
 
@@ -12,7 +11,8 @@ int main()
 	}
 	catch (const std::exception& _exception)
 	{
-		MessageBox(nullptr, utility::ToWide(_exception.what()).c_str(), L"Exception occured", MB_OK);
+		std::string exceptionDescription = _exception.what();
+		MessageBox(nullptr, std::wstring(exceptionDescription.begin(), exceptionDescription.end()).c_str(), L"exception", MB_OK);
 		return 1;
 	}
 #else
