@@ -5,7 +5,7 @@
 
 namespace io::graphics
 {
-	class VulkanTexture : public Texture, public VulkanShaderBinding
+	class VulkanTexture : public Texture
 	{
 	private:
 		VkDevice logicalDevice_ = VK_NULL_HANDLE;
@@ -16,18 +16,17 @@ namespace io::graphics
 		VkFormat format_ = VK_FORMAT_UNDEFINED;
 		uint32_t width_ = 0;
 		uint32_t height_ = 0;
-		VkDescriptorImageInfo imageInfo_;
+		VkDescriptorImageInfo imageInfo_{};
+		VkShaderStageFlags stage_{};
 
 	public:
 		VulkanTexture(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkQueue _graphicsQueue, VkCommandPool _commandPool, const Texture::Layout& _textureLayout);
 		~VulkanTexture();
 
 	public:
+		virtual std::shared_ptr<ShaderBinding> GetShaderBinding() const override;
 		virtual uint32_t GetWidth() const override;
 		virtual uint32_t GetHeight() const override;
-
-		virtual VkDescriptorSetLayoutBinding GetDescriptorLayout() const override;
-		virtual VkWriteDescriptorSet GetDescriptorWrite(VkDescriptorSet _descriptorSet) const override;
 
 	private:
 		file::Image LoadImage(std::string_view _path);

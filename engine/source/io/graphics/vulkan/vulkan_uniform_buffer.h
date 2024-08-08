@@ -4,7 +4,7 @@
 
 namespace io::graphics
 {
-	class VulkanUniformBuffer : public UniformBuffer, public VulkanShaderBinding
+	class VulkanUniformBuffer : public UniformBuffer
 	{
 	private:
 		VkDevice logicalDevice_ = VK_NULL_HANDLE;
@@ -13,14 +13,14 @@ namespace io::graphics
 		VkDeviceSize bufferSize_{};
 		void* mapped_ = nullptr;
 		VkDescriptorBufferInfo bufferInfo_{};
+		VkShaderStageFlags stage_{};
 
 	public:
 		VulkanUniformBuffer(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const UniformBuffer::Layout& _layout);
 		~VulkanUniformBuffer();
 
 	public:
-		virtual VkDescriptorSetLayoutBinding GetDescriptorLayout() const override;
-		virtual VkWriteDescriptorSet GetDescriptorWrite(VkDescriptorSet _descriptorSet) const override;
+		virtual std::shared_ptr<ShaderBinding> GetShaderBinding() const override;
 		virtual void Update(const void* _data) const override;
 
 		VkBuffer GetBuffer() const;

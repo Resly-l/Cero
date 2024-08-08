@@ -1,5 +1,5 @@
 #include "vulkan_buffer.h"
-#include "vulkan_validation.hpp"
+#include "vulkan_result.hpp"
 
 namespace io::graphics
 {

@@ -104,7 +104,6 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Header.h" />
     <ClInclude Include="source\core\math\matrix.h" />
     <ClInclude Include="source\core\math\vector.h" />
     <ClInclude Include="source\io\file\file_interface.h" />
@@ -127,7 +126,7 @@
     <ClInclude Include="source\io\graphics\vulkan\vulkan_texture.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_uniform_buffer.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_utility.h" />
-    <ClInclude Include="source\io\graphics\vulkan\vulkan_validation.hpp" />
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_result.hpp" />
     <ClInclude Include="source\io\window\application.h" />
     <ClInclude Include="source\io\window\window.h" />
     <ClInclude Include="source\io\window\window_min.h" />

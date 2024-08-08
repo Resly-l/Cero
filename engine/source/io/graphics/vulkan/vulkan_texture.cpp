@@ -1,6 +1,6 @@
 #include "vulkan_texture.h"
 #include "vulkan_buffer.h"
-#include "vulkan_validation.hpp"
+#include "vulkan_result.hpp"
 #include "vulkan_utility.h"
 
 namespace io::graphics
@@ -10,8 +10,8 @@ namespace io::graphics
 	{
 		slot_ = _layout.slot_;
 		numElements_ = _layout.numElements_;
-		stage_ = VkTypeConverter::Convert(_layout.stage_);
-		format_ = VkTypeConverter::Convert(_layout.format_);
+		stage_ = VulkanTypeConverter::Convert(_layout.stage_);
+		format_ = VulkanTypeConverter::Convert(_layout.format_);
 
 		file::Image image = LoadImage(_layout.imagePath_);
 		VkBuffer stagingBuffer = VK_NULL_HANDLE;
@@ -53,29 +53,50 @@ namespace io::graphics
 		return height_;
 	}
 
-	VkDescriptorSetLayoutBinding VulkanTexture::GetDescriptorLayout() const
+	class VulkanTextureBinding : public VulkanShaderBinding
 	{
-		VkDescriptorSetLayoutBinding layout{};
-		layout.binding = slot_;
-		layout.descriptorCount = numElements_;
-		layout.pImmutableSamplers = nullptr;
-		layout.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		layout.stageFlags = stage_;
-		return layout;
-	}
+	public:
+		uint32_t slot_ = 0;
+		uint32_t numElements_ = 1;
+		VkShaderStageFlags stage_{};
+		VkDescriptorImageInfo imageInfo_{};
 
-	VkWriteDescriptorSet VulkanTexture::GetDescriptorWrite(VkDescriptorSet _descriptorSet) const
-	{
-		VkWriteDescriptorSet descriptorWrite{};
-		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrite.dstSet = _descriptorSet;
-		descriptorWrite.dstBinding = slot_;
-		descriptorWrite.dstArrayElement = 0;
-		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorWrite.descriptorCount = 1;
-		descriptorWrite.pImageInfo = &imageInfo_;
-		return descriptorWrite;
-	}
+	public:
+		virtual VkDescriptorSetLayoutBinding GetDescriptorLayout() const override
+		{
+			VkDescriptorSetLayoutBinding layout{};
+			layout.binding = slot_;
+			layout.descriptorCount = numElements_;
+			layout.pImmutableSamplers = nullptr;
+			layout.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			layout.stageFlags = stage_;
+			return layout;
+		}
+
+		virtual VkWriteDescriptorSet GetDescriptorWrite(VkDescriptorSet _descriptorSet) const override
+		{
+			VkWriteDescriptorSet descriptorWrite{};
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = _descriptorSet;
+			descriptorWrite.dstBinding = slot_;
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrite.descriptorCount = 1;
+			descriptorWrite.pImageInfo = &imageInfo_;
+			return descriptorWrite;
+		}
+	};
+
+    std::shared_ptr<ShaderBinding> VulkanTexture::GetShaderBinding() const
+    {
+		auto binding = std::make_shared<VulkanTextureBinding>();
+		binding->slot_ = slot_;
+		binding->numElements_ = numElements_;
+		binding->stage_ = stage_;
+		binding->imageInfo_ = imageInfo_;
+
+		return binding;
+    }
 
 	file::Image VulkanTexture::LoadImage(std::string_view _path)
 	{

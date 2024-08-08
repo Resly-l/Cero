@@ -53,7 +53,7 @@ TextureDemo::TextureDemo()
 	pipelineLayout.pixelShaderPath_ = L"shader/bin/texture.frag.spv";
 	pipelineLayout.vertexInputLayout_ = vertexLayout;
 	pipelineLayout.depthFunc_ = io::graphics::ComparisonFunc::LESS_EQUAL;
-	pipelineLayout.descriptor_.bindings_.push_back(texture_);
+	pipelineLayout.descriptor_.resources_.push_back(texture_);
 	pipelineLayout.descriptor_.outputs.push_back(colorOutput);
 	pipelineLayout.descriptor_.outputs.push_back(depthOutput);
 	pipeline_ = graphicsAPI_->CreatePipeline(pipelineLayout);

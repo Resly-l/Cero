@@ -4,13 +4,8 @@
 
 namespace io::graphics
 {
-	class VulkanShaderBinding
+	class VulkanShaderBinding : public ShaderBinding
 	{
-	protected:
-		uint32_t slot_ = 0;
-		uint32_t numElements_ = 0;
-		VkShaderStageFlags stage_{};
-
 	public:
 		virtual ~VulkanShaderBinding() {}
 

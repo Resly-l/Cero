@@ -81,7 +81,6 @@
     <ClInclude Include="source\core\math\vector.h">
       <Filter>source\core\math</Filter>
     </ClInclude>
-    <ClInclude Include="Header.h" />
     <ClInclude Include="source\io\graphics\vulkan\vulkan_api.h">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClInclude>
@@ -94,7 +93,7 @@
     <ClInclude Include="source\thirdparty\vk_bootstrap\VkBootstrapDispatch.h">
       <Filter>source\thirdparty\vk_bootstrap</Filter>
     </ClInclude>
-    <ClInclude Include="source\io\graphics\vulkan\vulkan_validation.hpp">
+    <ClInclude Include="source\io\graphics\vulkan\vulkan_result.hpp">
       <Filter>source\io\graphics\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="source\io\graphics\pipeline.h">

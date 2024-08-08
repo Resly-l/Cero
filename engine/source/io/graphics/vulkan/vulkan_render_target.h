@@ -33,5 +33,8 @@ namespace io::graphics
 		uint32_t GetNumAttachments() const;
 		std::vector<VkImageView> GetImageViews() const;
 		VkFramebuffer GetFramebuffer(VkRenderPass _renderPass) const;
+
+	private:
+		static VkImageAspectFlags GetAspectMask(VkFormat _format, VkImageUsageFlags _usage);
 	};
 }

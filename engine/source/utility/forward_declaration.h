@@ -16,7 +16,7 @@ namespace io
 		class UniformBuffer;
 		class Texture;
 
-		class ShaderBinding;
+		class ShaderResource;
 		struct ShaderDescriptor;
 
 		struct Viewport;

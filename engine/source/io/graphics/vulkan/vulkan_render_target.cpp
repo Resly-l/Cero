@@ -1,5 +1,5 @@
 #include "vulkan_render_target.h"
-#include "vulkan_validation.hpp"
+#include "vulkan_result.hpp"
 #include "vulkan_utility.h"
 
 namespace io::graphics
@@ -51,7 +51,7 @@ namespace io::graphics
 		VkImageCreateInfo imageCreateInfo{};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageCreateInfo.format = VkTypeConverter::Convert(_description.format_);
+		imageCreateInfo.format = VulkanTypeConverter::Convert(_description.format_);
 		imageCreateInfo.extent.width = _description.width_;
 		imageCreateInfo.extent.height = _description.height_;
 		imageCreateInfo.extent.depth = 1;
@@ -59,7 +59,7 @@ namespace io::graphics
 		imageCreateInfo.arrayLayers = 1;
 		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageCreateInfo.usage = VkTypeConverter::Convert(_description.usage_);
+		imageCreateInfo.usage = VulkanTypeConverter::Convert(_description.usage_);
 		vkCreateImage(logicalDevice_, &imageCreateInfo, nullptr, &*attachment.image_) >> VulkanResultChecker::GetInstance();
 
 		VkMemoryRequirements memoryRequirements{};
@@ -74,8 +74,8 @@ namespace io::graphics
 		VkImageViewCreateInfo imageViewCreateInfo{};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		imageViewCreateInfo.format = VkTypeConverter::Convert(_description.format_);
-		imageViewCreateInfo.subresourceRange.aspectMask = VkTypeConverter::GetAspectMask(imageCreateInfo.format, imageCreateInfo.usage);
+		imageViewCreateInfo.format = VulkanTypeConverter::Convert(_description.format_);
+		imageViewCreateInfo.subresourceRange.aspectMask = GetAspectMask(imageCreateInfo.format, imageCreateInfo.usage);
 		imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
 		imageViewCreateInfo.subresourceRange.levelCount = 1;
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
@@ -132,5 +132,26 @@ namespace io::graphics
 	VkFramebuffer VulkanRenderTarget::GetFramebuffer(VkRenderPass _renderPass) const
 	{
 		return framebuffers_.at(_renderPass);
+	}
+
+	VkImageAspectFlags VulkanRenderTarget::GetAspectMask(VkFormat _format, VkImageUsageFlags _usage)
+	{
+		VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_NONE;
+
+		if (_usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
+		{
+			aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		}
+		else if (_usage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
+		{
+			aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+			if (_format >= VK_FORMAT_D16_UNORM_S8_UINT)
+			{
+				aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+			}
+		}
+
+		return aspectMask;
 	}
 }

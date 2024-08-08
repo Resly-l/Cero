@@ -5,7 +5,7 @@
 
 namespace io::graphics
 {
-	class Texture : public ShaderBinding
+	class Texture : public ShaderResource
 	{
 	public:
 		struct Layout
@@ -19,7 +19,6 @@ namespace io::graphics
 		};
 
 	public:
-		virtual ShaderBinding::Type GetType() const override { return Type::TEXTURE; }
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 	};

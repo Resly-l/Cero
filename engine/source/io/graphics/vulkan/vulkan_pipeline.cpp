@@ -1,6 +1,6 @@
 #include "vulkan_pipeline.h"
 #include "vulkan_utility.h"
-#include "vulkan_validation.hpp"
+#include "vulkan_result.hpp"
 #include "vulkan_render_target.h"
 #include "vulkan_uniform_buffer.h"
 #include "vulkan_texture.h"
@@ -84,7 +84,7 @@ namespace io::graphics
 
 	uint32_t VulkanPipeline::GetNumBindings() const
 	{
-		return (uint32_t)shaderDescriptor_.bindings_.size();
+		return (uint32_t)shaderBindings_.size();
 	}
 
 	void VulkanPipeline::LoadShaders(std::wstring_view _vsPath, std::wstring_view _fsPath)
@@ -269,10 +269,10 @@ namespace io::graphics
 			for (const ShaderDescriptor::Output& output : shaderDescriptor_.outputs)
 			{
 				VkAttachmentDescription attachment{};
-				attachment.format = VkTypeConverter::Convert(output.format_);
+				attachment.format = VulkanTypeConverter::Convert(output.format_);
 				attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-				attachment.loadOp = VkTypeConverter::ConvertLoadOp(output.loadOp_);
-				attachment.storeOp = VkTypeConverter::ConvertStoreOp(output.storeOp_);
+				attachment.loadOp = VulkanTypeConverter::ConvertLoadOp(output.loadOp_);
+				attachment.storeOp = VulkanTypeConverter::ConvertStoreOp(output.storeOp_);
 				attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 				attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -335,19 +335,9 @@ namespace io::graphics
 		// descriptor
 		{
 			std::vector<VkDescriptorSetLayoutBinding> descriptorBindings;
-
-			for (auto& binding : shaderDescriptor_.bindings_)
+			for (auto& resource : shaderDescriptor_.resources_)
 			{
-				switch (binding->GetType())
-				{
-				case ShaderBinding::Type::UNIFORM:
-					shaderBindings_.push_back(std::static_pointer_cast<VulkanUniformBuffer>(binding));
-					break;
-				case ShaderBinding::Type::TEXTURE:
-					shaderBindings_.push_back(std::static_pointer_cast<VulkanTexture>(binding));
-					break;
-				}
-
+				shaderBindings_.push_back(std::static_pointer_cast<VulkanShaderBinding>(resource->GetShaderBinding()));
 				descriptorBindings.push_back(shaderBindings_.back()->GetDescriptorLayout());
 			}
 

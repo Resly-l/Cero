@@ -1,9 +1,9 @@
 #include "vulkan_utility.h"
-#include "vulkan_validation.hpp"
+#include "vulkan_result.hpp"
 
 namespace io::graphics
 {
-	VkFormat VkTypeConverter::Convert(ImageFormat _format)
+	VkFormat VulkanTypeConverter::Convert(ImageFormat _format)
 	{
 		switch (_format)
 		{
@@ -32,7 +32,7 @@ namespace io::graphics
 		return VK_FORMAT_UNDEFINED;
 	}
 
-	VkImageUsageFlags VkTypeConverter::Convert(ImageUsage _usage)
+	VkImageUsageFlags VulkanTypeConverter::Convert(ImageUsage _usage)
 	{
 		switch (_usage)
 		{
@@ -45,28 +45,7 @@ namespace io::graphics
 		return VkImageUsageFlags{};
 	}
 
-	VkImageAspectFlags VkTypeConverter::GetAspectMask(VkFormat _format, VkImageUsageFlags _usage)
-	{
-		VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_NONE;
-
-		if (_usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
-		{
-			aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		}
-		else if (_usage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
-		{
-			aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-
-			if (_format >= VK_FORMAT_D16_UNORM_S8_UINT)
-			{
-				aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
-			}
-		}
-
-		return aspectMask;
-	}
-
-	VkAttachmentLoadOp VkTypeConverter::ConvertLoadOp(ImageOperation _operation)
+	VkAttachmentLoadOp VulkanTypeConverter::ConvertLoadOp(ImageOperation _operation)
 	{
 		switch (_operation)
 		{
@@ -79,7 +58,7 @@ namespace io::graphics
 		return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	}
 
-    VkAttachmentStoreOp VkTypeConverter::ConvertStoreOp(ImageOperation _operation)
+    VkAttachmentStoreOp VulkanTypeConverter::ConvertStoreOp(ImageOperation _operation)
     {
         switch (_operation)
 		{
@@ -92,20 +71,7 @@ namespace io::graphics
 		return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
     }
 
-	VkDescriptorType VkTypeConverter::Convert(ShaderBinding::Type _type)
-	{
-		switch (_type)
-		{
-		case ShaderBinding::Type::TEXTURE:
-			return VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		case ShaderBinding::Type::UNIFORM:
-			return VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		}
-
-		return VkDescriptorType{};
-	}
-
-	VkShaderStageFlags VkTypeConverter::Convert(ShaderBinding::Stage _stage)
+	VkShaderStageFlags VulkanTypeConverter::Convert(ShaderBinding::Stage _stage)
 	{
 		VkShaderStageFlags flags{};
 		if (_stage & ShaderBinding::Stage::VERTEX)

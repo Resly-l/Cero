@@ -8,11 +8,6 @@ namespace io::graphics
 	class ShaderBinding
 	{
 	public:
-		enum class Type
-		{
-			UNIFORM,
-			TEXTURE,
-		};
 		enum Stage : uint32_t
 		{
 			VERTEX = 1 << 0,
@@ -21,8 +16,18 @@ namespace io::graphics
 
 	public:
 		virtual ~ShaderBinding() {}
+	};
 
-		virtual Type GetType() const = 0;
+	class ShaderResource
+	{
+	protected:
+		uint32_t slot_ = 0;
+		uint32_t numElements_ = 0;
+
+	public:
+		virtual ~ShaderResource() {}
+
+		virtual std::shared_ptr<ShaderBinding> GetShaderBinding() const = 0;
 	};
 
 	struct ShaderDescriptor
@@ -37,7 +42,7 @@ namespace io::graphics
 			uint32_t height_;
 		};
 
-		std::vector<std::shared_ptr<ShaderBinding>> bindings_;
+		std::vector<std::shared_ptr<ShaderResource>> resources_;
 		std::vector<Output> outputs;
 	};
 }

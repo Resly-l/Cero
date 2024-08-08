@@ -4,7 +4,7 @@
 
 namespace io::graphics
 {
-	class UniformBuffer : public ShaderBinding
+	class UniformBuffer : public ShaderResource
 	{
 	public:
 		struct Layout
@@ -16,7 +16,6 @@ namespace io::graphics
 		};
 
 	public:
-		virtual ShaderBinding::Type GetType() const override { return Type::UNIFORM; }
 		virtual void Update(const void* _data) const = 0;
 	};
 }

@@ -57,8 +57,8 @@ HelloTriangle::HelloTriangle()
 	output.format_ = ImageFormat::D32_SFLOAT_U8_UINT;
 	output.usage_ = ImageUsage::DEPTH_STENCIL;
 	pipelineLayout.descriptor_.outputs.push_back(output);
-	pipelineLayout.descriptor_.bindings_.push_back(modelViewUniformBuffer_);
-	pipelineLayout.descriptor_.bindings_.push_back(projectionUniformBuffer_);
+	pipelineLayout.descriptor_.resources_.push_back(modelViewUniformBuffer_);
+	pipelineLayout.descriptor_.resources_.push_back(projectionUniformBuffer_);
 
 	pipeline_ = graphicsAPI_->CreatePipeline(pipelineLayout);
 	renderTarget_ = pipeline_->CreateRenderTarget(1600, 900);
