@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "console_sandbox", "console_
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "texture", "application\rendering_demo\texture\texture.vcxproj", "{7A01CDEA-C2B4-4B18-BAE2-F4ED9996B620}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "depth_buffer", "application\rendering_demo\depth_buffer\depth_buffer.vcxproj", "{0675B113-F231-4F1F-8912-FF977A0102C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -37,6 +39,10 @@ Global
 		{7A01CDEA-C2B4-4B18-BAE2-F4ED9996B620}.Debug|x64.Build.0 = Debug|x64
 		{7A01CDEA-C2B4-4B18-BAE2-F4ED9996B620}.Release|x64.ActiveCfg = Release|x64
 		{7A01CDEA-C2B4-4B18-BAE2-F4ED9996B620}.Release|x64.Build.0 = Release|x64
+		{0675B113-F231-4F1F-8912-FF977A0102C7}.Debug|x64.ActiveCfg = Debug|x64
+		{0675B113-F231-4F1F-8912-FF977A0102C7}.Debug|x64.Build.0 = Debug|x64
+		{0675B113-F231-4F1F-8912-FF977A0102C7}.Release|x64.ActiveCfg = Release|x64
+		{0675B113-F231-4F1F-8912-FF977A0102C7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -45,6 +51,7 @@ Global
 		{81D04BF6-A8C7-40B1-A980-B0E00EFCEAEA} = {A45B1DF6-9D3F-4903-BA14-9C45F179084E}
 		{19E04362-16B9-4C7C-ACBF-24A0E71C5945} = {81D04BF6-A8C7-40B1-A980-B0E00EFCEAEA}
 		{7A01CDEA-C2B4-4B18-BAE2-F4ED9996B620} = {81D04BF6-A8C7-40B1-A980-B0E00EFCEAEA}
+		{0675B113-F231-4F1F-8912-FF977A0102C7} = {81D04BF6-A8C7-40B1-A980-B0E00EFCEAEA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0F1E914D-9C3F-4ABC-B213-04998E7E35CD}

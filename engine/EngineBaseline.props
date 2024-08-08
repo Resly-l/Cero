@@ -3,8 +3,8 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <OutDir>$(SolutionDir)_build\$(ProjectName)</OutDir>
-    <IntDir>$(SolutionDir)_build\$(ProjectName)</IntDir>
+    <OutDir>$(SolutionDir)_build\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)_build\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

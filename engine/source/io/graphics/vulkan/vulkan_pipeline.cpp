@@ -227,14 +227,14 @@ namespace io::graphics
 		VkPipelineDepthStencilStateCreateInfo depthStencilState{};
 		{
 			depthStencilState.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-			depthStencilState.depthTestEnable = (_pipelineLayout.depthFunc_ != ComparisonFunc::NONE && _pipelineLayout.stencilFunc_ != ComparisonFunc::NONE) ? VK_TRUE : VK_FALSE;
+			depthStencilState.depthTestEnable = (_pipelineLayout.depthFunc_ != ComparisonFunc::NONE) ? VK_TRUE : VK_FALSE;
 			depthStencilState.depthWriteEnable = VK_TRUE;
 			depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 			depthStencilState.depthBoundsTestEnable = VK_FALSE;
 			depthStencilState.back.failOp = VK_STENCIL_OP_KEEP;
 			depthStencilState.back.passOp = VK_STENCIL_OP_KEEP;
 			depthStencilState.back.compareOp = VK_COMPARE_OP_ALWAYS;
-			depthStencilState.stencilTestEnable = VK_FALSE;
+			depthStencilState.stencilTestEnable = (_pipelineLayout.stencilFunc_ != ComparisonFunc::NONE) ? VK_TRUE : VK_FALSE;
 			depthStencilState.front = depthStencilState.back;
 		}
 
