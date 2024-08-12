@@ -12,11 +12,11 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <AdditionalIncludeDirectories>$(SolutionDir)\engine\source\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)engine\source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)\engine\source\thirdparty\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\engine\thirdparty\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>for /R "$(SolutionDir)engine\" %%f in (*.dll) do copy /Y %%f "$(OutDir)"</Command>

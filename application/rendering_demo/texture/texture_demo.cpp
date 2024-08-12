@@ -1,21 +1,21 @@
 #include "texture_demo.h"
-#include "core/math/vector.h"
-#include "io/file/shader_compiler.h"
+#include "math/vector.h"
+#include "file/shader_compiler.h"
 
 TextureDemo::TextureDemo()
-	: Application(io::graphics::GraphicsAPI::VULKAN)
+	: Application(graphics::GraphicsAPI::VULKAN)
 {
-	io::file::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
+	file::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
 	Window::Resize(1600, 90);
 	Application::Resize(2560, 1440);
 
-	io::graphics::Texture::Layout textureLayout;
+	graphics::Texture::Layout textureLayout;
 	textureLayout.imagePath_ = "wow.png";
-	textureLayout.stage_ = io::graphics::ShaderBinding::Stage::PIXEL;
+	textureLayout.stage_ = graphics::ShaderBinding::Stage::PIXEL;
 	textureLayout.slot_ = 0;
 	texture_ = graphicsAPI_->CreateTexture(textureLayout);
 
-	io::graphics::Mesh::Layout planeLayout;
+	graphics::Mesh::Layout planeLayout;
 	utility::ByteBuffer::Layout vertexLayout;
 	vertexLayout.AddAttribute<math::Float2>();
 	vertexLayout.AddAttribute<math::Float2>();
@@ -36,23 +36,23 @@ TextureDemo::TextureDemo()
 	planeLayout.indices_ = { 0, 1, 2, 2, 3, 0 };
 	plane_ = graphicsAPI_->CreateMesh(planeLayout);
 
-	io::graphics::ShaderDescriptor::Output colorOutput{};
+	graphics::ShaderDescriptor::Output colorOutput{};
 	colorOutput.width_ = 1600;
 	colorOutput.height_ = 900;
-	colorOutput.format_ = io::graphics::ImageFormat::B8G8R8A8_UNORM;
-	colorOutput.usage_ = io::graphics::ImageUsage::COLOR_ATTACHMENT;
-	colorOutput.loadOp_ = io::graphics::ImageOperation::CLEAR;
-	colorOutput.storeOp_ = io::graphics::ImageOperation::STORE;
-	io::graphics::ShaderDescriptor::Output depthOutput = colorOutput;
-	depthOutput.format_ = io::graphics::ImageFormat::D32_SFLOAT_U8_UINT;
-	depthOutput.usage_ = io::graphics::ImageUsage::DEPTH_STENCIL;
+	colorOutput.format_ = graphics::ImageFormat::B8G8R8A8_UNORM;
+	colorOutput.usage_ = graphics::ImageUsage::COLOR_ATTACHMENT;
+	colorOutput.loadOp_ = graphics::ImageOperation::CLEAR;
+	colorOutput.storeOp_ = graphics::ImageOperation::STORE;
+	graphics::ShaderDescriptor::Output depthOutput = colorOutput;
+	depthOutput.format_ = graphics::ImageFormat::D32_SFLOAT_U8_UINT;
+	depthOutput.usage_ = graphics::ImageUsage::DEPTH_STENCIL;
 
-	io::graphics::Pipeline::Layout pipelineLayout;
-	pipelineLayout.primitiveTopology_ = io::graphics::PrimitiveTopology::TRIANGLE_LIST;
+	graphics::Pipeline::Layout pipelineLayout;
+	pipelineLayout.primitiveTopology_ = graphics::PrimitiveTopology::TRIANGLE_LIST;
 	pipelineLayout.vertexShaderPath_ = L"shader/bin/texture.vert.spv";
 	pipelineLayout.pixelShaderPath_ = L"shader/bin/texture.frag.spv";
 	pipelineLayout.vertexInputLayout_ = vertexLayout;
-	pipelineLayout.depthFunc_ = io::graphics::ComparisonFunc::LESS_EQUAL;
+	pipelineLayout.depthFunc_ = graphics::ComparisonFunc::LESS_EQUAL;
 	pipelineLayout.descriptor_.resources_.push_back(texture_);
 	pipelineLayout.descriptor_.outputs.push_back(colorOutput);
 	pipelineLayout.descriptor_.outputs.push_back(depthOutput);

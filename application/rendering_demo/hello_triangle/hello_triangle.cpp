@@ -1,13 +1,13 @@
 #include "hello_triangle.h"
 #include "utility/byte_buffer.h"
-#include "core/math/vector.h"
-#include "core/math/matrix.h"
-#include "io/graphics/uniform_buffer.h"
+#include "math/vector.h"
+#include "math/matrix.h"
+#include "graphics/uniform_buffer.h"
 #include <iostream>
 
-#include "io/file/shader_compiler.h"
+#include "file/shader_compiler.h"
 
-using namespace io::graphics;
+using namespace graphics;
 
 HelloTriangle::HelloTriangle()
 	: Application(GraphicsAPI::VULKAN)
@@ -15,7 +15,7 @@ HelloTriangle::HelloTriangle()
 	Window::SetTitle("Hello Triangle");
 	Window::SetResizability(false);
 
-	io::file::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
+	file::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
 
 	utility::ByteBuffer::Layout modelViewMatrixLayout;
 	modelViewMatrixLayout.AddAttribute<math::Matrix>();

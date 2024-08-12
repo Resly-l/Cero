@@ -1,15 +1,15 @@
 #pragma once
-#include "io/window/application.h"
+#include "window/application.h"
 #include "utility/timer.hpp"
 
 
-class DepthBufferDemo : public io::window::Application
+class DepthBufferDemo : public window::Application
 {
 private:
-	std::shared_ptr<io::graphics::Pipeline> pipeline_;
-	std::shared_ptr<io::graphics::Mesh> cubeMesh_;
-	std::shared_ptr<io::graphics::UniformBuffer> modelViewUniformBuffer_;
-	std::shared_ptr<io::graphics::UniformBuffer> projectionUniformBuffer_;
+	std::shared_ptr<graphics::Pipeline> pipeline_;
+	std::shared_ptr<graphics::Mesh> cubeMesh_;
+	std::shared_ptr<graphics::UniformBuffer> modelViewUniformBuffer_;
+	std::shared_ptr<graphics::UniformBuffer> projectionUniformBuffer_;
 	utility::ByteBuffer mvBuffer_;
 	utility::ByteBuffer pBuffer_;
 

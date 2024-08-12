@@ -1,12 +1,12 @@
 #pragma once
-#include "io/window/application.h"
+#include "window/application.h"
 
-class TextureDemo : public io::window::Application
+class TextureDemo : public window::Application
 {
 private:
-	std::shared_ptr<io::graphics::Pipeline> pipeline_;
-	std::shared_ptr<io::graphics::Mesh> plane_;
-	std::shared_ptr<io::graphics::Texture> texture_;
+	std::shared_ptr<graphics::Pipeline> pipeline_;
+	std::shared_ptr<graphics::Mesh> plane_;
+	std::shared_ptr<graphics::Texture> texture_;
 
 public:
 	TextureDemo();

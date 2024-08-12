@@ -1,13 +1,13 @@
 #pragma once
-#include "io/window/application.h"
+#include "window/application.h"
 
-class AssimpTest : public io::window::Application
+class AssimpTest : public window::Application
 {
 private:
-    std::shared_ptr<io::graphics::Pipeline> pipeline_;
-    std::shared_ptr<io::graphics::Mesh> mesh_;
-	std::shared_ptr<io::graphics::UniformBuffer> modelViewUniformBuffer_;
-	std::shared_ptr<io::graphics::UniformBuffer> projectionUniformBuffer_;
+    std::shared_ptr<graphics::Pipeline> pipeline_;
+    std::shared_ptr<graphics::Mesh> mesh_;
+	std::shared_ptr<graphics::UniformBuffer> modelViewUniformBuffer_;
+	std::shared_ptr<graphics::UniformBuffer> projectionUniformBuffer_;
 	utility::ByteBuffer mvBuffer_;
 	utility::ByteBuffer pBuffer_;
 
