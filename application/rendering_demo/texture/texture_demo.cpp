@@ -17,22 +17,22 @@ TextureDemo::TextureDemo()
 
 	io::graphics::Mesh::Layout planeLayout;
 	utility::ByteBuffer::Layout vertexLayout;
-	vertexLayout.AddAttribute<math::Vector2d<float>>();
-	vertexLayout.AddAttribute<math::Vector2d<float>>();
+	vertexLayout.AddAttribute<math::Float2>();
+	vertexLayout.AddAttribute<math::Float2>();
 	planeLayout.vertices_.SetLayout(vertexLayout);
 
 	auto vertex = planeLayout.vertices_.Add();
-	vertex.Get<math::Vector2d<float>>(0) = math::Vector2d<float>(-1.0f, -1.0f);
-	vertex.Get<math::Vector2d<float>>(1) = math::Vector2d<float>(0.0f, 0.0f);
+	vertex.Get<math::Float2>(0) = math::Float2(-1.0f, -1.0f);
+	vertex.Get<math::Float2>(1) = math::Float2(0.0f, 0.0f);
 	vertex = planeLayout.vertices_.Add();
-	vertex.Get<math::Vector2d<float>>(0) = math::Vector2d<float>(1.0f,-1.0f);
-	vertex.Get<math::Vector2d<float>>(1) = math::Vector2d<float>(1.0f, 0.0f);
+	vertex.Get<math::Float2>(0) = math::Float2(1.0f,-1.0f);
+	vertex.Get<math::Float2>(1) = math::Float2(1.0f, 0.0f);
 	vertex = planeLayout.vertices_.Add();
-	vertex.Get<math::Vector2d<float>>(0) = math::Vector2d<float>(1.0f, 1.0f);
-	vertex.Get<math::Vector2d<float>>(1) = math::Vector2d<float>(1.0f, 1.0f);
+	vertex.Get<math::Float2>(0) = math::Float2(1.0f, 1.0f);
+	vertex.Get<math::Float2>(1) = math::Float2(1.0f, 1.0f);
 	vertex = planeLayout.vertices_.Add();
-	vertex.Get<math::Vector2d<float>>(0) = math::Vector2d<float>(-1.0f, 1.0f);
-	vertex.Get<math::Vector2d<float>>(1) = math::Vector2d<float>(0.0f, 1.0f);
+	vertex.Get<math::Float2>(0) = math::Float2(-1.0f, 1.0f);
+	vertex.Get<math::Float2>(1) = math::Float2(0.0f, 1.0f);
 	planeLayout.indices_ = { 0, 1, 2, 2, 3, 0 };
 	plane_ = graphicsAPI_->CreateMesh(planeLayout);
 

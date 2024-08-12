@@ -18,6 +18,7 @@ layout(binding = 1) uniform PTransform
 
 void main()
 {
-        gl_Position = p.proj * mv.model * vec4(_position, 1.0);
+	gl_Position = p.proj * mv.model * vec4(_position, 1.0);
+	gl_Position.y *= -1.0f;
 	color = _color;
 }

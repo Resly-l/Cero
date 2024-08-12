@@ -1,8 +1,11 @@
 #include "image.h"
 #include <string_view>
+#include "utility/log.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "thirdparty/stb/stb_image.h"
+
+using utility::Log;
 
 namespace io::file
 {
@@ -12,6 +15,7 @@ namespace io::file
 		stbi_uc* loaded = stbi_load(_path.data(), &width, &height, &numChannels, STBI_rgb_alpha);
 		if (!loaded)
 		{
+			std::cout << Log::Format(Log::Category::file, Log::Level::warning, "failed to load image");
 			return false;
 		}
 

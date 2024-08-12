@@ -18,13 +18,13 @@ HelloTriangle::HelloTriangle()
 	io::file::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
 
 	utility::ByteBuffer::Layout modelViewMatrixLayout;
-	modelViewMatrixLayout.AddAttribute<math::Matrix<float>>();
-	modelViewMatrixLayout.AddAttribute<math::Matrix<float>>();
+	modelViewMatrixLayout.AddAttribute<math::Matrix>();
+	modelViewMatrixLayout.AddAttribute<math::Matrix>();
 	mvBuffer_.SetLayout(modelViewMatrixLayout);
 	mvBuffer_.Add();
 
 	utility::ByteBuffer::Layout projectionMatrixLayout;
-	projectionMatrixLayout.AddAttribute<math::Matrix<float>>();
+	projectionMatrixLayout.AddAttribute<math::Matrix>();
 	pBuffer_.SetLayout(projectionMatrixLayout);
 	pBuffer_.Add();
 
@@ -41,10 +41,11 @@ HelloTriangle::HelloTriangle()
 	projectionUniformBuffer_ = graphicsAPI_->CreateUniformBuffer(projectionUBLayout);
 
 	Pipeline::Layout pipelineLayout;
+	pipelineLayout.primitiveTopology_ = PrimitiveTopology::TRIANGLE_LIST;
 	pipelineLayout.vertexShaderPath_ = L"shader/bin/hello_triangle.vert.spv";
 	pipelineLayout.pixelShaderPath_ = L"shader/bin/hello_triangle.frag.spv";
-	pipelineLayout.vertexInputLayout_.AddAttribute<math::Vector2d<float>>();
-	pipelineLayout.vertexInputLayout_.AddAttribute<math::Vector3d<float>>();
+	pipelineLayout.vertexInputLayout_.AddAttribute<math::Float2>();
+	pipelineLayout.vertexInputLayout_.AddAttribute<math::Float3>();
 	pipelineLayout.depthFunc_ = ComparisonFunc::LESS_EQUAL;
 	ShaderDescriptor::Output output{};
 	output.width_ = 1600;
@@ -67,17 +68,17 @@ HelloTriangle::HelloTriangle()
 	meshLayout.vertices_.SetLayout(pipelineLayout.vertexInputLayout_);
 
 	auto vertex = meshLayout.vertices_.Add();
-	vertex.Get<math::Vector2d<float>>(0) = math::Vector2d(-0.35f, -0.5f);
-	vertex.Get<math::Vector3d<float>>(1) = math::Vector3d(0.98f, 0.75f, 0.85f);
+	vertex.Get<math::Float2>(0) = math::Float2(-0.35f, -0.5f);
+	vertex.Get<math::Float3>(1) = math::Float3(0.98f, 0.75f, 0.85f);
 	vertex = meshLayout.vertices_.Add();
-	vertex.Get<math::Vector2d<float>>(0) = math::Vector2d(0.35f, -0.5f);
-	vertex.Get<math::Vector3d<float>>(1) = math::Vector3d(0.69f, 0.22f, 0.25f);
+	vertex.Get<math::Float2>(0) = math::Float2(0.35f, -0.5f);
+	vertex.Get<math::Float3>(1) = math::Float3(0.69f, 0.22f, 0.25f);
 	vertex = meshLayout.vertices_.Add();
-	vertex.Get<math::Vector2d<float>>(0) = math::Vector2d(0.35f, 0.5f);
-	vertex.Get<math::Vector3d<float>>(1) = math::Vector3d(0.98f, 0.75f, 0.85f);
+	vertex.Get<math::Float2>(0) = math::Float2(0.35f, 0.5f);
+	vertex.Get<math::Float3>(1) = math::Float3(0.98f, 0.75f, 0.85f);
 	vertex = meshLayout.vertices_.Add();
-	vertex.Get<math::Vector2d<float>>(0) = math::Vector2d(-0.35f, 0.5f);
-	vertex.Get<math::Vector3d<float>>(1) = math::Vector3d(0.15f, 0.15f, 0.15f);
+	vertex.Get<math::Float2>(0) = math::Float2(-0.35f, 0.5f);
+	vertex.Get<math::Float3>(1) = math::Float3(0.15f, 0.15f, 0.15f);
 
 	meshLayout.indices_ = { 0, 1, 2, 2, 3, 0 };
 	mesh_ = graphicsAPI_->CreateMesh(meshLayout);
@@ -90,12 +91,12 @@ void HelloTriangle::Update()
 	auto deltaSeconds = timer_.Mark();
 	yaw_ += (float)deltaSeconds;
 
-	math::Matrix<float> modelMatrix = math::Matrix<float>::RotationY(yaw_);
-	modelMatrix *= math::Matrix<float>::Translation(math::Vector<float>(0.0f, 0.0f, 1.5f + sinf(yaw_), 0.0f));
+	math::Matrix modelMatrix = math::Matrix::RotationY(yaw_);
+	modelMatrix *= math::Matrix::Translation(math::Vector(0.0f, 0.0f, 1.5f + sinf(yaw_), 0.0f));
 	
-	mvBuffer_.At(0).Get<math::Matrix<float>>(0) = modelMatrix;
-	mvBuffer_.At(0).Get<math::Matrix<float>>(1) = math::Matrix<float>::Identity();
-	pBuffer_.At(0).Get<math::Matrix<float>>(0) = math::Matrix<float>::Projection(0.1f, 100.0f, 90.0f, 1.777777f);
+	mvBuffer_.At(0).Get<math::Matrix>(0) = modelMatrix;
+	mvBuffer_.At(0).Get<math::Matrix>(1) = math::Matrix::Identity();
+	pBuffer_.At(0).Get<math::Matrix>(0) = math::Matrix::Projection(0.1f, 100.0f, 90.0f, 1.777777f);
 
 	modelViewUniformBuffer_->Update(mvBuffer_.GetRawBufferAddress());
 	projectionUniformBuffer_->Update(pBuffer_.GetRawBufferAddress());

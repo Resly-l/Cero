@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="assimp_test.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="assimp_test.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="shader">
+      <UniqueIdentifier>{932f19ad-a5a9-4e8d-a670-5708426f4d98}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\model.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\model.vert">
+      <Filter>shader</Filter>
+    </None>
+  </ItemGroup>
+</Project>

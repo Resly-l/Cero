@@ -12,4 +12,12 @@
       <UniqueIdentifier>{6f33becb-68bd-443c-ba15-201a1b7d5dbb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\depth_buffer.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\depth_buffer.vert">
+      <Filter>shader</Filter>
+    </None>
+  </ItemGroup>
 </Project>

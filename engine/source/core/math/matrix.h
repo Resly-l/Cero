@@ -24,161 +24,27 @@
 
 namespace math
 {
-	template <typename T>
-	struct Matrix2x2
-	{
-		union
-		{
-			Vector2d<T> v_[2];
-			struct
-			{
-				T _11, _12;
-				T _21, _22;
-			};
-		};
-
-		Matrix2x2()
-			: _11(T(0)), _12(T(0))
-			, _21(T(0)), _22(T(0))
-		{}
-
-		static Matrix2x2 Identity()
-		{
-			Matrix2x2 mat{};
-			mat.v_[0] = Vector2d(T(1), T(0));
-			mat.v_[1] = Vector2d(T(0), T(1));
-			return mat;
-		}
-
-		static Matrix2x2 Rotation(const T _angle)
-		{
-			const T sinTheta = sin(_angle);
-			const T cosTheta = cos(_angle);
-
-			Matrix2x2 mat;
-			mat.v_[0] = Vector2d(T(cosTheta), T(sinTheta));
-			mat.v_[1] = Vector2d(-T(sinTheta), T(cosTheta));
-			return mat;
-		}
-	};
-
-	template <typename T>
-	struct Matrix3x3
-	{
-		union
-		{
-			Vector3d<T> v_[3];
-			struct
-			{
-				T _11, _12, _13;
-				T _21, _22, _23;
-				T _31, _32, _33;
-			};
-		};
-
-		Matrix3x3()
-			: _11(T(0)), _12(T(0)), _13(T(0))
-			, _21(T(0)), _22(T(0)), _23(T(0))
-			, _31(T(0)), _32(T(0)), _33(T(0))
-		{}
-
-		Matrix3x3& operator =(const Matrix2x2<T>& _matrix2d)
-		{
-			_11 = _matrix2d._11;
-			_12 = _matrix2d._12;
-			_21 = _matrix2d._21;
-			_22 = _matrix2d._22;
-			return *this;
-		}
-
-		static Matrix3x3 Identity()
-		{
-			Matrix3x3 mat{};
-			mat.v_[0] = Vector3d(T(1), T(0), T(0));
-			mat.v_[1] = Vector3d(T(0), T(1), T(0));
-			mat.v_[2] = Vector3d(T(0), T(0), T(1));
-			return mat;
-		}
-
-		static Matrix3x3 RotationX(const T _angle)
-		{
-			const T sinTheta = sin(_angle);
-			const T cosTheta = cos(_angle);
-
-			Matrix3x3 mat;
-			mat.v_[0] = Vector3d(T(1), T(0), T(0));
-			mat.v_[1] = Vector3d(T(0), T(cosTheta), T(sinTheta));
-			mat.v_[2] = Vector3d(T(0), -T(sinTheta), T(cosTheta));
-			return mat;
-		}
-		static Matrix3x3 RotationY(const T _angle)
-		{
-			const T sinTheta = sin(_angle);
-			const T cosTheta = cos(_angle);
-
-			Matrix3x3 mat;
-			mat.v_[0] = Vector3d(T(cosTheta), T(0), -T(sinTheta));
-			mat.v_[1] = Vector3d(T(0), T(1), T(0));
-			mat.v_[2] = Vector3d(T(sinTheta), T(0), T(cosTheta));
-			return mat;
-		}
-		static Matrix3x3 RotationZ(const T _angle)
-		{
-			const T sinTheta = sin(_angle);
-			const T cosTheta = cos(_angle);
-
-			Matrix3x3 mat;
-			mat.v_[0] = Vector3d(T(cosTheta), T(sinTheta), T(0));
-			mat.v_[1] = Vector3d(-T(sinTheta), T(cosTheta), T(0));
-			mat.v_[2] = Vector3d(T(0), T(0), T(1));
-			return mat;
-		}
-	};
-
-	template <typename T>
 	struct Matrix
 	{
 		union
 		{
-			Vector<T> v_[4];
+			Vector v_[4];
 			struct
 			{
-				T _11, _12, _13, _14;
-				T _21, _22, _23, _24;
-				T _31, _32, _33, _34;
-				T _41, _42, _43, _44;
+				float _11, _12, _13, _14;
+				float _21, _22, _23, _24;
+				float _31, _32, _33, _34;
+				float _41, _42, _43, _44;
 			};
 		};
 
 		Matrix()
-			: _11(T(0)), _12(T(0)), _13(T(0)), _14(T(0))
-			, _21(T(0)), _22(T(0)), _23(T(0)), _24(T(0))
-			, _31(T(0)), _32(T(0)), _33(T(0)), _34(T(0))
-			, _41(T(0)), _42(T(0)), _43(T(0)), _44(T(0))
+			: _11(0.0f), _12(0.0f), _13(0.0f), _14(0.0f)
+			, _21(0.0f), _22(0.0f), _23(0.0f), _24(0.0f)
+			, _31(0.0f), _32(0.0f), _33(0.0f), _34(0.0f)
+			, _41(0.0f), _42(0.0f), _43(0.0f), _44(0.0f)
 		{}
 
-		Matrix& operator =(const Matrix2x2<T>& _matrix2d)
-		{
-			_11 = _matrix2d._11;
-			_12 = _matrix2d._12;
-			_21 = _matrix2d._21;
-			_22 = _matrix2d._22;
-			return *this;
-		}
-		Matrix& operator =(const Matrix3x3<T>& _matrix3d)
-		{
-			_11 = _matrix3d._11;
-			_12 = _matrix3d._12;
-			_13 = _matrix3d._13;
-			_21 = _matrix3d._21;
-			_22 = _matrix3d._22;
-			_23 = _matrix3d._23;
-			_31 = _matrix3d._31;
-			_32 = _matrix3d._32;
-			_33 = _matrix3d._33;
-			return *this;
-		}
-		
 		Matrix operator *(const Matrix& _other) const
 		{
 			Matrix m;
@@ -213,38 +79,53 @@ namespace math
 		static Matrix Identity()
 		{
 			Matrix mat{};
-			mat.v_[0] = Vector(T(1), T(0), T(0), T(0));
-			mat.v_[1] = Vector(T(0), T(1), T(0), T(0));
-			mat.v_[2] = Vector(T(0), T(0), T(1), T(0));
-			mat.v_[3] = Vector(T(0), T(0), T(0), T(1));
+			mat.v_[0] = Vector(1.0f, 0.0f, 0.0f, 0.0f);
+			mat.v_[1] = Vector(0.0f, 1.0f, 0.0f, 0.0f);
+			mat.v_[2] = Vector(0.0f, 0.0f, 1.0f, 0.0f);
+			mat.v_[3] = Vector(0.0f, 0.0f, 0.0f, 1.0f);
 			return mat;
 		}
 
-		static Matrix RotationX(const T _angle)
+		static Matrix RotationX(const float _angle)
 		{
-			Matrix<T> mat = Identity();
-			mat = Matrix3x3<T>::RotationX(_angle);
+			const float sinTheta = sin(_angle);
+			const float cosTheta = cos(_angle);
+
+			Matrix mat = Identity();
+			mat.v_[0] = Vector(1.0f, 0.0f, 0.0f);
+			mat.v_[1] = Vector(0.0f, cosTheta, sinTheta);
+			mat.v_[2] = Vector(0.0f, -sinTheta, cosTheta);
 			return mat;
 		}
-		static Matrix RotationY(const T _angle)
+		static Matrix RotationY(const float _angle)
 		{
-			Matrix<T> mat = Identity();
-			mat = Matrix3x3<T>::RotationY(_angle);
+			const float sinTheta = sin(_angle);
+			const float cosTheta = cos(_angle);
+
+			Matrix mat = Identity();
+			mat.v_[0] = Vector(cosTheta, 0.0f, -sinTheta);
+			mat.v_[1] = Vector(0.0f, 1.0f, 0.0f);
+			mat.v_[2] = Vector(sinTheta, 0.0f, cosTheta);
 			return mat;
 		}
-		static Matrix RotationZ(const T _angle)
+		static Matrix RotationZ(const float _angle)
 		{
-			Matrix<T> mat = Identity();
-			mat = Matrix3x3<T>::RotationZ(_angle);
+			const float sinTheta = sin(_angle);
+			const float cosTheta = cos(_angle);
+
+			Matrix mat = Identity();
+			mat.v_[0] = Vector(cosTheta, sinTheta, 0.0f);
+			mat.v_[1] = Vector(-sinTheta, cosTheta, 0.0f);
+			mat.v_[2] = Vector(0.0f, 0.0f, 1.0f);
 			return mat;
 		}
 
-		static Matrix Rotation(const Vector<T>& _pitchYawRoll)
+		static Matrix Rotation(const Vector& _pitchYawRoll)
 		{
-			return RotationZ(_pitchYawRoll.z) * RotationX(_pitchYawRoll.x) * RotationY(_pitchYawRoll.y);
+			return RotationZ(_pitchYawRoll.z_) * RotationX(_pitchYawRoll.x_) * RotationY(_pitchYawRoll.y_);
 		}
 
-		static Matrix Translation(const Vector<T>& _offset)
+		static Matrix Translation(const Vector& _offset)
 		{
 			Matrix translation = Identity();
 			translation._41 = _offset.x_;
@@ -253,21 +134,21 @@ namespace math
 			return translation;
 		}
 
-		static Matrix Projection(const T _near, const T _far, const T _horizontalFoV, const T _aspectRatio)
+		static Matrix Projection(const float _near, const float _far, const float _horizontalFoV, const float _aspectRatio)
 		{
 			// depth division occurs in graphics api pipeline
 			// projection matrix is to convert world space point into ndc space point
 
-			const T tanHorizontal = tan(_horizontalFoV * T(0.5));
-			const T tanVertical = tanHorizontal / _aspectRatio;
-			const T invFmN = T(_far) / (_far - _near);
-			const T beta = -_near * invFmN;
+			const float tanHorizontal = tan(_horizontalFoV * 0.5f);
+			const float tanVertical = tanHorizontal / _aspectRatio;
+			const float invFmN = _far / (_far - _near);
+			const float beta = -_near * invFmN;
 
-			Matrix<T> mat;
-			mat.v_[0] = Vector<T>(T(T(1) / (tanHorizontal)), T(0), T(0), T(0));
-			mat.v_[1] = Vector<T>(T(0), T(T(1) / (tanVertical)), T(0), T(0));
-			mat.v_[2] = Vector<T>(T(0), T(0), T(invFmN), T(1));
-			mat.v_[3] = Vector<T>(T(0), T(0), T(beta), T(0));
+			Matrix mat;
+			mat.v_[0] = Vector(1.0f / (tanHorizontal), 0.0f, 0.0f, 0.0f);
+			mat.v_[1] = Vector(0.0f, 1.0f / (tanVertical), 0.0f, 0.0f);
+			mat.v_[2] = Vector(0.0f, 0.0f, invFmN, 1.0f);
+			mat.v_[3] = Vector(0.0f, 0.0f, beta, 0.0f);
 			return mat;
 		}
 	};

@@ -1,7 +1,7 @@
 implementation
 	function separation
 		- functionalities which are used in more that two places must be functions.
-		- functionalities which are used only in single place are [ undefined ]
+		- functionalities which are used only in single place : is logic specific ? no function : function
 	
 nameing
 	file
@@ -13,6 +13,17 @@ nameing
 		- each words are separated by capital letter of following word.
 			- use '_' when necessary.
 	variable
-		- local variable : none
+		- local variable : starts with small case, separate words with cappital
 		- member variable : put '_' at the end
 		- parameter variable : put '_' at the front
+
+namespace
+	naming
+		- same as file name
+	depth
+		- math filter & file & namespace sturcture
+	memo
+		- idk if i should keep nested namespace dpeth since it's inconvenient to use
+		- the purpose of namespace is to
+			1. avoid conflict with other project
+			2. avoid conflict name other contexts in the same project (+ be bore explicit)

@@ -3,36 +3,43 @@
 
 namespace math
 {
-	template <typename T>
-	struct Vector2d
+	struct Float2
 	{
-		T x_{};
-		T y_{};
+		float x_ = 0.0f;
+		float y_ = 0.0f;
 
-		Vector2d() : x_(T{}), y_(T{}) {}
-		Vector2d(const T& _x, const T& _y) : x_(_x), y_(_y) {}
+		Float2() = default;
+		Float2(float _x, float _y) : x_(_x), y_(_y) {}
+	};
+	struct Float3 : public Float2
+	{
+		float z_ = 0.0f;
+
+		Float3() = default;
+		Float3(float _x, float _y, float _z) : Float2(_x, _y), z_(_z) {}
+	};
+	struct Float4 : public Float3
+	{
+		float w_ = 0.0f;
+
+		Float4() = default;
+		Float4(float _x, float _y, float _z, float _w) : Float3(_x, _y, _z), w_(_w) {}
 	};
 
-	template <typename T>
-	struct Vector3d
-	{
-		T x_{};
-		T y_{};
-		T z_{};
-
-		Vector3d() : x_(T{}), y_(T{}), z_(T{}) {}
-		Vector3d(const T& _x, const T& _y, const T& _z) : x_(_x), y_(_y), z_(_z) {}
-	};
-
-	template <typename T>
 	struct Vector
 	{
-		T x_{};
-		T y_{};
-		T z_{};
-		T w_{};
+		float x_ = 0.0f;
+		float y_ = 0.0f;
+		float z_ = 0.0f;
+		float w_ = 0.0f;
 
-		Vector() : x_(T{}), y_(T{}), z_(T{}), w_(T{}) {}
-		Vector(const T& _x, const T& _y, const T& _z, const T& _w) : x_(_x), y_(_y), z_(_z), w_(_w) {}
+		Vector() = default;
+		Vector(float _value);
+		Vector(Float2 _float2);
+		Vector(Float3 _float3);
+		Vector(Float4 _float4);
+		Vector(float _x, float _y, float _z, float _w = 0.0f);
+
+
 	};
 }

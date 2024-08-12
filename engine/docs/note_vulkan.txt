@@ -17,8 +17,6 @@ the thing is, swapchain images have framebuffers individually meaning in each ev
 	-> but then again, regardless of vulkan, pipeline must know how input&output attachments are configured which is
 		 exactly what vulkan renderpass is for. meaning it's neccessary
 
-
-
 2024/05/15---------------------------------------------------------------------------------------------------------------------------
 framebuffer is just a buffer which holds render target information
 it can specify how each render targets will be used during redering that frame
@@ -46,17 +44,15 @@ synchronization
 
 	In summary, semaphores are used to specify the execution order of operations on the GPU while fences are used to keep the CPU and GPU in sync with each-other.
 
-
-
 2024/05/16---------------------------------------------------------------------------------------------------------------------------
 why would i need render target interface
 - to bind pipline and render target separatly
 - can render to the same target using different pipelines
 
-
-2024/05/19---------------------------------------------------------------------------------------------------------------------------
-
-
 2024/08/07---------------------------------------------------------------------------------------------------------------------------
 managed to draw image.
 figuring out how to deal with binding interfaces (vk version of uniform buffer and texture & exposed version)
+
+2024/08/11---------------------------------------------------------------------------------------------------------------------------
+obviously, setting PoolSize for VkDescriptorPool with large number can be wasteful
+it is valid to create another pool once previouse one reaches pool size according to GPT

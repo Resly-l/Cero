@@ -2,41 +2,42 @@
 #include "core/math/vector.h"
 #include "core/math/matrix.h"
 #include "io/file/shader_compiler.h"
+#include "io/file/image.h"
 
 DepthBufferDemo::DepthBufferDemo()
 	: io::window::Application(io::graphics::GraphicsAPI::VULKAN)
 {
 	io::file::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
-
+	
 	io::graphics::Mesh::Layout cubeLayout;
 	utility::ByteBuffer::Layout vertexLayout;
-	vertexLayout.AddAttribute<math::Vector3d<float>>();
-	vertexLayout.AddAttribute<math::Vector3d<float>>();
+	vertexLayout.AddAttribute<math::Float3>();
+	vertexLayout.AddAttribute<math::Float3>();
 	cubeLayout.vertices_.SetLayout(vertexLayout);
 	auto vertex = cubeLayout.vertices_.Add();
-	vertex.Get<math::Vector3d<float>>(0) = math::Vector3d<float>(-0.5f, 0.5f, -0.5f);
-	vertex.Get<math::Vector3d<float>>(1) = math::Vector3d<float>(0.5f, 0.0f, 0.5f);
+	vertex.Get<math::Float3>(0) = math::Float3(-0.5f, 0.5f, -0.5f);
+	vertex.Get<math::Float3>(1) = math::Float3(0.5f, 0.0f, 0.5f);
 	vertex = cubeLayout.vertices_.Add();
-	vertex.Get<math::Vector3d<float>>(0) = math::Vector3d<float>(0.5f, 0.5f, -0.5f);
-	vertex.Get<math::Vector3d<float>>(1) = math::Vector3d<float>(1.0f, 0.0f, 0.0f);
+	vertex.Get<math::Float3>(0) = math::Float3(0.5f, 0.5f, -0.5f);
+	vertex.Get<math::Float3>(1) = math::Float3(1.0f, 0.0f, 0.0f);
 	vertex = cubeLayout.vertices_.Add();
-	vertex.Get<math::Vector3d<float>>(0) = math::Vector3d<float>(0.5f, -0.5f, -0.5f);
-	vertex.Get<math::Vector3d<float>>(1) = math::Vector3d<float>(0.0f, 0.0f, 1.0f);
+	vertex.Get<math::Float3>(0) = math::Float3(0.5f, -0.5f, -0.5f);
+	vertex.Get<math::Float3>(1) = math::Float3(0.0f, 0.0f, 1.0f);
 	vertex = cubeLayout.vertices_.Add();
-	vertex.Get<math::Vector3d<float>>(0) = math::Vector3d<float>(-0.5f, -0.5f, -0.5f);
-	vertex.Get<math::Vector3d<float>>(1) = math::Vector3d<float>(0.5f, 1.0f, 0.0f);
+	vertex.Get<math::Float3>(0) = math::Float3(-0.5f, -0.5f, -0.5f);
+	vertex.Get<math::Float3>(1) = math::Float3(0.5f, 1.0f, 0.0f);
 	vertex = cubeLayout.vertices_.Add();
-	vertex.Get<math::Vector3d<float>>(0) = math::Vector3d<float>(-0.5f, 0.5f, 0.5f);
-	vertex.Get<math::Vector3d<float>>(1) = math::Vector3d<float>(1.0f, 1.0f, 1.0f);
+	vertex.Get<math::Float3>(0) = math::Float3(-0.5f, 0.5f, 0.5f);
+	vertex.Get<math::Float3>(1) = math::Float3(1.0f, 1.0f, 1.0f);
 	vertex = cubeLayout.vertices_.Add();
-	vertex.Get<math::Vector3d<float>>(0) = math::Vector3d<float>(0.5f, 0.5f, 0.5f);
-	vertex.Get<math::Vector3d<float>>(1) = math::Vector3d<float>(1.0f, 0.5f, 0.0f);
+	vertex.Get<math::Float3>(0) = math::Float3(0.5f, 0.5f, 0.5f);
+	vertex.Get<math::Float3>(1) = math::Float3(1.0f, 0.5f, 0.0f);
 	vertex = cubeLayout.vertices_.Add();
-	vertex.Get<math::Vector3d<float>>(0) = math::Vector3d<float>(0.5f, -0.5f, 0.5f);
-	vertex.Get<math::Vector3d<float>>(1) = math::Vector3d<float>(0.5f, 1.0f, 1.0f);
+	vertex.Get<math::Float3>(0) = math::Float3(0.5f, -0.5f, 0.5f);
+	vertex.Get<math::Float3>(1) = math::Float3(0.5f, 1.0f, 1.0f);
 	vertex = cubeLayout.vertices_.Add();
-	vertex.Get<math::Vector3d<float>>(0) = math::Vector3d<float>(-0.5f, -0.5f, 0.5f);
-	vertex.Get<math::Vector3d<float>>(1) = math::Vector3d<float>(1.0f, 0.4f, 0.4f);
+	vertex.Get<math::Float3>(0) = math::Float3(-0.5f, -0.5f, 0.5f);
+	vertex.Get<math::Float3>(1) = math::Float3(1.0f, 0.4f, 0.4f);
 
 	cubeLayout.indices_ = {
 		0, 1, 2, 2, 3, 0,
@@ -50,13 +51,13 @@ DepthBufferDemo::DepthBufferDemo()
 	cubeMesh_ = graphicsAPI_->CreateMesh(cubeLayout);
 
 	utility::ByteBuffer::Layout modelViewMatrixLayout;
-	modelViewMatrixLayout.AddAttribute<math::Matrix<float>>();
-	modelViewMatrixLayout.AddAttribute<math::Matrix<float>>();
+	modelViewMatrixLayout.AddAttribute<math::Matrix>();
+	modelViewMatrixLayout.AddAttribute<math::Matrix>();
 	mvBuffer_.SetLayout(modelViewMatrixLayout);
 	mvBuffer_.Add();
 
 	utility::ByteBuffer::Layout projectionMatrixLayout;
-	projectionMatrixLayout.AddAttribute<math::Matrix<float>>();
+	projectionMatrixLayout.AddAttribute<math::Matrix>();
 	pBuffer_.SetLayout(projectionMatrixLayout);
 	pBuffer_.Add();
 
@@ -101,12 +102,12 @@ void DepthBufferDemo::Update()
 	double deltaSeconds = timer_.Mark();
 	yaw_ += (float)deltaSeconds;
 
-	math::Matrix<float> modelMatrix = math::Matrix<float>::RotationY(yaw_) * math::Matrix<float>::RotationX(yaw_);
-	modelMatrix *= math::Matrix<float>::Translation(math::Vector<float>(0.0f, 0.0f, 2.0f + sinf(yaw_) * 0.5f, 0.0f));
+	math::Matrix modelMatrix = math::Matrix::RotationY(yaw_) * math::Matrix::RotationX(yaw_);
+	modelMatrix *= math::Matrix::Translation(math::Vector(0.0f, 0.0f, 2.0f + sinf(yaw_) * 0.5f, 0.0f));
 
-	mvBuffer_.At(0).Get<math::Matrix<float>>(0) = modelMatrix;
-	mvBuffer_.At(0).Get<math::Matrix<float>>(1) = math::Matrix<float>::Identity();
-	pBuffer_.At(0).Get<math::Matrix<float>>(0) = math::Matrix<float>::Projection(0.1f, 100.0f, 90.0f, 1.777777f);
+	mvBuffer_.At(0).Get<math::Matrix>(0) = modelMatrix;
+	mvBuffer_.At(0).Get<math::Matrix>(1) = math::Matrix::Identity();
+	pBuffer_.At(0).Get<math::Matrix>(0) = math::Matrix::Projection(0.1f, 100.0f, 90.0f, 1.777777f);
 
 	modelViewUniformBuffer_->Update(mvBuffer_.GetRawBufferAddress());
 	projectionUniformBuffer_->Update(pBuffer_.GetRawBufferAddress());
