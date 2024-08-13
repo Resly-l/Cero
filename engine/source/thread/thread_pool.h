@@ -1,48 +1,28 @@
 #pragma once
-#include <functional>
-#include <optional>
 #include <queue>
 #include <condition_variable>
+#include <functional>
+#include "utility/forward_declaration.h"
 
-namespace core
+namespace thread
 {
-	class Task
-	{
-	public:
-		class Callback
-		{
-		public:
-			virtual void OnFinished() = 0;
-		};
-
-	private:
-		std::function<void()> function_;
-		std::optional<Callback*> callback_;
-
-	public:
-		Task() = default;
-		Task(std::function<void()> _function_, std::optional<Callback*> _callback = std::nullopt);
-
-		void Execute();
-	};
-
 	class ThreadPool
 	{
-	private:
-		std::vector<std::thread> workers_;
-		std::queue<Task> tasks_;
+		friend class window::Application;
 
-		std::mutex mutex_;
-		std::condition_variable condition_;
-		bool stop_;
+	private:
+		inline static std::vector<std::thread> workers_;
+		inline static std::queue<std::function<void()>> tasks_;
+		inline static std::mutex mutex_;
+		inline static std::condition_variable condition_;
+		inline static bool stop_ = false;
 
 	public:
-		ThreadPool(size_t _numThreads);
-		~ThreadPool();
-
-		void EnqueueTask(Task _task);
+		static void EnqueueTask(std::function<void()> _task);
 
 	private:
-		void WorkerThread();
+		static void Initialize(size_t _numThreads = 4);
+		static void Deinitialize();
+		static void WorkerThread();
 	};
 }

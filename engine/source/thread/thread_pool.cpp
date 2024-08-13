@@ -1,33 +1,17 @@
 #include "thread_pool.h"
 
-namespace core
+namespace thread
 {
-	Task::Task(std::function<void()> _function_, std::optional<Callback*> _callback)
-		: function_(_function_)
-		, callback_(_callback)
-	{}
-
-	void Task::Execute()
-	{
-		function_();
-
-		if (callback_)
-		{
-			(*callback_)->OnFinished();
-		}
-	}
-
-	ThreadPool::ThreadPool(size_t _numThreads)
-		: stop_(false)
+	void ThreadPool::Initialize(size_t _numThreads)
 	{
 		workers_.reserve(_numThreads);
 		for (size_t i = 0; i < _numThreads; ++i)
 		{
-			workers_.emplace_back(&ThreadPool::WorkerThread, this);
+			workers_.emplace_back(&ThreadPool::WorkerThread);
 		}
 	}
 
-	ThreadPool::~ThreadPool()
+	void ThreadPool::Deinitialize()
 	{
 		{
 			std::unique_lock<std::mutex> lock(mutex_);
@@ -41,7 +25,7 @@ namespace core
 		}
 	}
 
-	void ThreadPool::EnqueueTask(Task _task)
+	void ThreadPool::EnqueueTask(std::function<void()> _task)
 	{
 		{
 			std::unique_lock<std::mutex> lock(mutex_);
@@ -54,11 +38,11 @@ namespace core
 	{
 		while (true)
 		{
-			Task task;
+			std::function<void()> task;
 			{
 				std::unique_lock<std::mutex> lock(mutex_); // must be locked inside this scope to avoid blocking other workers
 
-				condition_.wait(lock, [this] { return stop_ || !tasks_.empty(); });
+				condition_.wait(lock, [] { return stop_ || !tasks_.empty(); });
 
 				if (stop_)
 				{
@@ -69,7 +53,7 @@ namespace core
 				tasks_.pop();
 			}
 
-			task.Execute();
+			task();
 		}
 	}
 }

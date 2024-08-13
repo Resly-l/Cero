@@ -1,11 +1,11 @@
 #include "texture_demo.h"
 #include "math/vector.h"
-#include "file/shader_compiler.h"
+#include "utility/shader_compiler.h"
 
 TextureDemo::TextureDemo()
 	: Application(graphics::GraphicsAPI::VULKAN)
 {
-	file::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
+	utility::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
 	Window::Resize(1600, 90);
 	Application::Resize(2560, 1440);
 

@@ -3,9 +3,8 @@
 #include "math/vector.h"
 #include "math/matrix.h"
 #include "graphics/uniform_buffer.h"
+#include "utility/shader_compiler.h"
 #include <iostream>
-
-#include "file/shader_compiler.h"
 
 using namespace graphics;
 
@@ -15,7 +14,7 @@ HelloTriangle::HelloTriangle()
 	Window::SetTitle("Hello Triangle");
 	Window::SetResizability(false);
 
-	file::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
+	utility::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
 
 	utility::ByteBuffer::Layout modelViewMatrixLayout;
 	modelViewMatrixLayout.AddAttribute<math::Matrix>();

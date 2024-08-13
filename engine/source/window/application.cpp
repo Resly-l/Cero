@@ -1,12 +1,14 @@
 #include "application.h"
-
 #include "graphics/vulkan/vulkan_api.h"
+#include "thread/thread_pool.h"
 
 namespace window
 {
 	Application::Application(graphics::GraphicsAPI::Type _apiType)
 		: Window(defaultWindowWidth, defaultWindowHeight, "Window Application")
 	{
+		thread::ThreadPool::Initialize();
+
 		switch (_apiType)
 		{
 		case graphics::GraphicsAPI::Type::VULKAN:
@@ -38,6 +40,7 @@ namespace window
 			}
 		}
 
+		thread::ThreadPool::Deinitialize();
 		graphicsAPI_->WaitIdle();
 	}
 

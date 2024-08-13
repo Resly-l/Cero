@@ -1,37 +1,48 @@
 #include "vulkan_texture.h"
 #include "vulkan_result.hpp"
 #include "vulkan_utility.h"
+#include "thread/thread_pool.h"
+#include "file/path.generated.h"
+#include "utility/log.h"
+
+using utility::Log;
 
 namespace graphics
 {
 	VulkanTexture::VulkanTexture(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkQueue _graphicsQueue, VkCommandPool _commandPool, const Texture::Layout& _layout)
 		: logicalDevice_(_logicalDevice)
+		, physicalDevice_(_physicalDevice)
+		, graphicsQueue_(_graphicsQueue)
+		, commandPool_(_commandPool)
 	{
+		if (!placeholder_)
+		{
+			placeholder_ = std::make_unique<file::Image>();
+			placeholder_->Load(std::string(PATH_ENGINE_ASSET) + std::string("image/placeholder.png"));
+			if (!placeholder_->IsLoaded())
+			{
+				throw std::runtime_error(std::string("failed to load placeholder image"));
+			}
+		}
+
 		slot_ = _layout.slot_;
 		numElements_ = _layout.numElements_;
 		stage_ = VulkanTypeConverter::Convert(_layout.stage_);
 		format_ = VulkanTypeConverter::Convert(_layout.format_);
+		Initialize(physicalDevice_, graphicsQueue_, commandPool_, *placeholder_);
 
-		file::Image image = LoadImage(_layout.imagePath_);
-		VkBuffer stagingBuffer = VK_NULL_HANDLE;
-		VkDeviceMemory stagingBufferMemory = VK_NULL_HANDLE;
+		thread::ThreadPool::EnqueueTask([&]()
+			{
+				imageFile_ = std::make_unique<file::Image>();
+				imageFile_->Load(_layout.imagePath_);
+				if (!imageFile_->IsLoaded())
+				{
+					std::cout << Log::Format(Log::Category::file, Log::Level::error, "failed to load image, path : " + std::string(_layout.imagePath_));
+					return;
+				}
 
-		CreateStagingBuffer(_physicalDevice, image, stagingBuffer, stagingBufferMemory);
-		CreateImage(_physicalDevice);
-		{
-			TransitImageLayout(format_, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _graphicsQueue, _commandPool);
-			CopyBufferToImage(stagingBuffer, _graphicsQueue, _commandPool);
-			TransitImageLayout(format_, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, _graphicsQueue, _commandPool);
-		}
-		CreateImageView();
-		CreateSampler(_physicalDevice);
-
-		vkFreeMemory(logicalDevice_, stagingBufferMemory, nullptr);
-		vkDestroyBuffer(logicalDevice_, stagingBuffer, nullptr);
-
-		imageInfo_.imageView = imageView_;
-		imageInfo_.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		imageInfo_.sampler = sampler_;
+				isLoaded_ = true;
+			});
 	}
 
 	VulkanTexture::~VulkanTexture()
@@ -86,7 +97,25 @@ namespace graphics
 		}
 	};
 
-    std::shared_ptr<ShaderBinding> VulkanTexture::GetShaderBinding() const
+	bool VulkanTexture::IsPendingUpdate() const
+	{
+		return isLoaded_;
+	}
+
+	void VulkanTexture::Update()
+	{
+		vkDeviceWaitIdle(logicalDevice_);
+		vkDestroySampler(logicalDevice_, sampler_, nullptr);
+		vkFreeMemory(logicalDevice_, imageMemory_, nullptr);
+		vkDestroyImageView(logicalDevice_, imageView_, nullptr);
+		vkDestroyImage(logicalDevice_, image_, nullptr);
+
+		Initialize(physicalDevice_, graphicsQueue_, commandPool_, *imageFile_);
+		isLoaded_ = false;
+		imageFile_ = nullptr;
+	}
+
+	std::shared_ptr<ShaderBinding> VulkanTexture::GetShaderBinding() const
     {
 		auto binding = std::make_shared<VulkanTextureBinding>();
 		binding->slot_ = slot_;
@@ -97,19 +126,30 @@ namespace graphics
 		return binding;
     }
 
-	file::Image VulkanTexture::LoadImage(std::string_view _path)
+	void VulkanTexture::Initialize(VkPhysicalDevice _physicalDevice, VkQueue _graphicsQueue, VkCommandPool _commandPool, file::Image& _image)
 	{
-		file::Image image;
-		image.Load(_path);
-		if (!image.IsLoaded())
+		width_ = _image.width_;
+		height_ = _image.height_;
+
+		VkBuffer stagingBuffer = VK_NULL_HANDLE;
+		VkDeviceMemory stagingBufferMemory = VK_NULL_HANDLE;
+
+		CreateStagingBuffer(_physicalDevice, _image, stagingBuffer, stagingBufferMemory);
+		CreateImage(_physicalDevice);
 		{
-			throw std::runtime_error(std::string("failed to load image") + std::string(_path));
+			TransitImageLayout(format_, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _graphicsQueue, _commandPool);
+			CopyBufferToImage(stagingBuffer, _graphicsQueue, _commandPool);
+			TransitImageLayout(format_, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, _graphicsQueue, _commandPool);
 		}
+		CreateImageView();
+		CreateSampler(_physicalDevice);
 
-		width_ = image.width_;
-		height_ = image.height_;
+		vkFreeMemory(logicalDevice_, stagingBufferMemory, nullptr);
+		vkDestroyBuffer(logicalDevice_, stagingBuffer, nullptr);
 
-		return image;
+		imageInfo_.imageView = imageView_;
+		imageInfo_.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo_.sampler = sampler_;
 	}
 
 	void VulkanTexture::CreateStagingBuffer(VkPhysicalDevice _physicalDevice, const file::Image& _image, VkBuffer& _outStagingBuffer, VkDeviceMemory& _outBufferMemory)

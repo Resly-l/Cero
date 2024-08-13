@@ -1,13 +1,13 @@
 #include "depth_buffer_demo.h"
 #include "math/vector.h"
 #include "math/matrix.h"
-#include "file/shader_compiler.h"
+#include "utility/shader_compiler.h"
 #include "file/image.h"
 
 DepthBufferDemo::DepthBufferDemo()
 	: window::Application(graphics::GraphicsAPI::VULKAN)
 {
-	file::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
+	utility::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
 	
 	graphics::Mesh::Layout cubeLayout;
 	utility::ByteBuffer::Layout vertexLayout;

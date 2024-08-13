@@ -9,7 +9,9 @@ namespace file
 		utility::ByteBuffer vertices_;
 		std::vector<uint32_t> indices_;
 
-		bool Load(std::string_view _path);
+		std::string diffuseMapPath_;
+
+		bool Load(const std::string& _path);
 		bool IsLoaded() const;
 	};
 }

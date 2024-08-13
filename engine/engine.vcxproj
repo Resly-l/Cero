@@ -108,11 +108,10 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="source\file\file_interface.h" />
+    <ClInclude Include="source\file\explorer.h" />
     <ClInclude Include="source\file\image.h" />
     <ClInclude Include="source\file\model.h" />
     <ClInclude Include="source\file\path.generated.h" />
-    <ClInclude Include="source\file\shader_compiler.h" />
     <ClInclude Include="source\graphics\common.h" />
     <ClInclude Include="source\graphics\graphics_api.h" />
     <ClInclude Include="source\graphics\mesh.h" />
@@ -136,6 +135,7 @@
     <ClInclude Include="source\utility\byte_buffer.h" />
     <ClInclude Include="source\utility\forward_declaration.h" />
     <ClInclude Include="source\utility\log.h" />
+    <ClInclude Include="source\utility\shader_compiler.h" />
     <ClInclude Include="source\utility\timer.hpp" />
     <ClInclude Include="source\window\application.h" />
     <ClInclude Include="source\window\window.h" />
@@ -229,6 +229,7 @@
     <ClInclude Include="thirdparty\vk_bootstrap\VkBootstrapDispatch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\file\explorer.cpp" />
     <ClCompile Include="source\file\image.cpp" />
     <ClCompile Include="source\file\model.cpp" />
     <ClCompile Include="source\graphics\vulkan\vulkan_api.cpp" />

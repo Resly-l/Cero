@@ -1,8 +1,8 @@
 #pragma once
 #include <string_view>
-#include "path.generated.h"
+#include "file/path.generated.h"
 
-namespace file
+namespace utility
 {
 	class ShaderCompiler final
 	{

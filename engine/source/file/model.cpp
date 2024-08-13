@@ -17,8 +17,11 @@ using utility::Log;
 
 namespace file
 {
-	bool Model::Load(std::string_view _path)
+	bool Model::Load(const std::string& _path)
 	{
+		size_t separater = _path.find_last_of('/');
+		std::string parentDir(_path.begin(), _path.begin() + ((std::string::npos == separater) ? 0 : _path.find_last_of('/') + 1));
+
 		static Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(_path.data(),
 			aiProcess_ConvertToLeftHanded |
@@ -72,10 +75,12 @@ namespace file
 
 		for (uint32_t i = 0; i < scene->mNumMaterials; i++)
 		{
-
+			aiString path;
+			if (scene->mMaterials[i]->GetTexture(aiTextureType::aiTextureType_DIFFUSE, 0, &path) == aiReturn_SUCCESS)
+			{
+				diffuseMapPath_ = parentDir + path.C_Str();
+			}
 		}
-
-
 
 		return true;
 	}

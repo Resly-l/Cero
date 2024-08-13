@@ -102,6 +102,17 @@ namespace graphics
 	void VulkanAPI::BindPipeline(std::shared_ptr<Pipeline> _pipeline)
 	{
 		pipeline_ = std::static_pointer_cast<VulkanPipeline>(_pipeline);
+		renderTarget_ = nullptr;
+
+		if (!pipeline_->UpdateShaderBindings())
+		{
+			return;
+		}
+
+		for (auto& frame : frames_)
+		{
+			pipeline_->UpdateDescriptorSet(frame.descriptorSets_[pipeline_]);
+		}
 	}
 
 	void VulkanAPI::BindRenderTarget(std::shared_ptr<RenderTarget> _renderTarget)
@@ -225,6 +236,10 @@ namespace graphics
 		}
 
 		frameIndex_ = (frameIndex_ + 1) % config_.numFrameConcurrency_;
+
+		pipeline_ = nullptr;
+		renderTarget_ = nullptr;
+		mesh_ = nullptr;
 	}
 
 	void VulkanAPI::WaitIdle()

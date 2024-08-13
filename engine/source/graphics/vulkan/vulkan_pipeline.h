@@ -35,6 +35,7 @@ namespace graphics
 		VkDescriptorSetLayout GetDescriptorSetLayout() const;
 		uint32_t GetNumBindings() const;
 
+		bool UpdateShaderBindings();
 		void UpdateDescriptorSet(VkDescriptorSet _descriptorSet);
 
 	private:

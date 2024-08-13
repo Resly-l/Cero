@@ -6,6 +6,7 @@ class AssimpTest : public window::Application
 private:
     std::shared_ptr<graphics::Pipeline> pipeline_;
     std::shared_ptr<graphics::Mesh> mesh_;
+    std::shared_ptr<graphics::Texture> brickDiffuse_;
 	std::shared_ptr<graphics::UniformBuffer> modelViewUniformBuffer_;
 	std::shared_ptr<graphics::UniformBuffer> projectionUniformBuffer_;
 	utility::ByteBuffer mvBuffer_;

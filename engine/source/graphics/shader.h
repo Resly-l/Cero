@@ -27,6 +27,8 @@ namespace graphics
 	public:
 		virtual ~ShaderResource() {}
 
+		virtual bool IsPendingUpdate() const { return false; }
+		virtual void Update() {}
 		virtual std::shared_ptr<ShaderBinding> GetShaderBinding() const = 0;
 	};
 

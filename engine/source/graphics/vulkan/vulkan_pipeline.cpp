@@ -5,7 +5,7 @@
 #include "vulkan_uniform_buffer.h"
 #include "vulkan_texture.h"
 #include "vulkan_shader_binding.h"
-#include "file/file_interface.h"
+#include "file/explorer.h"
 
 namespace graphics
 {
@@ -72,6 +72,21 @@ namespace graphics
 		return descriptorSetLayout_;
 	}
 
+	bool VulkanPipeline::UpdateShaderBindings()
+	{
+		bool updated = false;
+		for (size_t i = 0; i < shaderDescriptor_.resources_.size(); i++)
+		{
+			if (updated |= shaderDescriptor_.resources_[i]->IsPendingUpdate())
+			{
+				shaderDescriptor_.resources_[i]->Update();
+				shaderBindings_[i] = std::static_pointer_cast<VulkanShaderBinding>(shaderDescriptor_.resources_[i]->GetShaderBinding());
+			}
+		}
+
+		return updated;
+	}
+
 	void VulkanPipeline::UpdateDescriptorSet(VkDescriptorSet _descriptorSet)
 	{
 		std::vector< VkWriteDescriptorSet> descriptorWrites;
@@ -89,13 +104,13 @@ namespace graphics
 
 	void VulkanPipeline::LoadShaders(std::wstring_view _vsPath, std::wstring_view _fsPath)
 	{
-		auto vsCode = file::FileInterface::LoadFile(_vsPath, true, true);
+		auto vsCode = file::Explorer::LoadFile(_vsPath, true, true);
 		if (_vsPath.empty() != vsCode.empty())
 		{
 			throw std::exception("vertex shader path specified but failed to load");
 		}
 
-		auto psCode = file::FileInterface::LoadFile(_fsPath, true, true);
+		auto psCode = file::Explorer::LoadFile(_fsPath, true, true);
 		if (_fsPath.empty() != psCode.empty())
 		{
 			throw std::exception("vertex shader path specified but failed to load");

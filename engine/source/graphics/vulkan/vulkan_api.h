@@ -48,6 +48,7 @@ namespace graphics
 		virtual std::shared_ptr<Texture> CreateTexture(const Texture::Layout& _textureLayout) override;
 		virtual std::shared_ptr<RenderTarget> GetSwapchainRenderTarget() override;
 
+		/* pipeline must be bound first before render target */
 		virtual void BindPipeline(std::shared_ptr<Pipeline> _pipeline) override;
 		virtual void BindRenderTarget(std::shared_ptr<RenderTarget> _renderTarget) override;
 		virtual void BindMesh(std::shared_ptr<Mesh> _mesh) override;

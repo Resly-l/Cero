@@ -126,7 +126,7 @@
     <ClInclude Include="source\graphics\vulkan\vulkan_utility.h">
       <Filter>source\graphics\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="source\file\file_interface.h">
+    <ClInclude Include="source\file\explorer.h">
       <Filter>source\file</Filter>
     </ClInclude>
     <ClInclude Include="source\file\image.h">
@@ -136,9 +136,6 @@
       <Filter>source\file</Filter>
     </ClInclude>
     <ClInclude Include="source\file\path.generated.h">
-      <Filter>source\file</Filter>
-    </ClInclude>
-    <ClInclude Include="source\file\shader_compiler.h">
       <Filter>source\file</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\byte_buffer.h">
@@ -426,6 +423,9 @@
     <ClInclude Include="thirdparty\assimp\ZipArchiveIOSystem.h">
       <Filter>thirdparty\assimp</Filter>
     </ClInclude>
+    <ClInclude Include="source\utility\shader_compiler.h">
+      <Filter>source\utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\math\matrix.cpp">
@@ -478,6 +478,9 @@
     </ClCompile>
     <ClCompile Include="thirdparty\vk_bootstrap\VkBootstrap.cpp">
       <Filter>thirdparty\vk_bootstrap</Filter>
+    </ClCompile>
+    <ClCompile Include="source\file\explorer.cpp">
+      <Filter>source\file</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

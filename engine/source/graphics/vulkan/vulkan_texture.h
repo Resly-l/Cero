@@ -2,34 +2,46 @@
 #include "vulkan_shader_binding.h"
 #include "graphics/texture.h"
 #include "file/image.h"
+#include <atomic>
 
 namespace graphics
 {
 	class VulkanTexture : public Texture
 	{
 	private:
-		VkDevice logicalDevice_ = VK_NULL_HANDLE;
-		VkImage image_ = VK_NULL_HANDLE;
-		VkImageView imageView_ = VK_NULL_HANDLE;
-		VkDeviceMemory imageMemory_ = VK_NULL_HANDLE;
-		VkSampler sampler_ = VK_NULL_HANDLE;
-		VkFormat format_ = VK_FORMAT_UNDEFINED;
+		inline static std::unique_ptr<file::Image> placeholder_;
+
+		VkDevice logicalDevice_;
+		VkPhysicalDevice physicalDevice_;
+		VkQueue graphicsQueue_;
+		VkCommandPool commandPool_;
+
+		VkImage image_;
+		VkImageView imageView_;
+		VkDeviceMemory imageMemory_;
+		VkSampler sampler_;
+		VkFormat format_;
 		uint32_t width_ = 0;
 		uint32_t height_ = 0;
 		VkDescriptorImageInfo imageInfo_{};
 		VkShaderStageFlags stage_{};
+
+		std::unique_ptr<file::Image> imageFile_;
+		std::atomic_bool isLoaded_ = false;
 
 	public:
 		VulkanTexture(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkQueue _graphicsQueue, VkCommandPool _commandPool, const Texture::Layout& _textureLayout);
 		~VulkanTexture();
 
 	public:
+		virtual bool IsPendingUpdate() const override;
+		virtual void Update() override;
 		virtual std::shared_ptr<ShaderBinding> GetShaderBinding() const override;
 		virtual uint32_t GetWidth() const override;
 		virtual uint32_t GetHeight() const override;
 
 	private:
-		file::Image LoadImage(std::string_view _path);
+		void Initialize(VkPhysicalDevice _physicalDevice, VkQueue _graphicsQueue, VkCommandPool _commandPool, file::Image& _image);
 		void CreateStagingBuffer(VkPhysicalDevice _physicalDevice, const file::Image& _image, VkBuffer& _outStagingBuffer, VkDeviceMemory& _outBufferMemory);
 		void CreateImage(VkPhysicalDevice _physicalDevice);
 		void CreateImageView();

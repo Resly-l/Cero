@@ -1,6 +1,6 @@
 #include "assimp_test.h"
 #include "file/model.h"
-#include "file/shader_compiler.h"
+#include "utility/shader_compiler.h"
 #include "math/vector.h"
 #include "math/matrix.h"
 
@@ -10,13 +10,13 @@ AssimpTest::AssimpTest()
 	file::Model brickPlane;
 	brickPlane.Load("brick/brick_dissolved.fbx");
 
-	file::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
+	utility::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
 
-	/*graphics::Texture::Layout textureLayout;
-	textureLayout.imagePath_ = "wow.png";
+	graphics::Texture::Layout textureLayout;
+	textureLayout.imagePath_ = brickPlane.diffuseMapPath_;
 	textureLayout.stage_ = graphics::ShaderBinding::Stage::PIXEL;
-	textureLayout.slot_ = 0;
-	texture_ = graphicsAPI_->CreateTexture(textureLayout);*/
+	textureLayout.slot_ = 2;
+	brickDiffuse_ = graphicsAPI_->CreateTexture(textureLayout);
 
 	utility::ByteBuffer::Layout modelViewMatrixLayout;
 	modelViewMatrixLayout.AddAttribute<math::Matrix>();
@@ -71,11 +71,11 @@ AssimpTest::AssimpTest()
 	pipelineLayout.pixelShaderPath_ = L"shader/bin/model.frag.spv";
 	pipelineLayout.vertexInputLayout_ = brickPlane.vertices_.GetLayout().value();
 	pipelineLayout.depthFunc_ = graphics::ComparisonFunc::LESS_EQUAL;
-	//pipelineLayout.descriptor_.resources_.push_back(texture_);
 	pipelineLayout.descriptor_.outputs.push_back(colorOutput);
 	pipelineLayout.descriptor_.outputs.push_back(depthOutput);
 	pipelineLayout.descriptor_.resources_.push_back(modelViewUniformBuffer_);
 	pipelineLayout.descriptor_.resources_.push_back(projectionUniformBuffer_);
+	pipelineLayout.descriptor_.resources_.push_back(brickDiffuse_);
 	pipeline_ = graphicsAPI_->CreatePipeline(pipelineLayout);
 }
 

@@ -37,7 +37,7 @@ namespace graphics
 
 namespace file
 {
-	class FileInterface;
+	class Explorer;
 	struct Image;
 	struct Model;
 }
