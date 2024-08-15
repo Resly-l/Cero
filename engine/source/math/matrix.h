@@ -134,7 +134,7 @@ namespace math
 			return translation;
 		}
 
-		static Matrix Projection(const float _near, const float _far, const float _horizontalFoV, const float _aspectRatio)
+		static Matrix Projection(const float _near, const float _far, const float _horizontalFoV, const float _aspectRatio, bool _flipY = false)
 		{
 			// depth division occurs in graphics api pipeline
 			// projection matrix is to convert world space point into ndc space point
@@ -146,9 +146,10 @@ namespace math
 
 			Matrix mat;
 			mat.v_[0] = Vector(1.0f / (tanHorizontal), 0.0f, 0.0f, 0.0f);
-			mat.v_[1] = Vector(0.0f, 1.0f / (tanVertical), 0.0f, 0.0f);
+			mat.v_[1] = Vector(0.0f, (_flipY ? -1.0f : 1.0f) / (tanVertical), 0.0f, 0.0f);
 			mat.v_[2] = Vector(0.0f, 0.0f, invFmN, 1.0f);
 			mat.v_[3] = Vector(0.0f, 0.0f, beta, 0.0f);
+
 			return mat;
 		}
 	};

@@ -1,6 +1,6 @@
 #pragma once
 #include "window_min.h"
-#include <string_view>
+#include <string>
 
 namespace window
 {
@@ -15,11 +15,11 @@ namespace window
 		HWND wnd_;
 
 	public:
-		Window(uint32_t _width, uint32_t _height, std::string_view _title, std::string_view _className = "default class name");
+		Window(uint32_t _width, uint32_t _height, std::string _title, std::string _className = "default class name");
 		virtual ~Window();
 
 		std::string_view GetTitle() const;
-		void SetTitle(std::string_view _title);
+		void SetTitle(std::string _title);
 		bool SetVisibility(bool _visible);
 		void SetResizability(bool _resizable);
 		void Close() const;
@@ -32,7 +32,7 @@ namespace window
 		virtual void Render() = 0;
 
 	private:
-		void RegisterWindowClass(std::string_view _className, std::string_view _iconPath) const;
+		void RegisterWindowClass(std::string_view _iconPath) const;
 		void Instantiate(uint32_t _width, uint32_t _height);
 
 		static LRESULT SetupWindowProc(HWND _window, UINT _msg, WPARAM _wParam, LPARAM _lParam);

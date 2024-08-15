@@ -45,7 +45,7 @@ AssimpTest::AssimpTest()
 	modelMatrix = math::Matrix::Translation(math::Vector(0.0f, 0.0f, 2.0f, 0.0f));
 	mvBuffer_.At(0).Get<math::Matrix>(0) = modelMatrix;
 	mvBuffer_.At(0).Get<math::Matrix>(1) = math::Matrix::Identity();
-	pBuffer_.At(0).Get<math::Matrix>(0) = math::Matrix::Projection(0.1f, 100.0f, 90.0f, 1.777777f);
+	pBuffer_.At(0).Get<math::Matrix>(0) = math::Matrix::Projection(0.1f, 100.0f, 90.0f, 1.777777f, true);
 	modelViewUniformBuffer_->Update(mvBuffer_.GetRawBufferAddress());
 	projectionUniformBuffer_->Update(pBuffer_.GetRawBufferAddress());
 

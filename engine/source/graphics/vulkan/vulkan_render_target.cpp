@@ -4,14 +4,14 @@
 
 namespace graphics
 {
-	VulkanRenderTarget::VulkanRenderTarget(VkDevice _logicalDevice, const RenderTarget::Layout& _renderTargetLayout)
+	VulkanRenderTarget::VulkanRenderTarget(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const RenderTarget::Layout& _renderTargetLayout)
 		: logicalDevice_(_logicalDevice)
 		, width_(_renderTargetLayout.width_)
 		, height_(_renderTargetLayout.height_)
 	{
 		for (const ShaderDescriptor::Output& attachmentDescription : _renderTargetLayout.attachments_)
 		{
-			AddAttachment(attachmentDescription);
+			AddAttachment(_physicalDevice, attachmentDescription);
 		}
 	}
 
@@ -42,7 +42,7 @@ namespace graphics
 		}
 	}
 
-	void VulkanRenderTarget::AddAttachment(ShaderDescriptor::Output _description)
+	void VulkanRenderTarget::AddAttachment(VkPhysicalDevice _physicalDevice, ShaderDescriptor::Output _description)
 	{
 		VulkanAttachment attachment;
 		attachment.image_ = VK_NULL_HANDLE;
@@ -67,7 +67,7 @@ namespace graphics
 		VkMemoryAllocateInfo memoryAllocateInfo{};
 		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		memoryAllocateInfo.allocationSize = memoryRequirements.size;
-		//memoryAllocateInfo.memoryTypeIndex = memoryRequirements.memoryTypeBits;
+		memoryAllocateInfo.memoryTypeIndex = FindMemoryTypeIndex(_physicalDevice, memoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 		vkAllocateMemory(logicalDevice_, &memoryAllocateInfo, nullptr, &*attachment.memory_);
 		vkBindImageMemory(logicalDevice_, *attachment.image_, *attachment.memory_, 0);
 

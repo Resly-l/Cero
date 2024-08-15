@@ -2,12 +2,12 @@
 
 namespace window
 {
-	Window::Window(uint32_t _width, uint32_t _height, std::string_view _title, std::string_view _className)
-		: className_(_className)
-		, title_(_title)
+	Window::Window(uint32_t _width, uint32_t _height, std::string _title, std::string _className)
+		: className_(std::move(_className))
+		, title_(std::move(_title))
 		, instance_(GetModuleHandle(nullptr))
 	{
-		RegisterWindowClass(_title, std::string_view{});
+		RegisterWindowClass(std::string_view{});
 		Instantiate(_width, _height);
 		SetVisibility(true);
 	}
@@ -40,9 +40,9 @@ namespace window
 		return title_;
 	}
 
-	void Window::SetTitle(std::string_view _title)
+	void Window::SetTitle(std::string _title)
 	{
-		title_ = _title;
+		title_ = std::move(_title);
 		SetWindowTextA(wnd_, title_.c_str());
 	}
 
@@ -75,7 +75,7 @@ namespace window
 		return IsIconic(wnd_);
 	}
 
-	void Window::RegisterWindowClass(std::string_view _className, std::string_view _iconPath) const
+	void Window::RegisterWindowClass(std::string_view _iconPath) const
 	{
 		WNDCLASSEXA wc = {};
 		wc.cbSize = sizeof(WNDCLASSEXA);

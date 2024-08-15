@@ -104,7 +104,7 @@ namespace graphics
 
 	void VulkanTexture::Update()
 	{
-		vkDeviceWaitIdle(logicalDevice_);
+		vkQueueWaitIdle(graphicsQueue_);
 		vkDestroySampler(logicalDevice_, sampler_, nullptr);
 		vkFreeMemory(logicalDevice_, imageMemory_, nullptr);
 		vkDestroyImageView(logicalDevice_, imageView_, nullptr);

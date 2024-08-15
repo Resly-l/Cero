@@ -368,7 +368,7 @@ namespace graphics
 			depthStencilDescription.height_ = swapchain_.extent.height;
 			depthStencilDescription.format_ = ImageFormat::D32_SFLOAT_U8_UINT;
 			depthStencilDescription.usage_ = ImageUsage::DEPTH_STENCIL;
-			renderTarget->AddAttachment(depthStencilDescription);
+			renderTarget->AddAttachment(physicalDevice_, depthStencilDescription);
 			swapchainRenderTargets_.push_back(std::move(renderTarget));
 		}
 	}

@@ -49,7 +49,7 @@ namespace graphics
 		renderTargetLayout.height_ = _height;
 		renderTargetLayout.attachments_ = shaderDescriptor_.outputs;
 
-		return std::make_shared<VulkanRenderTarget>(logicalDevice_, renderTargetLayout);
+		return std::make_shared<VulkanRenderTarget>(logicalDevice_, physicalDevice_, renderTargetLayout);
 	}
 
 	VkPipeline VulkanPipeline::GetInstance() const

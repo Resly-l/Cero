@@ -23,5 +23,4 @@ void main()
 {
 	texCoord = _texCoord;
     gl_Position = p.proj * mv.model * vec4(_position, 1.0);
-	gl_Position.y *= -1.0f;
 }

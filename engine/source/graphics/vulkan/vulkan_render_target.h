@@ -22,12 +22,12 @@ namespace graphics
 		std::unordered_map<VkRenderPass, VkFramebuffer> framebuffers_;
 
 	public:
-		VulkanRenderTarget(VkDevice _logicalDevice, const RenderTarget::Layout& _renderTargetLayout);
+		VulkanRenderTarget(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const RenderTarget::Layout& _renderTargetLayout);
 		VulkanRenderTarget(VkDevice _logicalDevice, uint32_t _width, uint32_t _height, VkImageView _outputImageView);
 		~VulkanRenderTarget();
 
 	public:
-		void AddAttachment(ShaderDescriptor::Output _description);
+		void AddAttachment(VkPhysicalDevice _physicalDevice, ShaderDescriptor::Output _description);
 		void Bind(VkRenderPass _renderPass);
 
 		uint32_t GetNumAttachments() const;
