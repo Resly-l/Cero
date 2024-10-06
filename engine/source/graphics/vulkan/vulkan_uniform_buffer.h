@@ -20,11 +20,10 @@ namespace graphics
 		~VulkanUniformBuffer();
 
 	public:
-		virtual std::shared_ptr<ShaderBinding> GetShaderBinding() const override;
 		virtual void Update(const void* _data) const override;
+		virtual std::shared_ptr<ShaderBinding::ApiSpecificImpl> GetApiSpecificImpl() const override;
 
 		VkBuffer GetBuffer() const;
 		VkDeviceSize GetBufferSize() const;
-		uint32_t GetSlot() const;
 	};
 }

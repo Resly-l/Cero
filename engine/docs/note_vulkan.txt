@@ -56,3 +56,11 @@ figuring out how to deal with binding interfaces (vk version of uniform buffer a
 2024/08/11---------------------------------------------------------------------------------------------------------------------------
 obviously, setting PoolSize for VkDescriptorPool with large number can be wasteful
 it is valid to create another pool once previouse one reaches pool size according to GPT
+
+2024/10/06---------------------------------------------------------------------------------------------------------------------------
+after making descriptor set per pipeline, found out that vkUpdateDescriptorSet call is bottlenecking
+and if we think about it, there's no need to update the desctriptor set itself when there's no change to the actual buffer
+we only need to re-bind descriptor set when drawing different meshes
+
+so we have to make material to own descriptor set
+

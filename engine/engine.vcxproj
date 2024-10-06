@@ -115,6 +115,7 @@
     <ClInclude Include="source\graphics\common.h" />
     <ClInclude Include="source\graphics\graphics_api.h" />
     <ClInclude Include="source\graphics\mesh.h" />
+    <ClInclude Include="source\graphics\model.h" />
     <ClInclude Include="source\graphics\pipeline.h" />
     <ClInclude Include="source\graphics\render_target.h" />
     <ClInclude Include="source\graphics\shader.h" />

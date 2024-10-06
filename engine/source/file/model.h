@@ -6,12 +6,33 @@ namespace file
 {
 	struct Model
 	{
-		utility::ByteBuffer vertices_;
-		std::vector<uint32_t> indices_;
+	private:
+		struct Material
+		{
+			std::string diffuseMapPath_;
+			std::string normalMapPath_;
+		};
 
-		std::string diffuseMapPath_;
+		struct Mesh
+		{
+			utility::ByteBuffer vertices_;
+			std::vector<uint32_t> indices_;
+			uint32_t materialIndex_ = 0;
+		};
+
+	public:
+		std::vector<Material> materials_;
+		std::vector<Mesh> meshes_;
 
 		bool Load(const std::string& _path);
 		bool IsLoaded() const;
 	};
+
+	/*
+	* Model model;
+	* model.Load("", graphicsAPI);
+	* 
+	* model.Draw(graphicsAPI);
+	* 
+	*/
 }

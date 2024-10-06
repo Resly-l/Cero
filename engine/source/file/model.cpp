@@ -36,6 +36,7 @@ namespace file
 			aiProcess_SplitLargeMeshes |
 			aiProcess_ImproveCacheLocality
 		);
+		importer.ApplyPostProcessing(aiProcess_CalcTangentSpace);
 
 		if (!scene)
 		{
@@ -44,42 +45,71 @@ namespace file
 		}
 
 		utility::ByteBuffer::Layout vertexLayout;
-		vertexLayout.AddAttribute<math::Float3>();
-		vertexLayout.AddAttribute<math::Float3>();
-		vertexLayout.AddAttribute<math::Float3>();
-		vertexLayout.AddAttribute<math::Float3>();
-		vertexLayout.AddAttribute<math::Float2>();
-		vertices_.SetLayout(vertexLayout);
+		vertexLayout.AddAttribute<math::Float3>(); // position
+		vertexLayout.AddAttribute<math::Float3>(); // normal
+		vertexLayout.AddAttribute<math::Float3>(); // tangent
+		vertexLayout.AddAttribute<math::Float3>(); // bitangent
+		vertexLayout.AddAttribute<math::Float2>(); // texcoord
 
 		for (uint32_t i = 0; i < scene->mNumMeshes; i++)
 		{
-			auto& mesh = *scene->mMeshes[i];
-			for (uint32_t j = 0; j < mesh.mNumVertices; j++)
+			Mesh mesh;
+			mesh.vertices_.SetLayout(vertexLayout);
+
+			for (uint32_t j = 0; j < (*scene->mMeshes[i]).mNumVertices; j++)
 			{
-				auto vertex = vertices_.Add();
-				vertex.Get<math::Float3>(0) = *(math::Float3*)(&mesh.mVertices[j]);
-				vertex.Get<math::Float3>(1) = *(math::Float3*)(&mesh.mNormals[j]);
-				vertex.Get<math::Float3>(2) = *(math::Float3*)(&mesh.mTangents[j]);
-				vertex.Get<math::Float3>(3) = *(math::Float3*)(&mesh.mBitangents[j]);
-				vertex.Get<math::Float2>(4) = *(math::Float3*)(&mesh.mTextureCoords[0][j]);
+				auto vertex = mesh.vertices_.Add();
+				vertex.Get<math::Float3>(0) = *(math::Float3*)(&(*scene->mMeshes[i]).mVertices[j]);
+				vertex.Get<math::Float3>(1) = *(math::Float3*)(&(*scene->mMeshes[i]).mNormals[j]);
+
+				if (scene->mMeshes[i]->HasTangentsAndBitangents())
+				{
+					vertex.Get<math::Float3>(2) = *(math::Float3*)(&(*scene->mMeshes[i]).mTangents[j]);
+					vertex.Get<math::Float3>(3) = *(math::Float3*)(&(*scene->mMeshes[i]).mBitangents[j]);
+				}
+				else
+				{
+					vertex.Get<math::Float3>(2) = math::Float3{};
+					vertex.Get<math::Float3>(3) = math::Float3{};
+				}
+
+				if (scene->mMeshes[i]->HasTextureCoords(0))
+				{
+					vertex.Get<math::Float2>(4) = *(math::Float3*)(&(*scene->mMeshes[i]).mTextureCoords[0][j]);
+				}
+				else
+				{
+					vertex.Get<math::Float2>(4) = math::Float2{};
+				}
 			}
 
-			indices_.reserve((size_t)mesh.mNumFaces * 3);
-			for (uint32_t uFace = 0; uFace < mesh.mNumFaces; uFace++)
+			mesh.indices_.reserve((size_t)(*scene->mMeshes[i]).mNumFaces * 3);
+			for (uint32_t uFace = 0; uFace < (*scene->mMeshes[i]).mNumFaces; uFace++)
 			{
-				indices_.push_back(mesh.mFaces[uFace].mIndices[0]);
-				indices_.push_back(mesh.mFaces[uFace].mIndices[1]);
-				indices_.push_back(mesh.mFaces[uFace].mIndices[2]);
+				mesh.indices_.push_back((*scene->mMeshes[i]).mFaces[uFace].mIndices[0]);
+				mesh.indices_.push_back((*scene->mMeshes[i]).mFaces[uFace].mIndices[1]);
+				mesh.indices_.push_back((*scene->mMeshes[i]).mFaces[uFace].mIndices[2]);
 			}
+
+			mesh.materialIndex_ = (*scene->mMeshes[i]).mMaterialIndex;
+			meshes_.push_back(std::move(mesh));
 		}
 
 		for (uint32_t i = 0; i < scene->mNumMaterials; i++)
 		{
+			Material material;
+
 			aiString path;
 			if (scene->mMaterials[i]->GetTexture(aiTextureType::aiTextureType_DIFFUSE, 0, &path) == aiReturn_SUCCESS)
 			{
-				diffuseMapPath_ = parentDir + path.C_Str();
+				material.diffuseMapPath_ = parentDir + path.C_Str();
 			}
+			if (scene->mMaterials[i]->GetTexture(aiTextureType::aiTextureType_NORMALS, 0, &path) == aiReturn_SUCCESS)
+			{
+				material.normalMapPath_ = parentDir + path.C_Str();
+			}
+
+			materials_.push_back(std::move(material));
 		}
 
 		return true;
@@ -87,6 +117,6 @@ namespace file
 
 	bool Model::IsLoaded() const
 	{
-		return vertices_.GetSizeInBytes() != 0;
+		return !meshes_.empty();
 	}
 }

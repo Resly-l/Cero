@@ -4,14 +4,12 @@
 
 namespace graphics
 {
-	class UniformBuffer : public ShaderResource
+	class UniformBuffer : public ShaderBinding
 	{
 	public:
 		struct Layout
 		{
-			ShaderBinding::Stage stage_{};
 			uint32_t size_ = 0;
-			uint32_t slot_ = 0;
 			uint32_t numElements_ = 1;
 		};
 

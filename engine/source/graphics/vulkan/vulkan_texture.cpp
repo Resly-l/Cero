@@ -15,34 +15,55 @@ namespace graphics
 		, graphicsQueue_(_graphicsQueue)
 		, commandPool_(_commandPool)
 	{
-		if (!placeholder_)
-		{
-			placeholder_ = std::make_unique<file::Image>();
-			placeholder_->Load(std::string(PATH_ENGINE_ASSET) + std::string("image/placeholder.png"));
-			if (!placeholder_->IsLoaded())
+		std::call_once(placeholderInitialized_, []()
 			{
-				throw std::runtime_error(std::string("failed to load placeholder image"));
-			}
-		}
-
-		slot_ = _layout.slot_;
-		numElements_ = _layout.numElements_;
-		stage_ = VulkanTypeConverter::Convert(_layout.stage_);
-		format_ = VulkanTypeConverter::Convert(_layout.format_);
-		Initialize(physicalDevice_, graphicsQueue_, commandPool_, *placeholder_);
-
-		thread::ThreadPool::EnqueueTask([&]()
-			{
-				imageFile_ = std::make_unique<file::Image>();
-				imageFile_->Load(_layout.imagePath_);
-				if (!imageFile_->IsLoaded())
+				if (!placeholder_.Load(std::string(PATH_ENGINE_ASSET) + std::string("image/placeholder.png")))
 				{
-					std::cout << Log::Format(Log::Category::file, Log::Level::error, "failed to load image, path : " + std::string(_layout.imagePath_));
-					return;
+					throw std::runtime_error(std::string("failed to load placeholder image"));
 				}
-
-				isLoaded_ = true;
 			});
+
+		format_ = VulkanTypeConverter::Convert(_layout.format_);
+
+		switch (_layout.initializationType_)
+		{
+		case Texture::InitializationType::FILE:
+			Initialize(physicalDevice_, graphicsQueue_, commandPool_, placeholder_);
+
+			break;
+
+			thread::ThreadPool::EnqueueTask([&]()
+				{
+					deferredImage_ = std::make_unique<file::Image>();
+					if (!deferredImage_->Load(_layout.imagePath_))
+					{
+						std::cout << Log::Format(Log::Category::file, Log::Level::error, "failed to load image, path : " + std::string(_layout.imagePath_));
+						return;
+					}
+
+					vkQueueWaitIdle(graphicsQueue_);
+
+					vkDestroySampler(logicalDevice_, sampler_, nullptr);
+					vkFreeMemory(logicalDevice_, imageMemory_, nullptr);
+					vkDestroyImageView(logicalDevice_, imageView_, nullptr);
+					vkDestroyImage(logicalDevice_, image_, nullptr);
+
+					Initialize(physicalDevice_, graphicsQueue_, commandPool_, *deferredImage_);
+					deferredImage_ = nullptr;
+				});
+			break;
+		case Texture::InitializationType::BUFFER:
+			if (!_layout.buffer_.has_value())
+			{
+				std::cout << Log::Format(Log::Category::file, Log::Level::error, "tried to load image with buffer but has no buffer" + std::string(_layout.imagePath_));
+				Initialize(physicalDevice_, graphicsQueue_, commandPool_, placeholder_);
+				break;
+			}
+
+			auto image = _layout.buffer_.value();
+			Initialize(physicalDevice_, graphicsQueue_, commandPool_, image);
+			break;
+		}
 	}
 
 	VulkanTexture::~VulkanTexture()
@@ -63,26 +84,12 @@ namespace graphics
 		return height_;
 	}
 
-	class VulkanTextureBinding : public VulkanShaderBinding
+	class VulkanTextureBinding : public VulkanShaderBindingImpl
 	{
 	public:
-		uint32_t slot_ = 0;
-		uint32_t numElements_ = 1;
-		VkShaderStageFlags stage_{};
 		VkDescriptorImageInfo imageInfo_{};
 
 	public:
-		virtual VkDescriptorSetLayoutBinding GetDescriptorLayout() const override
-		{
-			VkDescriptorSetLayoutBinding layout{};
-			layout.binding = slot_;
-			layout.descriptorCount = numElements_;
-			layout.pImmutableSamplers = nullptr;
-			layout.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			layout.stageFlags = stage_;
-			return layout;
-		}
-
 		virtual VkWriteDescriptorSet GetDescriptorWrite(VkDescriptorSet _descriptorSet) const override
 		{
 			VkWriteDescriptorSet descriptorWrite{};
@@ -97,34 +104,10 @@ namespace graphics
 		}
 	};
 
-	bool VulkanTexture::IsPendingUpdate() const
+	std::shared_ptr<ShaderBinding::ApiSpecificImpl> VulkanTexture::GetApiSpecificImpl() const
 	{
-		return isLoaded_;
+		return bindingImpl_;
 	}
-
-	void VulkanTexture::Update()
-	{
-		vkQueueWaitIdle(graphicsQueue_);
-		vkDestroySampler(logicalDevice_, sampler_, nullptr);
-		vkFreeMemory(logicalDevice_, imageMemory_, nullptr);
-		vkDestroyImageView(logicalDevice_, imageView_, nullptr);
-		vkDestroyImage(logicalDevice_, image_, nullptr);
-
-		Initialize(physicalDevice_, graphicsQueue_, commandPool_, *imageFile_);
-		isLoaded_ = false;
-		imageFile_ = nullptr;
-	}
-
-	std::shared_ptr<ShaderBinding> VulkanTexture::GetShaderBinding() const
-    {
-		auto binding = std::make_shared<VulkanTextureBinding>();
-		binding->slot_ = slot_;
-		binding->numElements_ = numElements_;
-		binding->stage_ = stage_;
-		binding->imageInfo_ = imageInfo_;
-
-		return binding;
-    }
 
 	void VulkanTexture::Initialize(VkPhysicalDevice _physicalDevice, VkQueue _graphicsQueue, VkCommandPool _commandPool, file::Image& _image)
 	{
@@ -150,6 +133,13 @@ namespace graphics
 		imageInfo_.imageView = imageView_;
 		imageInfo_.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		imageInfo_.sampler = sampler_;
+
+		if (!bindingImpl_)
+		{
+			bindingImpl_ = std::make_shared<VulkanTextureBinding>();
+		}
+
+		bindingImpl_->imageInfo_ = imageInfo_;
 	}
 
 	void VulkanTexture::CreateStagingBuffer(VkPhysicalDevice _physicalDevice, const file::Image& _image, VkBuffer& _outStagingBuffer, VkDeviceMemory& _outBufferMemory)

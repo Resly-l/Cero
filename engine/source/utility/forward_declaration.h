@@ -11,11 +11,11 @@ namespace graphics
 	class GraphicsAPI;
 	class Pipeline;
 	class RenderTarget;
-	class Mesh;
 	class UniformBuffer;
+	class Mesh;
 	class Texture;
 
-	class ShaderResource;
+	//struct ShaderBinding;
 	struct ShaderDescriptor;
 
 	struct Viewport;

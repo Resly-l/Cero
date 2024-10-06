@@ -73,7 +73,6 @@ namespace graphics
 		for (size_t i = 0; i < frames_.size(); i++)
 		{
 			frames_[i].descriptorSets_[pipeline] = descriptorSets[i];
-			pipeline->UpdateDescriptorSet(descriptorSets[i]);
 		}
 
 		return pipeline;
@@ -103,16 +102,6 @@ namespace graphics
 	{
 		pipeline_ = std::static_pointer_cast<VulkanPipeline>(_pipeline);
 		renderTarget_ = nullptr;
-
-		if (!pipeline_->UpdateShaderBindings())
-		{
-			return;
-		}
-
-		for (auto& frame : frames_)
-		{
-			pipeline_->UpdateDescriptorSet(frame.descriptorSets_[pipeline_]);
-		}
 	}
 
 	void VulkanAPI::BindRenderTarget(std::shared_ptr<RenderTarget> _renderTarget)
@@ -144,11 +133,6 @@ namespace graphics
 		}
 
 		vkResetFences(logicalDevice_, 1, &currentFrame.frameFence_) >> VulkanResultChecker::Get();
-
-		VkCommandBufferBeginInfo commandBufferBeginInfo{};
-		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		vkResetCommandBuffer(currentFrame.commandBuffer_, VkCommandBufferResetFlags{});
-		vkBeginCommandBuffer(currentFrame.commandBuffer_, &commandBufferBeginInfo);
 		return true;
 	}
 
@@ -160,6 +144,13 @@ namespace graphics
 		}
 
 		Frame& currentFrame = frames_[frameIndex_];
+
+		pipeline_->UpdateDescriptorSet(currentFrame.descriptorSets_[pipeline_]);
+
+		VkCommandBufferBeginInfo commandBufferBeginInfo{};
+		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		vkResetCommandBuffer(currentFrame.commandBuffer_, VkCommandBufferResetFlags{});
+		vkBeginCommandBuffer(currentFrame.commandBuffer_, &commandBufferBeginInfo);
 
 		VkClearValue clearValues[2]{};
 		clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -201,12 +192,13 @@ namespace graphics
 		}
 		vkCmdDrawIndexed(currentFrame.commandBuffer_, mesh_->GetNumIndices(), 1, 0, 0, 0);
 		vkCmdEndRenderPass(currentFrame.commandBuffer_);
+
+		vkEndCommandBuffer(currentFrame.commandBuffer_) >> VulkanResultChecker::Get();
 	}
 
 	void VulkanAPI::EndFrame()
 	{
 		Frame& currentFrame = frames_[frameIndex_];
-		vkEndCommandBuffer(currentFrame.commandBuffer_) >> VulkanResultChecker::Get();
 
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		VkSubmitInfo submitInfo{};
@@ -257,7 +249,7 @@ namespace graphics
 
 	void VulkanAPI::SelectPhysicalDevice(void* _window)
 	{
-		VkSurfaceKHR surface;
+		VkSurfaceKHR surface = VK_NULL_HANDLE;
 		VkWin32SurfaceCreateInfoKHR surfaceCreateInfo{};
 		HINSTANCE instance = GetModuleHandle(nullptr);
 		surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;

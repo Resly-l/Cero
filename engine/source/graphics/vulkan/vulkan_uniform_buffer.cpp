@@ -8,10 +8,6 @@ namespace graphics
 		: logicalDevice_(_logicalDevice)
 		, bufferSize_(_layout.size_)
 	{
-		slot_ = _layout.slot_;
-		numElements_ = _layout.numElements_;
-		stage_ = VulkanTypeConverter::Convert(_layout.stage_);
-
 		VkBufferUsageFlags memoryFlag = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 		VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 		CreateBuffer(_logicalDevice, _physicalDevice, memoryFlag, properties, bufferSize_, buffer_, bufferMemory_);
@@ -38,31 +34,17 @@ namespace graphics
 		return bufferSize_;
 	}
 
-	uint32_t VulkanUniformBuffer::GetSlot() const
+    void VulkanUniformBuffer::Update(const void* _data) const
 	{
-		return slot_;
+		memcpy(mapped_, _data, bufferSize_);
 	}
 
-	class VulkanUnformBufferBinding : public VulkanShaderBinding
+	class VulkanUnformBufferBinding : public VulkanShaderBindingImpl
 	{
 	public:
-		uint32_t slot_ = 0;
-		uint32_t numElements_ = 1;
-		VkShaderStageFlags stage_{};
 		VkDescriptorBufferInfo bufferInfo_{};
 
 	public:
-		virtual VkDescriptorSetLayoutBinding GetDescriptorLayout() const override
-		{
-			VkDescriptorSetLayoutBinding layout{};
-			layout.binding = slot_;
-			layout.descriptorCount = numElements_;
-			layout.pImmutableSamplers = nullptr;
-			layout.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			layout.stageFlags = stage_;
-			return layout;
-		}
-
 		virtual VkWriteDescriptorSet GetDescriptorWrite(VkDescriptorSet _descriptorSet) const override
 		{
 			VkWriteDescriptorSet descriptorWrite{};
@@ -79,19 +61,11 @@ namespace graphics
 		}
 	};
 
-    std::shared_ptr<ShaderBinding> VulkanUniformBuffer::GetShaderBinding() const
-    {
-		auto uniformBufferBinding = std::make_shared<VulkanUnformBufferBinding>();
-		uniformBufferBinding->slot_ = slot_;
-		uniformBufferBinding->numElements_ = numElements_;
-		uniformBufferBinding->stage_ = stage_;
-		uniformBufferBinding->bufferInfo_ = bufferInfo_;
-
-		return uniformBufferBinding;
-    }
-
-    void VulkanUniformBuffer::Update(const void* _data) const
+	std::shared_ptr<ShaderBinding::ApiSpecificImpl> VulkanUniformBuffer::GetApiSpecificImpl() const
 	{
-		memcpy(mapped_, _data, bufferSize_);
+		auto impl = std::make_shared<VulkanUnformBufferBinding>();
+		impl->bufferInfo_ = bufferInfo_;
+
+		return impl;
 	}
 }

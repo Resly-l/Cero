@@ -125,6 +125,15 @@ namespace math
 			return RotationZ(_pitchYawRoll.z_) * RotationX(_pitchYawRoll.x_) * RotationY(_pitchYawRoll.y_);
 		}
 
+		static Matrix Scale(const float _scale)
+		{
+			Matrix mat = Identity();
+			mat.v_[0].x_ = _scale;
+			mat.v_[1].y_ = _scale;
+			mat.v_[2].z_ = _scale;
+			return mat;
+		}
+
 		static Matrix Translation(const Vector& _offset)
 		{
 			Matrix translation = Identity();

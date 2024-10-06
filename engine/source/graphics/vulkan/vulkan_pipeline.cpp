@@ -35,7 +35,6 @@ namespace graphics
 
 	VulkanPipeline::~VulkanPipeline()
 	{
-		shaderBindings_.clear();
 		vkDestroyDescriptorSetLayout(logicalDevice_, descriptorSetLayout_, nullptr);
 		vkDestroyRenderPass(logicalDevice_, renderPass_, nullptr);
 		vkDestroyPipelineLayout(logicalDevice_, layout_, nullptr);
@@ -72,34 +71,26 @@ namespace graphics
 		return descriptorSetLayout_;
 	}
 
-	bool VulkanPipeline::UpdateShaderBindings()
-	{
-		bool updated = false;
-		for (size_t i = 0; i < shaderDescriptor_.resources_.size(); i++)
-		{
-			if (updated |= shaderDescriptor_.resources_[i]->IsPendingUpdate())
-			{
-				shaderDescriptor_.resources_[i]->Update();
-				shaderBindings_[i] = std::static_pointer_cast<VulkanShaderBinding>(shaderDescriptor_.resources_[i]->GetShaderBinding());
-			}
-		}
-
-		return updated;
-	}
-
 	void VulkanPipeline::UpdateDescriptorSet(VkDescriptorSet _descriptorSet)
 	{
-		std::vector< VkWriteDescriptorSet> descriptorWrites;
-		for (auto& binding : shaderBindings_)
+		std::vector<VkWriteDescriptorSet> descriptorWrites;
+		std::vector<std::shared_ptr<ShaderBinding::ApiSpecificImpl>> cache;
+		for (auto& [slot, binding] : shaderBindings_)
 		{
-			descriptorWrites.push_back(binding->GetDescriptorWrite(_descriptorSet));
+			cache.push_back(binding.first->GetApiSpecificImpl());
+
+			auto impl = std::static_pointer_cast<VulkanShaderBindingImpl>(cache.back());
+			impl->slot_ = slot;
+			impl->numElements_ = binding.first->numElements_;
+			impl->stage_ = VulkanTypeConverter::Convert(binding.second);
+			descriptorWrites.push_back(impl->GetDescriptorWrite(_descriptorSet));
 		}
 		vkUpdateDescriptorSets(logicalDevice_, (uint32_t)descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
 	}
 
 	uint32_t VulkanPipeline::GetNumBindings() const
 	{
-		return (uint32_t)shaderBindings_.size();
+		return (uint32_t)shaderDescriptor_.bindings_.size();
 	}
 
 	void VulkanPipeline::LoadShaders(std::wstring_view _vsPath, std::wstring_view _fsPath)
@@ -350,10 +341,16 @@ namespace graphics
 		// descriptor
 		{
 			std::vector<VkDescriptorSetLayoutBinding> descriptorBindings;
-			for (auto& resource : shaderDescriptor_.resources_)
+			for (size_t i = 0; i < shaderDescriptor_.bindings_.size(); i++)
 			{
-				shaderBindings_.push_back(std::static_pointer_cast<VulkanShaderBinding>(resource->GetShaderBinding()));
-				descriptorBindings.push_back(shaderBindings_.back()->GetDescriptorLayout());
+				VkDescriptorSetLayoutBinding binding{};
+				binding.binding = (uint32_t)shaderDescriptor_.bindings_[i].slot_;
+				binding.descriptorCount = shaderDescriptor_.bindings_[i].numElements_;
+				binding.descriptorType = VulkanTypeConverter::Convert(shaderDescriptor_.bindings_[i].type_);
+				binding.stageFlags = VulkanTypeConverter::Convert(shaderDescriptor_.bindings_[i].stage_);
+				binding.pImmutableSamplers = nullptr;
+
+				descriptorBindings.push_back(binding);
 			}
 
 			VkDescriptorSetLayoutCreateInfo dslCreateInfo{};

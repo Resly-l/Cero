@@ -2,14 +2,15 @@
 #include "vulkan_shader_binding.h"
 #include "graphics/texture.h"
 #include "file/image.h"
-#include <atomic>
+#include <mutex>
 
 namespace graphics
 {
 	class VulkanTexture : public Texture
 	{
 	private:
-		inline static std::unique_ptr<file::Image> placeholder_;
+		inline static std::once_flag placeholderInitialized_;
+		inline static file::Image placeholder_;
 
 		VkDevice logicalDevice_;
 		VkPhysicalDevice physicalDevice_;
@@ -25,18 +26,16 @@ namespace graphics
 		uint32_t height_ = 0;
 		VkDescriptorImageInfo imageInfo_{};
 		VkShaderStageFlags stage_{};
+		std::shared_ptr< class VulkanTextureBinding> bindingImpl_;
 
-		std::unique_ptr<file::Image> imageFile_;
-		std::atomic_bool isLoaded_ = false;
+		std::unique_ptr<file::Image> deferredImage_; // declared as pointer to free unnecessary memory
 
 	public:
 		VulkanTexture(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkQueue _graphicsQueue, VkCommandPool _commandPool, const Texture::Layout& _textureLayout);
 		~VulkanTexture();
 
 	public:
-		virtual bool IsPendingUpdate() const override;
-		virtual void Update() override;
-		virtual std::shared_ptr<ShaderBinding> GetShaderBinding() const override;
+		virtual std::shared_ptr<ShaderBinding::ApiSpecificImpl> GetApiSpecificImpl() const override;
 		virtual uint32_t GetWidth() const override;
 		virtual uint32_t GetHeight() const override;
 

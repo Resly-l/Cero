@@ -5,35 +5,39 @@
 
 namespace graphics
 {
+	enum class ShaderStage : uint8_t
+	{
+		VERTEX = 1 << 0,
+		PIXEL = 1 << 1,
+	};
+
 	class ShaderBinding
 	{
 	public:
-		enum Stage : uint32_t
+		enum class Type
 		{
-			VERTEX = 1 << 0,
-			PIXEL = 1 << 1,
+			UNIFORM_BUFFER,
+			TEXTURE_2D,
 		};
 
 	public:
-		virtual ~ShaderBinding() {}
-	};
+		Type type_;
+		uint32_t numElements_ = 1;
 
-	class ShaderResource
-	{
-	protected:
-		uint32_t slot_ = 0;
-		uint32_t numElements_ = 0;
-
-	public:
-		virtual ~ShaderResource() {}
-
-		virtual bool IsPendingUpdate() const { return false; }
-		virtual void Update() {}
-		virtual std::shared_ptr<ShaderBinding> GetShaderBinding() const = 0;
+		class ApiSpecificImpl {};
+		virtual std::shared_ptr<ApiSpecificImpl> GetApiSpecificImpl() const { return nullptr; };
 	};
 
 	struct ShaderDescriptor
 	{
+		struct Binding
+		{
+			ShaderBinding::Type type_;
+			uint32_t numElements_ = 1;
+			uint32_t slot_ = std::numeric_limits<uint32_t>::max();
+			ShaderStage stage_;
+		};
+
 		struct Output
 		{
 			ImageFormat format_;
@@ -44,7 +48,7 @@ namespace graphics
 			uint32_t height_;
 		};
 
-		std::vector<std::shared_ptr<ShaderResource>> resources_;
+		std::vector<Binding> bindings_;
 		std::vector<Output> outputs;
 	};
 }

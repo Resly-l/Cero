@@ -165,14 +165,27 @@ namespace graphics
 		return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
     }
 
-	VkShaderStageFlags VulkanTypeConverter::Convert(ShaderBinding::Stage _stage)
+	VkDescriptorType VulkanTypeConverter::Convert(ShaderBinding::Type _type)
+	{
+		switch (_type)
+		{
+		case ShaderBinding::Type::UNIFORM_BUFFER:
+			return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		case ShaderBinding::Type::TEXTURE_2D:
+			return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		}
+		
+		return VkDescriptorType{};
+	}
+
+	VkShaderStageFlags VulkanTypeConverter::Convert(ShaderStage _stage)
 	{
 		VkShaderStageFlags flags{};
-		if (_stage & ShaderBinding::Stage::VERTEX)
+		if ((uint8_t)_stage & (uint8_t)ShaderStage::VERTEX)
 		{
 			flags |= VK_SHADER_STAGE_VERTEX_BIT;
 		}
-		if (_stage & ShaderBinding::Stage::PIXEL)
+		if ((uint8_t)_stage & (uint8_t)ShaderStage::PIXEL)
 		{
 			flags |= VK_SHADER_STAGE_FRAGMENT_BIT;
 		}

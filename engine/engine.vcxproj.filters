@@ -426,6 +426,10 @@
     <ClInclude Include="source\utility\shader_compiler.h">
       <Filter>source\utility</Filter>
     </ClInclude>
+    <ClInclude Include="source\graphics\model.h">
+      <Filter>source\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\graphics\vulkan\vulkan_model.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\math\matrix.cpp">
@@ -482,6 +486,7 @@
     <ClCompile Include="source\file\explorer.cpp">
       <Filter>source\file</Filter>
     </ClCompile>
+    <ClCompile Include="source\graphics\vulkan\vulkan_model.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="tool\shader_compiler\compile_shaders.bat">

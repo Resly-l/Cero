@@ -17,10 +17,15 @@ layout(binding = 1) uniform PTransform
     mat4 proj;
 } p;
 
-layout(location = 0) out vec2 texCoord;
+layout(location = 0) out vec3 position;
+layout(location = 1) out vec3 normal;
+layout(location = 2) out vec2 texCoord;
 
 void main()
 {
+	position = (mv.model * vec4(_position, 1.0)).xyz;
+	normal = (mv.model * vec4(_normal, 1.0)).xyz;
 	texCoord = _texCoord;
-    gl_Position = p.proj * mv.model * vec4(_position, 1.0);
+
+    gl_Position = p.proj * vec4(position, 1.0);
 }

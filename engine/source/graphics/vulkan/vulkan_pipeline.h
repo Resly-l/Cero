@@ -18,7 +18,6 @@ namespace graphics
 		VkPipelineLayout layout_;
 		const bool useDepthStencil_;
 
-		std::vector<std::shared_ptr<VulkanShaderBinding>> shaderBindings_;
 		VkDescriptorPool descriptorPool_;
 		VkDescriptorSetLayout descriptorSetLayout_;
 
@@ -28,15 +27,12 @@ namespace graphics
 
 	public:
 		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(uint32_t _width, uint32_t _height) const override;
-
+		void UpdateDescriptorSet(VkDescriptorSet _descriptorSet);
 		VkPipeline GetInstance() const;
 		VkPipelineLayout GetLayout() const;
 		VkRenderPass GetRenderPass() const;
 		VkDescriptorSetLayout GetDescriptorSetLayout() const;
 		uint32_t GetNumBindings() const;
-
-		bool UpdateShaderBindings();
-		void UpdateDescriptorSet(VkDescriptorSet _descriptorSet);
 
 	private:
 		void LoadShaders(std::wstring_view _vsPath, std::wstring_view _fsPath);

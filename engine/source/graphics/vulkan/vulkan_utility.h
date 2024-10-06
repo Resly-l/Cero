@@ -16,6 +16,7 @@ namespace graphics
 		static VkImageUsageFlags Convert(ImageUsage _usage);
 		static VkAttachmentLoadOp ConvertLoadOp(ImageOperation _operation);
 		static VkAttachmentStoreOp ConvertStoreOp(ImageOperation _operation);
-		static VkShaderStageFlags Convert(ShaderBinding::Stage _stage);
+		static VkDescriptorType Convert(ShaderBinding::Type _type);
+		static VkShaderStageFlags Convert(ShaderStage _stage);
 	};
 }

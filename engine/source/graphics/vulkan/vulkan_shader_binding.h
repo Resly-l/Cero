@@ -4,13 +4,17 @@
 
 namespace graphics
 {
-	class VulkanShaderBinding : public ShaderBinding
+	class VulkanShaderBindingImpl : public ShaderBinding::ApiSpecificImpl
 	{
 	public:
-		virtual ~VulkanShaderBinding() {}
+		uint32_t slot_ = 0;
+		uint32_t numElements_ = 1;
+		VkShaderStageFlags stage_{};
 
 	public:
-		virtual VkDescriptorSetLayoutBinding GetDescriptorLayout() const = 0;
+		virtual ~VulkanShaderBindingImpl() {}
+
+	public:
 		virtual VkWriteDescriptorSet GetDescriptorWrite(VkDescriptorSet _descriptorSet) const = 0;
 	};
 }
