@@ -11,9 +11,10 @@ namespace graphics
 		{
 			uint32_t size_ = 0;
 			uint32_t numElements_ = 1;
+			bool persistentMapping_ = false;
 		};
 
 	public:
-		virtual void Update(const void* _data) const = 0;
+		virtual void Update(const void* _data) = 0;
 	};
 }

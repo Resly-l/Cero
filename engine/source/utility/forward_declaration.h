@@ -13,6 +13,8 @@ namespace graphics
 	class RenderTarget;
 	class UniformBuffer;
 	class Mesh;
+	class Material;
+	class Model;
 	class Texture;
 
 	//struct ShaderBinding;

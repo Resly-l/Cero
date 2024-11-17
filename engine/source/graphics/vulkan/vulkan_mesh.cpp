@@ -6,9 +6,10 @@ namespace graphics
 {
 	VulkanMesh::VulkanMesh(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkQueue _transferQueue, VkCommandPool _transferCommandPool, const Mesh::Layout& _meshLayout)
 		: logicalDevice_(_logicalDevice)
-		, numVertices_((uint32_t)_meshLayout.vertices_.GetNumElements())
-		, numIndices_((uint32_t)_meshLayout.indices_.size())
 	{
+		numVertices_ = (uint32_t)_meshLayout.vertices_.GetNumElements();
+		numIndices_ = (uint32_t)_meshLayout.indices_.size();
+
 		CreateVertexBuffer(logicalDevice_, _physicalDevice, _transferQueue, _transferCommandPool, _meshLayout.vertices_);
 		CreateIndexBuffer(logicalDevice_, _physicalDevice, _transferQueue, _transferCommandPool, _meshLayout.indices_);
 	}
@@ -30,16 +31,6 @@ namespace graphics
 	VkBuffer VulkanMesh::GetIndexBuffer() const
 	{
 		return indexBuffer_;
-	}
-
-	uint32_t VulkanMesh::GetNumVertices() const
-	{
-		return numVertices_;
-	}
-
-	uint32_t VulkanMesh::GetNumIndices() const
-	{
-		return numIndices_;
 	}
 
 	void VulkanMesh::CreateVertexBuffer(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkQueue _transferQueue, VkCommandPool _transferCommandPool,  const utility::ByteBuffer& _vertices)

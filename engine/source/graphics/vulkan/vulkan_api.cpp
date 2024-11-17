@@ -2,13 +2,20 @@
 #include "vulkan_pipeline.h"
 #include "vulkan_render_target.h"
 #include "vulkan_mesh.h"
+#include "vulkan_material.h"
+#include "vulkan_model.h"
 #include "vulkan_uniform_buffer.h"
 #include "vulkan_texture.h"
 #include "vulkan_result.hpp"
 #include "vulkan_utility.h"
 #include "window/window_min.h"
 #include <vulkan/vulkan_win32.h>
+#include <iostream>
+#include "utility/log.h"
 #include "math/vector.h"
+#include "math/matrix.h"
+
+using utility::Log;
 
 namespace graphics
 {
@@ -48,7 +55,7 @@ namespace graphics
 		}
 
 		vkDestroyDescriptorPool(logicalDevice_, descriptorPool_, nullptr);
-		vkDestroyCommandPool(logicalDevice_, transfereCommandPool_, nullptr);
+		vkDestroyCommandPool(logicalDevice_, transferCommandPool_, nullptr);
 		vkDestroyCommandPool(logicalDevice_, commandPool_, nullptr);
 
 		vkb::destroy_swapchain(swapchain_);
@@ -59,7 +66,7 @@ namespace graphics
 
 	std::shared_ptr<Pipeline> VulkanAPI::CreatePipeline(const Pipeline::Layout& _pipelineLayout)
 	{
-		auto pipeline = std::make_shared<VulkanPipeline>(logicalDevice_, physicalDevice_, descriptorPool_, _pipelineLayout);
+		auto pipeline = std::make_shared<VulkanPipeline>(logicalDevice_, physicalDevice_, _pipelineLayout);
 
 		std::vector<VkDescriptorSetLayout> descriptorSetLayouts(frames_.size(), pipeline->GetDescriptorSetLayout());
 		std::vector<VkDescriptorSet> descriptorSets(frames_.size());
@@ -80,8 +87,31 @@ namespace graphics
 
 	std::shared_ptr<Mesh> VulkanAPI::CreateMesh(const Mesh::Layout& _meshLayout)
 	{
-		return std::make_shared<VulkanMesh>(logicalDevice_, physicalDevice_, *logicalDevice_.get_queue(vkb::QueueType::transfer), transfereCommandPool_,  _meshLayout);
+		return std::make_shared<VulkanMesh>(logicalDevice_, physicalDevice_, *logicalDevice_.get_queue(vkb::QueueType::transfer), transferCommandPool_,  _meshLayout);
 	}
+
+	std::shared_ptr<Material> VulkanAPI::CreateMaterial(const Material::Layout& _materialLayout)
+	{
+		VulkanMaterial::Initializer initializer{};
+		initializer.logicalDevice_ = logicalDevice_;
+
+
+		initializer.descriptorPool_;
+
+		return std::make_shared<VulkanMaterial>(std::move(initializer), _materialLayout);
+	}
+
+    std::shared_ptr<Model> VulkanAPI::CreateModel(const Model::Layout& _modelLayout)
+    {
+		VulkanModel::Initializer initializer{};
+		initializer.logicalDevice_ = logicalDevice_;
+		initializer.physicalDevice_ = physicalDevice_;
+		initializer.tranferQueue_ = logicalDevice_.get_queue(vkb::QueueType::transfer).value();
+		initializer.transferCommandPool_ = transferCommandPool_;
+		initializer.descriptorPool_ = descriptorPool_;
+
+		return std::make_shared<VulkanModel>(std::move(initializer), _modelLayout);
+    }
 
 	std::shared_ptr<UniformBuffer> VulkanAPI::CreateUniformBuffer(const UniformBuffer::Layout& _layout)
 	{
@@ -145,8 +175,6 @@ namespace graphics
 
 		Frame& currentFrame = frames_[frameIndex_];
 
-		pipeline_->UpdateDescriptorSet(currentFrame.descriptorSets_[pipeline_]);
-
 		VkCommandBufferBeginInfo commandBufferBeginInfo{};
 		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		vkResetCommandBuffer(currentFrame.commandBuffer_, VkCommandBufferResetFlags{});
@@ -187,6 +215,8 @@ namespace graphics
 		vkCmdBindIndexBuffer(currentFrame.commandBuffer_, mesh_->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		if (pipeline_->GetNumBindings() > 0)
 		{
+			pipeline_->UpdateDescriptorSet(currentFrame.descriptorSets_[pipeline_]);
+
 			auto descriptorSet = currentFrame.descriptorSets_[pipeline_];
 			vkCmdBindDescriptorSets(currentFrame.commandBuffer_, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->GetLayout(), 0, 1, &descriptorSet, 0, nullptr);
 		}
@@ -264,6 +294,9 @@ namespace graphics
 		deviceSelector.set_surface(surface);
 		deviceSelector.set_required_features(requiredFeatures);
 		physicalDevice_ = Build(deviceSelector, &vkb::PhysicalDeviceSelector::select, vkb::DeviceSelectionMode::partially_and_fully_suitable);
+
+		VkPhysicalDeviceProperties properties{};
+		vkGetPhysicalDeviceProperties(physicalDevice_, &properties);
 	}
 
 	void VulkanAPI::CreateLogicalDevice()
@@ -294,7 +327,7 @@ namespace graphics
 
 		commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
 		commandPoolCreateInfo.queueFamilyIndex = logicalDevice_.get_queue_index(vkb::QueueType::transfer).value();
-		vkCreateCommandPool(logicalDevice_, &commandPoolCreateInfo, nullptr, &transfereCommandPool_) >> VulkanResultChecker::Get();
+		vkCreateCommandPool(logicalDevice_, &commandPoolCreateInfo, nullptr, &transferCommandPool_) >> VulkanResultChecker::Get();
 	}
 
     void VulkanAPI::CreateDescriptorPool()
@@ -310,7 +343,7 @@ namespace graphics
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
 		descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		descriptorPoolCreateInfo.maxSets = config_.numFrameConcurrency_;
+		descriptorPoolCreateInfo.maxSets = config_.numMaxDescriptorSets_;
 		descriptorPoolCreateInfo.poolSizeCount = (uint32_t)poolSizes.size();
 		descriptorPoolCreateInfo.pPoolSizes = poolSizes.data();
 		vkCreateDescriptorPool(logicalDevice_, &descriptorPoolCreateInfo, nullptr, &descriptorPool_);

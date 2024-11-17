@@ -23,9 +23,6 @@ namespace graphics
 	public:
 		Type type_;
 		uint32_t numElements_ = 1;
-
-		class ApiSpecificImpl {};
-		virtual std::shared_ptr<ApiSpecificImpl> GetApiSpecificImpl() const { return nullptr; };
 	};
 
 	struct ShaderDescriptor
@@ -51,4 +48,13 @@ namespace graphics
 		std::vector<Binding> bindings_;
 		std::vector<Output> outputs;
 	};
+
+	enum class ReservedBindings : uint8_t
+	{
+		DIFFUSE_MAP,
+		NORMAL_MAP,
+	};
+
+	// descending offset used in shader to prevent conflith with user defind offsets
+	static constexpr uint32_t reservedBindingOffset = 50;
 }

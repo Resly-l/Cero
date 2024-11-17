@@ -64,3 +64,26 @@ we only need to re-bind descriptor set when drawing different meshes
 
 so we have to make material to own descriptor set
 
+2024/10/09---------------------------------------------------------------------------------------------------------------------------
+
+reason separate descriptor sets are requried in each frames is because of cpu/gpu sync
+specifically for descriptor sets which require dynamic updates like transform buffer
+using single set for these buffer will cause performance issue or race condition between cpu/gpu (depends on how you implement it)
+
+but in other words, static buffers like static materials, since there's no write operation, we can reuse it (single set)
+
+2024/11/03---------------------------------------------------------------------------------------------------------------------------
+
+we're doing two things in order
+1. optimizing static uniform buffers to be only updated once
+	- make descriptors be owned by per material
+		- to create descriptor sets, we need desciprtor pools, model gets allocated with single pool depending on numMaterials required
+
+2. implemeting render pass to optimize ridiculous draw call overhead
+
+
+
+
+
+
+

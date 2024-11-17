@@ -14,13 +14,14 @@ namespace graphics
 		void* mapped_ = nullptr;
 		VkDescriptorBufferInfo bufferInfo_{};
 		VkShaderStageFlags stage_{};
+		bool persistentMapping_ = false;
 
 	public:
 		VulkanUniformBuffer(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const UniformBuffer::Layout& _layout);
 		~VulkanUniformBuffer();
 
 	public:
-		virtual void Update(const void* _data) const override;
+		virtual void Update(const void* _data) override;
 		virtual std::shared_ptr<ShaderBinding::ApiSpecificImpl> GetApiSpecificImpl() const override;
 
 		VkBuffer GetBuffer() const;

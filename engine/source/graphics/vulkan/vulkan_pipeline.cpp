@@ -22,12 +22,11 @@ namespace graphics
 		return shaderModule;
 	}
 
-	VulkanPipeline::VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkDescriptorPool _descriptorPool, const Pipeline::Layout& _pipelineLayout)
+	VulkanPipeline::VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const Pipeline::Layout& _pipelineLayout)
 		: logicalDevice_(_logicalDevice)
 		, physicalDevice_(_physicalDevice)
 		, useDepthStencil_(_pipelineLayout.depthFunc_ != ComparisonFunc::NONE)
 		, shaderDescriptor_(_pipelineLayout.descriptor_)
-		, descriptorPool_(_descriptorPool)
 	{
 		LoadShaders(_pipelineLayout.vertexShaderPath_, _pipelineLayout.pixelShaderPath_);
 		CreateInstance(_physicalDevice, _pipelineLayout);
@@ -73,6 +72,16 @@ namespace graphics
 
 	void VulkanPipeline::UpdateDescriptorSet(VkDescriptorSet _descriptorSet)
 	{
+		static std::vector<VkDescriptorSet> sdi;
+
+		if (std::find_if(sdi.begin(), sdi.end(), [_descriptorSet](VkDescriptorSet _set)
+			{
+				return _descriptorSet == _set;
+			}) != sdi.end())
+		{
+			return;
+		}
+
 		std::vector<VkWriteDescriptorSet> descriptorWrites;
 		std::vector<std::shared_ptr<ShaderBinding::ApiSpecificImpl>> cache;
 		for (auto& [slot, binding] : shaderBindings_)
@@ -86,6 +95,7 @@ namespace graphics
 			descriptorWrites.push_back(impl->GetDescriptorWrite(_descriptorSet));
 		}
 		vkUpdateDescriptorSets(logicalDevice_, (uint32_t)descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
+		sdi.push_back(_descriptorSet);
 	}
 
 	uint32_t VulkanPipeline::GetNumBindings() const

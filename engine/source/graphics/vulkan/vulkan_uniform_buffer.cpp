@@ -7,11 +7,16 @@ namespace graphics
 	VulkanUniformBuffer::VulkanUniformBuffer(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const UniformBuffer::Layout& _layout)
 		: logicalDevice_(_logicalDevice)
 		, bufferSize_(_layout.size_)
+		, persistentMapping_(_layout.persistentMapping_)
 	{
 		VkBufferUsageFlags memoryFlag = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 		VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 		CreateBuffer(_logicalDevice, _physicalDevice, memoryFlag, properties, bufferSize_, buffer_, bufferMemory_);
-		vkMapMemory(logicalDevice_, bufferMemory_, 0, bufferSize_, 0, &mapped_) >> VulkanResultChecker::Get();
+
+		if (persistentMapping_)
+		{
+			vkMapMemory(logicalDevice_, bufferMemory_, 0, bufferSize_, 0, &mapped_) >> VulkanResultChecker::Get();
+		}
 
 		bufferInfo_.buffer = buffer_;
 		bufferInfo_.offset = 0;
@@ -20,6 +25,11 @@ namespace graphics
 
 	VulkanUniformBuffer::~VulkanUniformBuffer()
 	{
+		if (persistentMapping_)
+		{
+			vkUnmapMemory(logicalDevice_, bufferMemory_);
+		}
+
 		vkFreeMemory(logicalDevice_, bufferMemory_, nullptr);
 		vkDestroyBuffer(logicalDevice_, buffer_, nullptr);
 	}
@@ -34,9 +44,18 @@ namespace graphics
 		return bufferSize_;
 	}
 
-    void VulkanUniformBuffer::Update(const void* _data) const
+    void VulkanUniformBuffer::Update(const void* _data)
 	{
-		memcpy(mapped_, _data, bufferSize_);
+		if (persistentMapping_)
+		{
+			memcpy(mapped_, _data, bufferSize_);
+		}
+		else
+		{
+			vkMapMemory(logicalDevice_, bufferMemory_, 0, bufferSize_, 0, &mapped_) >> VulkanResultChecker::Get();
+			memcpy(mapped_, _data, bufferSize_);
+			vkUnmapMemory(logicalDevice_, bufferMemory_);
+		}
 	}
 
 	class VulkanUnformBufferBinding : public VulkanShaderBindingImpl

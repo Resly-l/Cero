@@ -18,15 +18,15 @@ namespace graphics
 		VkPipelineLayout layout_;
 		const bool useDepthStencil_;
 
-		VkDescriptorPool descriptorPool_;
 		VkDescriptorSetLayout descriptorSetLayout_;
 
 	public:
-		VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkDescriptorPool _descriptorPool, const Pipeline::Layout& _pipelineLayout);
+		VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const Pipeline::Layout& _pipelineLayout);
 		~VulkanPipeline();
 
 	public:
 		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(uint32_t _width, uint32_t _height) const override;
+
 		void UpdateDescriptorSet(VkDescriptorSet _descriptorSet);
 		VkPipeline GetInstance() const;
 		VkPipelineLayout GetLayout() const;

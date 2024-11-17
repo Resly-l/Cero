@@ -124,9 +124,4 @@ void AssimpTest::Render()
     graphicsAPI_->BindRenderTarget(graphicsAPI_->GetSwapchainRenderTarget());
     graphicsAPI_->BindMesh(mesh_);
 	graphicsAPI_->Draw();
-
-	for (int i = 0; i < 100; i++)
-	{
-		graphicsAPI_->Draw();
-	}
 }

@@ -25,7 +25,7 @@ namespace graphics
 		vkb::Device logicalDevice_;
 		vkb::Swapchain swapchain_;
 		VkCommandPool commandPool_;
-		VkCommandPool transfereCommandPool_;
+		VkCommandPool transferCommandPool_;
 		VkDescriptorPool descriptorPool_;
 
 		std::vector<std::shared_ptr<VulkanRenderTarget>> swapchainRenderTargets_;
@@ -44,6 +44,8 @@ namespace graphics
 	public:
 		virtual std::shared_ptr<Pipeline> CreatePipeline(const Pipeline::Layout& _pipelineLayout) override;
 		virtual std::shared_ptr<Mesh> CreateMesh(const Mesh::Layout& _meshLayout) override;
+		virtual std::shared_ptr<Material> CreateMaterial(const Material::Layout& _materialLayout) override;
+		virtual std::shared_ptr<Model> CreateModel(const Model::Layout& _modelLayout) override;
 		virtual std::shared_ptr<UniformBuffer> CreateUniformBuffer(const UniformBuffer::Layout& _layout) override;
 		virtual std::shared_ptr<Texture> CreateTexture(const Texture::Layout& _textureLayout) override;
 		virtual std::shared_ptr<RenderTarget> GetSwapchainRenderTarget() override;
