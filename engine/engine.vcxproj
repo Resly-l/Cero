@@ -116,7 +116,6 @@
     <ClInclude Include="source\graphics\graphics_api.h" />
     <ClInclude Include="source\graphics\material.h" />
     <ClInclude Include="source\graphics\mesh.h" />
-    <ClInclude Include="source\graphics\model.h" />
     <ClInclude Include="source\graphics\pipeline.h" />
     <ClInclude Include="source\graphics\render_target.h" />
     <ClInclude Include="source\graphics\shader.h" />
@@ -125,7 +124,6 @@
     <ClInclude Include="source\graphics\vulkan\vulkan_api.h" />
     <ClInclude Include="source\graphics\vulkan\vulkan_material.h" />
     <ClInclude Include="source\graphics\vulkan\vulkan_mesh.h" />
-    <ClInclude Include="source\graphics\vulkan\vulkan_model.h" />
     <ClInclude Include="source\graphics\vulkan\vulkan_pipeline.h" />
     <ClInclude Include="source\graphics\vulkan\vulkan_render_target.h" />
     <ClInclude Include="source\graphics\vulkan\vulkan_result.hpp" />
@@ -239,7 +237,6 @@
     <ClCompile Include="source\graphics\vulkan\vulkan_api.cpp" />
     <ClCompile Include="source\graphics\vulkan\vulkan_material.cpp" />
     <ClCompile Include="source\graphics\vulkan\vulkan_mesh.cpp" />
-    <ClCompile Include="source\graphics\vulkan\vulkan_model.cpp" />
     <ClCompile Include="source\graphics\vulkan\vulkan_pipeline.cpp" />
     <ClCompile Include="source\graphics\vulkan\vulkan_render_target.cpp" />
     <ClCompile Include="source\graphics\vulkan\vulkan_texture.cpp" />

@@ -15,6 +15,9 @@ namespace graphics
 		};
 
 	public:
+		UniformBuffer() { type_ = ShaderBinding::Type::UNIFORM_BUFFER; }
+
+	public:
 		virtual void Update(const void* _data) = 0;
 	};
 }

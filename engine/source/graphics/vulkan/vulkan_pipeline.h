@@ -14,11 +14,13 @@ namespace graphics
 		VkShaderModule vertexShaderModule_;
 		VkShaderModule pixelShaderModule_;
 		VkRenderPass renderPass_;
-		ShaderDescriptor shaderDescriptor_;
 		VkPipelineLayout layout_;
 		const bool useDepthStencil_;
 
+		VkDescriptorSetLayout materialDescriptorSetLayout_;
 		VkDescriptorSetLayout descriptorSetLayout_;
+
+		bool pendingDescriptorSetUpdate_ = false;
 
 	public:
 		VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const Pipeline::Layout& _pipelineLayout);
@@ -26,11 +28,15 @@ namespace graphics
 
 	public:
 		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(uint32_t _width, uint32_t _height) const override;
+		virtual bool BindShaderBinding(std::shared_ptr<ShaderBinding> _shaderBinding, uint32_t _slot) override;
 
-		void UpdateDescriptorSet(VkDescriptorSet _descriptorSet);
+		bool IsPendingDescriptorSetUpdate() const;
+		void UpdateDescriptorSet(const std::vector<VkDescriptorSet>& _descriptSets);
+
 		VkPipeline GetInstance() const;
 		VkPipelineLayout GetLayout() const;
 		VkRenderPass GetRenderPass() const;
+
 		VkDescriptorSetLayout GetDescriptorSetLayout() const;
 		uint32_t GetNumBindings() const;
 

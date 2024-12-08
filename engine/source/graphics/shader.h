@@ -20,9 +20,13 @@ namespace graphics
 			TEXTURE_2D,
 		};
 
+		class BindingImpl {};
+
 	public:
-		Type type_;
-		uint32_t numElements_ = 1;
+		Type type_{};
+
+	public:
+		virtual std::shared_ptr<BindingImpl> GetBindingImpl() const { return nullptr; }
 	};
 
 	struct ShaderDescriptor
@@ -48,13 +52,4 @@ namespace graphics
 		std::vector<Binding> bindings_;
 		std::vector<Output> outputs;
 	};
-
-	enum class ReservedBindings : uint8_t
-	{
-		DIFFUSE_MAP,
-		NORMAL_MAP,
-	};
-
-	// descending offset used in shader to prevent conflith with user defind offsets
-	static constexpr uint32_t reservedBindingOffset = 50;
 }

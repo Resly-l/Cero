@@ -1,5 +1,6 @@
 #pragma once
-#include "graphics/graphics_api.h"
+#include "graphics/material.h"
+#include <vector>
 #include <vulkan/vulkan.h>
 
 namespace graphics
@@ -17,15 +18,19 @@ namespace graphics
 		static VkDescriptorSetLayout descriptorSetLayout_;
 		VkDevice logicalDevice_;
 		VkDescriptorSet descriptorSet_;
+		VkDescriptorPool descriptorPool_;
 
 	public:
-		VulkanMaterial(Initializer _initializer, const Material::Layout& _layout);
+		VulkanMaterial(Initializer _initializer);
+		~VulkanMaterial();
 
 	public:
-		VkDescriptorSetLayout GetDescriptorSetLayout() const;
+		static std::vector< VkDescriptorSetLayoutBinding> GetDescriptorSetLayoutBindings();
+		static VkDescriptorSetLayout CreateDescriptorSetLayout(VkDevice _logicalDevice);
+		VkDescriptorSet GetDescriptorSet() const;
+		void UpdateDescriptorSet();
 
 	private:
-		void CreateDescriptorSetLayout();
 		void CreateDescriptorSet(VkDescriptorPool _descriptorPool);
 	};
 }

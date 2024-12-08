@@ -114,9 +114,6 @@
     <ClInclude Include="source\graphics\vulkan\vulkan_result.hpp">
       <Filter>source\graphics\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="source\graphics\vulkan\vulkan_shader_binding.h">
-      <Filter>source\graphics\vulkan</Filter>
-    </ClInclude>
     <ClInclude Include="source\graphics\vulkan\vulkan_texture.h">
       <Filter>source\graphics\vulkan</Filter>
     </ClInclude>
@@ -426,16 +423,13 @@
     <ClInclude Include="source\utility\shader_compiler.h">
       <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\graphics\model.h">
-      <Filter>source\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="source\graphics\material.h">
       <Filter>source\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\graphics\vulkan\vulkan_model.h">
+    <ClInclude Include="source\graphics\vulkan\vulkan_material.h">
       <Filter>source\graphics\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="source\graphics\vulkan\vulkan_material.h">
+    <ClInclude Include="source\graphics\vulkan\vulkan_shader_binding.h">
       <Filter>source\graphics\vulkan</Filter>
     </ClInclude>
   </ItemGroup>
@@ -493,9 +487,6 @@
     </ClCompile>
     <ClCompile Include="source\file\explorer.cpp">
       <Filter>source\file</Filter>
-    </ClCompile>
-    <ClCompile Include="source\graphics\vulkan\vulkan_model.cpp">
-      <Filter>source\graphics\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="source\graphics\vulkan\vulkan_material.cpp">
       <Filter>source\graphics\vulkan</Filter>

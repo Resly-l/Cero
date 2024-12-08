@@ -1,5 +1,5 @@
 #pragma once
-#include "vulkan_shader_binding.h"
+#include "vulkan/vulkan.h"
 #include "graphics/texture.h"
 #include "file/image.h"
 #include <mutex>
@@ -8,6 +8,15 @@ namespace graphics
 {
 	class VulkanTexture : public Texture
 	{
+	public:
+		struct Initializer
+		{
+			VkDevice logicalDevice_;
+			VkPhysicalDevice physicalDevice_;
+			VkQueue graphicsQueue_;
+			VkCommandPool commandPool_;
+		};
+
 	private:
 		inline static std::once_flag placeholderInitialized_;
 		inline static file::Image placeholder_;
@@ -17,25 +26,25 @@ namespace graphics
 		VkQueue graphicsQueue_;
 		VkCommandPool commandPool_;
 
-		VkImage image_;
-		VkImageView imageView_;
-		VkDeviceMemory imageMemory_;
-		VkSampler sampler_;
+		VkImage image_ = VK_NULL_HANDLE;
+		VkImageView imageView_ = VK_NULL_HANDLE;
+		VkDeviceMemory imageMemory_ = VK_NULL_HANDLE;
+		VkSampler sampler_ = VK_NULL_HANDLE;
 		VkFormat format_;
 		uint32_t width_ = 0;
 		uint32_t height_ = 0;
 		VkDescriptorImageInfo imageInfo_{};
-		VkShaderStageFlags stage_{};
-		std::shared_ptr< class VulkanTextureBinding> bindingImpl_;
+		std::shared_ptr<class VulkanTextureBinding> bindingImpl_;
 
 		std::unique_ptr<file::Image> deferredImage_; // declared as pointer to free unnecessary memory
 
 	public:
-		VulkanTexture(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkQueue _graphicsQueue, VkCommandPool _commandPool, const Texture::Layout& _textureLayout);
+		VulkanTexture(Initializer _initializer, const Texture::Layout& _textureLayout);
 		~VulkanTexture();
 
 	public:
-		virtual std::shared_ptr<ShaderBinding::ApiSpecificImpl> GetApiSpecificImpl() const override;
+		virtual std::shared_ptr<BindingImpl> GetBindingImpl() const override;
+
 		virtual uint32_t GetWidth() const override;
 		virtual uint32_t GetHeight() const override;
 

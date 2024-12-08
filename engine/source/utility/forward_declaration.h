@@ -17,7 +17,7 @@ namespace graphics
 	class Model;
 	class Texture;
 
-	//struct ShaderBinding;
+	class ShaderBinding;
 	struct ShaderDescriptor;
 
 	struct Viewport;
@@ -32,6 +32,7 @@ namespace graphics
 	class VulkanPipeline;
 	class VulkanRenderTarget;
 	class VulkanMesh;
+	class VulkanMaterial;
 	class VulkanShaderBinding;
 	class VulkanUniformBuffer;
 	class VulkanTexture;

@@ -1,6 +1,7 @@
 #include "vulkan_texture.h"
 #include "vulkan_result.hpp"
 #include "vulkan_utility.h"
+#include "vulkan_shader_binding.h"
 #include "thread/thread_pool.h"
 #include "file/path.generated.h"
 #include "utility/log.h"
@@ -9,11 +10,24 @@ using utility::Log;
 
 namespace graphics
 {
-	VulkanTexture::VulkanTexture(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, VkQueue _graphicsQueue, VkCommandPool _commandPool, const Texture::Layout& _layout)
-		: logicalDevice_(_logicalDevice)
-		, physicalDevice_(_physicalDevice)
-		, graphicsQueue_(_graphicsQueue)
-		, commandPool_(_commandPool)
+	class VulkanTextureBinding : public VulkanShaderBinding
+	{
+	public:
+		VkDescriptorImageInfo imageInfo_{};
+
+	public:
+		virtual void FillBindingInfo(VkWriteDescriptorSet& _WriteDescriptorSet) const override
+		{
+			_WriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			_WriteDescriptorSet.pImageInfo = &imageInfo_;
+		}
+	};
+
+	VulkanTexture::VulkanTexture(Initializer _initializer, const Texture::Layout& _layout)
+		: logicalDevice_(_initializer.logicalDevice_)
+		, physicalDevice_(_initializer.physicalDevice_)
+		, graphicsQueue_(_initializer.graphicsQueue_)
+		, commandPool_(_initializer.commandPool_)
 	{
 		std::call_once(placeholderInitialized_, []()
 			{
@@ -25,12 +39,9 @@ namespace graphics
 
 		format_ = VulkanTypeConverter::Convert(_layout.format_);
 
-		switch (_layout.initializationType_)
+		if (_layout.initializationType_ == Texture::InitializationType::FILE)
 		{
-		case Texture::InitializationType::FILE:
 			Initialize(physicalDevice_, graphicsQueue_, commandPool_, placeholder_);
-
-			break;
 
 			thread::ThreadPool::EnqueueTask([&]()
 				{
@@ -51,18 +62,19 @@ namespace graphics
 					Initialize(physicalDevice_, graphicsQueue_, commandPool_, *deferredImage_);
 					deferredImage_ = nullptr;
 				});
-			break;
-		case Texture::InitializationType::BUFFER:
+		}
+		else if (_layout.initializationType_ == Texture::InitializationType::BUFFER)
+		{
 			if (!_layout.buffer_.has_value())
 			{
 				std::cout << Log::Format(Log::Category::file, Log::Level::error, "tried to load image with buffer but has no buffer" + std::string(_layout.imagePath_));
 				Initialize(physicalDevice_, graphicsQueue_, commandPool_, placeholder_);
-				break;
 			}
-
-			auto image = _layout.buffer_.value();
-			Initialize(physicalDevice_, graphicsQueue_, commandPool_, image);
-			break;
+			else
+			{
+				auto image = _layout.buffer_.value();
+				Initialize(physicalDevice_, graphicsQueue_, commandPool_, image);
+			}
 		}
 	}
 
@@ -74,6 +86,11 @@ namespace graphics
 		vkDestroyImage(logicalDevice_, image_, nullptr);
 	}
 
+	std::shared_ptr<ShaderBinding::BindingImpl> VulkanTexture::GetBindingImpl() const
+	{
+		return bindingImpl_;
+	}
+
 	uint32_t VulkanTexture::GetWidth() const
 	{
 		return width_;
@@ -82,31 +99,6 @@ namespace graphics
 	uint32_t VulkanTexture::GetHeight() const
 	{
 		return height_;
-	}
-
-	class VulkanTextureBinding : public VulkanShaderBindingImpl
-	{
-	public:
-		VkDescriptorImageInfo imageInfo_{};
-
-	public:
-		virtual VkWriteDescriptorSet GetDescriptorWrite(VkDescriptorSet _descriptorSet) const override
-		{
-			VkWriteDescriptorSet descriptorWrite{};
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = _descriptorSet;
-			descriptorWrite.dstBinding = slot_;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			descriptorWrite.descriptorCount = 1;
-			descriptorWrite.pImageInfo = &imageInfo_;
-			return descriptorWrite;
-		}
-	};
-
-	std::shared_ptr<ShaderBinding::ApiSpecificImpl> VulkanTexture::GetApiSpecificImpl() const
-	{
-		return bindingImpl_;
 	}
 
 	void VulkanTexture::Initialize(VkPhysicalDevice _physicalDevice, VkQueue _graphicsQueue, VkCommandPool _commandPool, file::Image& _image)
@@ -137,9 +129,8 @@ namespace graphics
 		if (!bindingImpl_)
 		{
 			bindingImpl_ = std::make_shared<VulkanTextureBinding>();
+			bindingImpl_->imageInfo_ = imageInfo_;
 		}
-
-		bindingImpl_->imageInfo_ = imageInfo_;
 	}
 
 	void VulkanTexture::CreateStagingBuffer(VkPhysicalDevice _physicalDevice, const file::Image& _image, VkBuffer& _outStagingBuffer, VkDeviceMemory& _outBufferMemory)

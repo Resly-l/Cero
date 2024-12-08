@@ -2,9 +2,10 @@
 #include "common.h"
 #include "utility/byte_buffer.h"
 #include "utility/forward_declaration.h"
+#include "utility/log.h"
 #include "shader.h"
 #include <string_view>
-#include <unordered_map>
+#include <array>
 
 namespace graphics
 {
@@ -23,21 +24,37 @@ namespace graphics
 			std::wstring_view vertexShaderPath_;
 			std::wstring_view pixelShaderPath_;
 			utility::ByteBuffer::Layout vertexInputLayout_;
-			ShaderDescriptor descriptor_;
+			ShaderDescriptor shaderDescriptor_;
 		};
 
 	protected:
-		std::unordered_map<uint32_t, std::pair<std::shared_ptr<ShaderBinding>, ShaderStage>> shaderBindings_;
+		std::array<std::shared_ptr<ShaderBinding>, 512> shaderBindings_;
+		ShaderDescriptor shaderDescriptor_;
 
 	public:
+		Pipeline(const Layout& _layout) : shaderDescriptor_(_layout.shaderDescriptor_) {}
 		virtual ~Pipeline() {};
 
 	public:
 		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(uint32_t _width, uint32_t _height) const = 0;
-
-		void BindShaderBinding(std::shared_ptr<ShaderBinding> _shaderBinding, ShaderStage _stage, uint32_t _slot)
+		virtual bool BindShaderBinding(std::shared_ptr<ShaderBinding> _shaderBinding, uint32_t _slot)
 		{
-			shaderBindings_[_slot] = { _shaderBinding, _stage};
+			using utility::Log;
+
+			if (_slot >= shaderDescriptor_.bindings_.size())
+			{
+				std::cout << Log::Format(Log::Category::graphics, Log::Level::warning, "Tried to bind with invalid slot to pipeline") << std::endl;
+				return false;
+			}
+
+			if (shaderDescriptor_.bindings_[_slot].type_ != _shaderBinding->type_)
+			{
+				std::cout << Log::Format(Log::Category::graphics, Log::Level::warning, "Tried to bind different binding type to pipeline") << std::endl;
+				return false;
+			}
+
+			shaderBindings_[_slot] = _shaderBinding;
+			return true;
 		}
 	};
 }

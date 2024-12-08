@@ -1,9 +1,23 @@
 #include "vulkan_uniform_buffer.h"
 #include "vulkan_result.hpp"
 #include "vulkan_utility.h"
+#include "vulkan_shader_binding.h"
 
 namespace graphics
 {
+	class VulkanUniformBufferBinding : public VulkanShaderBinding
+	{
+	public:
+		VkDescriptorBufferInfo bufferInfo_{};
+
+	public:
+		virtual void FillBindingInfo(VkWriteDescriptorSet& _WriteDescriptorSet) const override
+		{
+			_WriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			_WriteDescriptorSet.pBufferInfo = &bufferInfo_;
+		}
+	};
+
 	VulkanUniformBuffer::VulkanUniformBuffer(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const UniformBuffer::Layout& _layout)
 		: logicalDevice_(_logicalDevice)
 		, bufferSize_(_layout.size_)
@@ -21,6 +35,9 @@ namespace graphics
 		bufferInfo_.buffer = buffer_;
 		bufferInfo_.offset = 0;
 		bufferInfo_.range = bufferSize_;
+
+		bindingImpl_ = std::make_shared<VulkanUniformBufferBinding>();
+		bindingImpl_->bufferInfo_ = bufferInfo_;
 	}
 
 	VulkanUniformBuffer::~VulkanUniformBuffer()
@@ -44,6 +61,11 @@ namespace graphics
 		return bufferSize_;
 	}
 
+	std::shared_ptr<ShaderBinding::BindingImpl> VulkanUniformBuffer::GetBindingImpl() const
+	{
+		return bindingImpl_;
+	}
+
     void VulkanUniformBuffer::Update(const void* _data)
 	{
 		if (persistentMapping_)
@@ -56,35 +78,5 @@ namespace graphics
 			memcpy(mapped_, _data, bufferSize_);
 			vkUnmapMemory(logicalDevice_, bufferMemory_);
 		}
-	}
-
-	class VulkanUnformBufferBinding : public VulkanShaderBindingImpl
-	{
-	public:
-		VkDescriptorBufferInfo bufferInfo_{};
-
-	public:
-		virtual VkWriteDescriptorSet GetDescriptorWrite(VkDescriptorSet _descriptorSet) const override
-		{
-			VkWriteDescriptorSet descriptorWrite{};
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = _descriptorSet;
-			descriptorWrite.dstBinding = slot_;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descriptorWrite.descriptorCount = 1;
-			descriptorWrite.pBufferInfo = &bufferInfo_;
-			descriptorWrite.pImageInfo = nullptr;
-			descriptorWrite.pTexelBufferView = nullptr;
-			return descriptorWrite;
-		}
-	};
-
-	std::shared_ptr<ShaderBinding::ApiSpecificImpl> VulkanUniformBuffer::GetApiSpecificImpl() const
-	{
-		auto impl = std::make_shared<VulkanUnformBufferBinding>();
-		impl->bufferInfo_ = bufferInfo_;
-
-		return impl;
 	}
 }

@@ -1,5 +1,6 @@
 #include "assimp_test.h"
 #include "file/model.h"
+#include "graphics/mesh.h"
 #include "utility/shader_compiler.h"
 #include "utility/timer.hpp"
 #include "math/vector.h"
@@ -16,13 +17,8 @@ AssimpTest::AssimpTest()
 
 	graphics::Mesh::Layout meshLayout;
 	meshLayout.vertices_ = brickPlane.meshes_[0].vertices_;
-	meshLayout.indices_ = brickPlane.meshes_[0].indices_;;
+	meshLayout.indices_ = brickPlane.meshes_[0].indices_;
 	mesh_ = graphicsAPI_->CreateMesh(meshLayout);
-
-	graphics::Texture::Layout textureLayout;
-	textureLayout.initializationType_ = graphics::Texture::InitializationType::FILE;
-	textureLayout.imagePath_ = brickPlane.materials_[0].diffuseMapPath_;
-	brickDiffuse_ = graphicsAPI_->CreateTexture(textureLayout);
 
 	utility::ByteBuffer::Layout modelViewMatrixLayout;
 	modelViewMatrixLayout.AddAttribute<math::Matrix>();
@@ -37,10 +33,12 @@ AssimpTest::AssimpTest()
 
 	graphics::UniformBuffer::Layout modelViewUBLayout;
 	modelViewUBLayout.size_ = (uint32_t)modelViewMatrixLayout.GetSizeInBytes();
+	modelViewUBLayout.persistentMapping_ = true;
 	modelViewUniformBuffer_ = graphicsAPI_->CreateUniformBuffer(modelViewUBLayout);
 
 	graphics::UniformBuffer::Layout projectionUBLayout;
 	projectionUBLayout.size_ = (uint32_t)projectionMatrixLayout.GetSizeInBytes();
+	projectionUBLayout.persistentMapping_ = true;
 	projectionUniformBuffer_ = graphicsAPI_->CreateUniformBuffer(projectionUBLayout);
 
 	math::Matrix modelMatrix;
@@ -69,28 +67,27 @@ AssimpTest::AssimpTest()
 	pipelineLayout.pixelShaderPath_ = L"shader/bin/model.frag.spv";
 	pipelineLayout.vertexInputLayout_ = brickPlane.meshes_[0].vertices_.GetLayout().value();
 	pipelineLayout.depthFunc_ = graphics::ComparisonFunc::LESS_EQUAL;
-	pipelineLayout.descriptor_.outputs.push_back(colorOutput);
-	pipelineLayout.descriptor_.outputs.push_back(depthOutput);
+	pipelineLayout.shaderDescriptor_.outputs.push_back(colorOutput);
+	pipelineLayout.shaderDescriptor_.outputs.push_back(depthOutput);
 
 	graphics::ShaderDescriptor::Binding binding;
 	binding.stage_ = graphics::ShaderStage::VERTEX;
 	binding.type_ = graphics::ShaderBinding::Type::UNIFORM_BUFFER;
 	binding.slot_ = 0;
-	pipelineLayout.descriptor_.bindings_.push_back(binding);
+	pipelineLayout.shaderDescriptor_.bindings_.push_back(binding);
 
 	binding.slot_ = 1;
-	pipelineLayout.descriptor_.bindings_.push_back(binding);
+	pipelineLayout.shaderDescriptor_.bindings_.push_back(binding);
 
 	binding.stage_ = graphics::ShaderStage::PIXEL;
 	binding.type_ = graphics::ShaderBinding::Type::TEXTURE_2D;
 	binding.slot_ = 2;
-	pipelineLayout.descriptor_.bindings_.push_back(binding);
+	pipelineLayout.shaderDescriptor_.bindings_.push_back(binding);
 
 	pipeline_ = graphicsAPI_->CreatePipeline(pipelineLayout);
 
-	pipeline_->BindShaderBinding(modelViewUniformBuffer_, graphics::ShaderStage::VERTEX, 0);
-	pipeline_->BindShaderBinding(projectionUniformBuffer_, graphics::ShaderStage::VERTEX, 1);
-	pipeline_->BindShaderBinding(brickDiffuse_, graphics::ShaderStage::PIXEL, 2);
+	pipeline_->BindShaderBinding(modelViewUniformBuffer_, 0);
+	pipeline_->BindShaderBinding(projectionUniformBuffer_, 1);
 }
 
 void AssimpTest::Update()

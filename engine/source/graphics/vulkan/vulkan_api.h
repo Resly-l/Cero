@@ -15,6 +15,8 @@ namespace graphics
 			VkSemaphore imageAcquiringSemaphore_ = VK_NULL_HANDLE;
 			VkSemaphore commandExecutionSemaphore_ = VK_NULL_HANDLE;
 			VkFence frameFence_ = VK_NULL_HANDLE;
+
+			// need to find a way which does not use map
 			std::unordered_map<std::shared_ptr<VulkanPipeline>, VkDescriptorSet> descriptorSets_;
 		};
 
@@ -35,7 +37,12 @@ namespace graphics
 
 		std::shared_ptr<VulkanPipeline> pipeline_;
 		std::shared_ptr<VulkanRenderTarget> renderTarget_;
+
+		// these must be managed by proper render system
 		std::shared_ptr<VulkanMesh> mesh_;
+		std::shared_ptr<VulkanMaterial> material_;
+		std::shared_ptr<VulkanTexture> defaultTexture_;
+		std::unique_ptr<VulkanMaterial> defaultMaterial_;
 
 	public:
 		VulkanAPI(void* _window);
@@ -44,8 +51,7 @@ namespace graphics
 	public:
 		virtual std::shared_ptr<Pipeline> CreatePipeline(const Pipeline::Layout& _pipelineLayout) override;
 		virtual std::shared_ptr<Mesh> CreateMesh(const Mesh::Layout& _meshLayout) override;
-		virtual std::shared_ptr<Material> CreateMaterial(const Material::Layout& _materialLayout) override;
-		virtual std::shared_ptr<Model> CreateModel(const Model::Layout& _modelLayout) override;
+		virtual std::shared_ptr<Material> CreateMaterial() override;
 		virtual std::shared_ptr<UniformBuffer> CreateUniformBuffer(const UniformBuffer::Layout& _layout) override;
 		virtual std::shared_ptr<Texture> CreateTexture(const Texture::Layout& _textureLayout) override;
 		virtual std::shared_ptr<RenderTarget> GetSwapchainRenderTarget() override;
@@ -53,7 +59,9 @@ namespace graphics
 		/* pipeline must be bound first before render target */
 		virtual void BindPipeline(std::shared_ptr<Pipeline> _pipeline) override;
 		virtual void BindRenderTarget(std::shared_ptr<RenderTarget> _renderTarget) override;
+
 		virtual void BindMesh(std::shared_ptr<Mesh> _mesh) override;
+		virtual void BindMaterial(std::shared_ptr<Material> _material) override;
 
 		virtual bool BeginFrame() override;
 		virtual void Draw() override;
@@ -73,5 +81,7 @@ namespace graphics
 		void CreateSyncObjects();
 		void CreateSwapchainRenderTargets();
 		void RecreateSwapchain();
+
+		VkDescriptorPool CreateDescriptorPool(const std::vector<VkDescriptorSetLayoutBinding>& _bindings) const;
 	};
 }

@@ -4,6 +4,7 @@
 #include "vulkan_render_target.h"
 #include "vulkan_uniform_buffer.h"
 #include "vulkan_texture.h"
+#include "vulkan_material.h"
 #include "vulkan_shader_binding.h"
 #include "file/explorer.h"
 
@@ -23,10 +24,10 @@ namespace graphics
 	}
 
 	VulkanPipeline::VulkanPipeline(VkDevice _logicalDevice, VkPhysicalDevice _physicalDevice, const Pipeline::Layout& _pipelineLayout)
-		: logicalDevice_(_logicalDevice)
+		: Pipeline(_pipelineLayout)
+		, logicalDevice_(_logicalDevice)
 		, physicalDevice_(_physicalDevice)
 		, useDepthStencil_(_pipelineLayout.depthFunc_ != ComparisonFunc::NONE)
-		, shaderDescriptor_(_pipelineLayout.descriptor_)
 	{
 		LoadShaders(_pipelineLayout.vertexShaderPath_, _pipelineLayout.pixelShaderPath_);
 		CreateInstance(_physicalDevice, _pipelineLayout);
@@ -34,6 +35,7 @@ namespace graphics
 
 	VulkanPipeline::~VulkanPipeline()
 	{
+		vkDestroyDescriptorSetLayout(logicalDevice_, materialDescriptorSetLayout_, nullptr);
 		vkDestroyDescriptorSetLayout(logicalDevice_, descriptorSetLayout_, nullptr);
 		vkDestroyRenderPass(logicalDevice_, renderPass_, nullptr);
 		vkDestroyPipelineLayout(logicalDevice_, layout_, nullptr);
@@ -48,6 +50,63 @@ namespace graphics
 		renderTargetLayout.attachments_ = shaderDescriptor_.outputs;
 
 		return std::make_shared<VulkanRenderTarget>(logicalDevice_, physicalDevice_, renderTargetLayout);
+	}
+
+	bool VulkanPipeline::BindShaderBinding(std::shared_ptr<ShaderBinding> _shaderBinding, uint32_t _slot)
+	{
+		if (Pipeline::BindShaderBinding(_shaderBinding, _slot) == false)
+		{
+			return false;
+		}
+
+		pendingDescriptorSetUpdate_ = true;
+		return true;
+	}
+
+	bool VulkanPipeline::IsPendingDescriptorSetUpdate() const
+	{
+		return pendingDescriptorSetUpdate_;
+	}
+
+	void VulkanPipeline::UpdateDescriptorSet(const std::vector<VkDescriptorSet>& _descriptSets)
+	{
+		if (pendingDescriptorSetUpdate_ == false)
+		{
+			using utility::Log;
+			std::cout << Log::Format(Log::Category::graphics, Log::Level::message, "Pipeline - Tried to update descriptor set when there's no change") << std::endl;
+			return;
+		}
+
+		uint32_t materialBindingOffset = (uint32_t)Material::FixedBindingIndex::FB_MAX;
+
+		std::vector<VkWriteDescriptorSet> descriptorWrites;
+		for (VkDescriptorSet descriptorSet : _descriptSets)
+		{
+			for (uint32_t i = 0; i < shaderBindings_.size(); i++)
+			{
+				if (!shaderBindings_[i])
+				{
+					continue;
+				}
+
+				VkWriteDescriptorSet write{};
+				write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				write.pNext = nullptr;
+				write.dstSet = descriptorSet;
+				write.dstBinding = i + materialBindingOffset;
+				write.dstArrayElement = 0;
+				write.descriptorCount = 1;
+				write.pTexelBufferView = nullptr;
+
+				auto casted = std::static_pointer_cast<VulkanShaderBinding>(shaderBindings_[i]->GetBindingImpl());
+				casted->FillBindingInfo(write);
+
+				descriptorWrites.push_back(write);
+			}
+		}
+
+		vkUpdateDescriptorSets(logicalDevice_, (uint32_t)descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
+		pendingDescriptorSetUpdate_ = false;
 	}
 
 	VkPipeline VulkanPipeline::GetInstance() const
@@ -68,34 +127,6 @@ namespace graphics
 	VkDescriptorSetLayout VulkanPipeline::GetDescriptorSetLayout() const
 	{
 		return descriptorSetLayout_;
-	}
-
-	void VulkanPipeline::UpdateDescriptorSet(VkDescriptorSet _descriptorSet)
-	{
-		static std::vector<VkDescriptorSet> sdi;
-
-		if (std::find_if(sdi.begin(), sdi.end(), [_descriptorSet](VkDescriptorSet _set)
-			{
-				return _descriptorSet == _set;
-			}) != sdi.end())
-		{
-			return;
-		}
-
-		std::vector<VkWriteDescriptorSet> descriptorWrites;
-		std::vector<std::shared_ptr<ShaderBinding::ApiSpecificImpl>> cache;
-		for (auto& [slot, binding] : shaderBindings_)
-		{
-			cache.push_back(binding.first->GetApiSpecificImpl());
-
-			auto impl = std::static_pointer_cast<VulkanShaderBindingImpl>(cache.back());
-			impl->slot_ = slot;
-			impl->numElements_ = binding.first->numElements_;
-			impl->stage_ = VulkanTypeConverter::Convert(binding.second);
-			descriptorWrites.push_back(impl->GetDescriptorWrite(_descriptorSet));
-		}
-		vkUpdateDescriptorSets(logicalDevice_, (uint32_t)descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
-		sdi.push_back(_descriptorSet);
 	}
 
 	uint32_t VulkanPipeline::GetNumBindings() const
@@ -350,11 +381,14 @@ namespace graphics
 
 		// descriptor
 		{
+			std::vector<VkDescriptorSetLayoutBinding> mateerialDescriptorBindings = VulkanMaterial::GetDescriptorSetLayoutBindings();
+			uint32_t materialBindingOffset = (uint32_t)Material::FixedBindingIndex::FB_MAX;
+
 			std::vector<VkDescriptorSetLayoutBinding> descriptorBindings;
 			for (size_t i = 0; i < shaderDescriptor_.bindings_.size(); i++)
 			{
 				VkDescriptorSetLayoutBinding binding{};
-				binding.binding = (uint32_t)shaderDescriptor_.bindings_[i].slot_;
+				binding.binding = (uint32_t)shaderDescriptor_.bindings_[i].slot_ + materialBindingOffset;
 				binding.descriptorCount = shaderDescriptor_.bindings_[i].numElements_;
 				binding.descriptorType = VulkanTypeConverter::Convert(shaderDescriptor_.bindings_[i].type_);
 				binding.stageFlags = VulkanTypeConverter::Convert(shaderDescriptor_.bindings_[i].stage_);
@@ -372,10 +406,18 @@ namespace graphics
 
 		// layout
 		{
+			materialDescriptorSetLayout_ = VulkanMaterial::CreateDescriptorSetLayout(logicalDevice_);
+
+			VkDescriptorSetLayout setLayouts[2] =
+			{
+				materialDescriptorSetLayout_,
+				descriptorSetLayout_
+			};
+
 			VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
 			pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-			pipelineLayoutCreateInfo.setLayoutCount = 1;
-			pipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout_;
+			pipelineLayoutCreateInfo.setLayoutCount = 2;
+			pipelineLayoutCreateInfo.pSetLayouts = setLayouts;
 			pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 			pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 			vkCreatePipelineLayout(logicalDevice_, &pipelineLayoutCreateInfo, nullptr, &layout_) >> VulkanResultChecker::Get();

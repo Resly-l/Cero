@@ -3,7 +3,6 @@
 #include "vulkan_render_target.h"
 #include "vulkan_mesh.h"
 #include "vulkan_material.h"
-#include "vulkan_model.h"
 #include "vulkan_uniform_buffer.h"
 #include "vulkan_texture.h"
 #include "vulkan_result.hpp"
@@ -33,10 +32,34 @@ namespace graphics
 		CreateCommandBuffers();
 		CreateSwapchainRenderTargets();
 		CreateSyncObjects();
+
+		// CreateDefaultMaterial(), temporary code
+		{
+			VulkanTexture::Initializer textureInitializer{};
+			textureInitializer.logicalDevice_ = logicalDevice_;
+			textureInitializer.physicalDevice_ = physicalDevice_;
+			textureInitializer.graphicsQueue_ = *logicalDevice_.get_queue(vkb::QueueType::graphics);
+			textureInitializer.commandPool_ = commandPool_;
+			VulkanTexture::Layout textureLayout{};
+			textureLayout.initializationType_ = Texture::InitializationType::BUFFER;
+			defaultTexture_ = std::make_shared<VulkanTexture>(textureInitializer, textureLayout);
+
+			VulkanMaterial::Initializer materialInitializer{};
+			materialInitializer.logicalDevice_ = logicalDevice_;
+			materialInitializer.descriptorPool_ = CreateDescriptorPool(VulkanMaterial::GetDescriptorSetLayoutBindings());
+			defaultMaterial_ = std::make_unique<VulkanMaterial>(materialInitializer);
+
+			defaultMaterial_->SetFixedBinding(Material::FixedBindingIndex::DIFFUSE_MAP, defaultTexture_);
+			defaultMaterial_->SetFixedBinding(Material::FixedBindingIndex::NORMAL_MAP, defaultTexture_);
+			defaultMaterial_->UpdateDescriptorSet();
+		}
 	}
 
 	VulkanAPI::~VulkanAPI()
 	{
+		defaultTexture_ = nullptr;
+		defaultMaterial_ = nullptr;
+
 		vkDeviceWaitIdle(logicalDevice_);
 
 		mesh_ = nullptr;
@@ -68,18 +91,21 @@ namespace graphics
 	{
 		auto pipeline = std::make_shared<VulkanPipeline>(logicalDevice_, physicalDevice_, _pipelineLayout);
 
-		std::vector<VkDescriptorSetLayout> descriptorSetLayouts(frames_.size(), pipeline->GetDescriptorSetLayout());
-		std::vector<VkDescriptorSet> descriptorSets(frames_.size());
-		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
-		descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		descriptorSetAllocateInfo.descriptorPool = descriptorPool_;
-		descriptorSetAllocateInfo.descriptorSetCount = (uint32_t)descriptorSets.size();
-		descriptorSetAllocateInfo.pSetLayouts = descriptorSetLayouts.data();
-		vkAllocateDescriptorSets(logicalDevice_, &descriptorSetAllocateInfo, descriptorSets.data());
-
-		for (size_t i = 0; i < frames_.size(); i++)
+		// pipeline registration to api
 		{
-			frames_[i].descriptorSets_[pipeline] = descriptorSets[i];
+			std::vector<VkDescriptorSetLayout> descriptorSetLayouts(frames_.size(), pipeline->GetDescriptorSetLayout());
+			std::vector<VkDescriptorSet> descriptorSets(frames_.size());
+			VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
+			descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+			descriptorSetAllocateInfo.descriptorPool = descriptorPool_;
+			descriptorSetAllocateInfo.descriptorSetCount = (uint32_t)descriptorSets.size();
+			descriptorSetAllocateInfo.pSetLayouts = descriptorSetLayouts.data();
+			vkAllocateDescriptorSets(logicalDevice_, &descriptorSetAllocateInfo, descriptorSets.data());
+
+			for (size_t i = 0; i < frames_.size(); i++)
+			{
+				frames_[i].descriptorSets_[pipeline] = descriptorSets[i];
+			}
 		}
 
 		return pipeline;
@@ -90,28 +116,14 @@ namespace graphics
 		return std::make_shared<VulkanMesh>(logicalDevice_, physicalDevice_, *logicalDevice_.get_queue(vkb::QueueType::transfer), transferCommandPool_,  _meshLayout);
 	}
 
-	std::shared_ptr<Material> VulkanAPI::CreateMaterial(const Material::Layout& _materialLayout)
+	std::shared_ptr<Material> VulkanAPI::CreateMaterial()
 	{
 		VulkanMaterial::Initializer initializer{};
 		initializer.logicalDevice_ = logicalDevice_;
+		initializer.descriptorPool_ = CreateDescriptorPool(VulkanMaterial::GetDescriptorSetLayoutBindings());
 
-
-		initializer.descriptorPool_;
-
-		return std::make_shared<VulkanMaterial>(std::move(initializer), _materialLayout);
+		return std::make_shared<VulkanMaterial>(std::move(initializer));
 	}
-
-    std::shared_ptr<Model> VulkanAPI::CreateModel(const Model::Layout& _modelLayout)
-    {
-		VulkanModel::Initializer initializer{};
-		initializer.logicalDevice_ = logicalDevice_;
-		initializer.physicalDevice_ = physicalDevice_;
-		initializer.tranferQueue_ = logicalDevice_.get_queue(vkb::QueueType::transfer).value();
-		initializer.transferCommandPool_ = transferCommandPool_;
-		initializer.descriptorPool_ = descriptorPool_;
-
-		return std::make_shared<VulkanModel>(std::move(initializer), _modelLayout);
-    }
 
 	std::shared_ptr<UniformBuffer> VulkanAPI::CreateUniformBuffer(const UniformBuffer::Layout& _layout)
 	{
@@ -120,7 +132,13 @@ namespace graphics
 
 	std::shared_ptr<Texture> VulkanAPI::CreateTexture(const Texture::Layout& _textureLayout)
 	{
-		return std::make_shared<VulkanTexture>(logicalDevice_, physicalDevice_, *logicalDevice_.get_queue(vkb::QueueType::graphics), commandPool_, _textureLayout);
+		VulkanTexture::Initializer initializer{};
+		initializer.logicalDevice_ = logicalDevice_;
+		initializer.physicalDevice_ = physicalDevice_;
+		initializer.graphicsQueue_ = *logicalDevice_.get_queue(vkb::QueueType::graphics);
+		initializer.commandPool_ = commandPool_;
+
+		return std::make_shared<VulkanTexture>(initializer, _textureLayout);
 	}
 
 	std::shared_ptr<RenderTarget> VulkanAPI::GetSwapchainRenderTarget()
@@ -150,6 +168,11 @@ namespace graphics
 		mesh_ = std::static_pointer_cast<VulkanMesh>(_mesh);
 	}
 
+	void VulkanAPI::BindMaterial(std::shared_ptr<Material> _material)
+	{
+		material_ = std::static_pointer_cast<VulkanMaterial>(_material);
+	}
+
 	bool VulkanAPI::BeginFrame()
 	{
 		Frame& currentFrame = frames_[frameIndex_];
@@ -171,6 +194,18 @@ namespace graphics
 		if (!pipeline_ || !renderTarget_ || !mesh_)
 		{
 			return;
+		}
+
+		if (pipeline_->IsPendingDescriptorSetUpdate())
+		{
+			std::vector<VkDescriptorSet> descriptorSets;
+			
+			for (auto& frame : frames_)
+			{
+				descriptorSets.push_back(frame.descriptorSets_[pipeline_]);
+			}
+
+			pipeline_->UpdateDescriptorSet(descriptorSets);
 		}
 
 		Frame& currentFrame = frames_[frameIndex_];
@@ -213,13 +248,18 @@ namespace graphics
 		vkCmdBindPipeline(currentFrame.commandBuffer_, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->GetInstance());
 		vkCmdBindVertexBuffers(currentFrame.commandBuffer_, 0, 1, vertexBuffers, offsets);
 		vkCmdBindIndexBuffer(currentFrame.commandBuffer_, mesh_->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
 		if (pipeline_->GetNumBindings() > 0)
 		{
-			pipeline_->UpdateDescriptorSet(currentFrame.descriptorSets_[pipeline_]);
+			VkDescriptorSet descriptorSets[2] =
+			{
+				material_ ? material_->GetDescriptorSet() : defaultMaterial_->GetDescriptorSet(),
+				currentFrame.descriptorSets_[pipeline_]
+			};
 
-			auto descriptorSet = currentFrame.descriptorSets_[pipeline_];
-			vkCmdBindDescriptorSets(currentFrame.commandBuffer_, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->GetLayout(), 0, 1, &descriptorSet, 0, nullptr);
+			vkCmdBindDescriptorSets(currentFrame.commandBuffer_, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->GetLayout(), 0, 2, descriptorSets, 0, nullptr);
 		}
+
 		vkCmdDrawIndexed(currentFrame.commandBuffer_, mesh_->GetNumIndices(), 1, 0, 0, 0);
 		vkCmdEndRenderPass(currentFrame.commandBuffer_);
 
@@ -414,5 +454,49 @@ namespace graphics
 				renderTarget->Bind(pipeline_->GetRenderPass());
 			}
 		}
+	}
+
+	VkDescriptorPool VulkanAPI::CreateDescriptorPool(const std::vector<VkDescriptorSetLayoutBinding>& _bindings) const
+	{
+		VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+		std::vector<VkDescriptorPoolSize> poolSizes;
+
+		uint32_t numSamplers = 0;
+		uint32_t numUniformBuffers = 0;
+
+		for (const auto& binding : _bindings)
+		{
+			if (binding.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+			{
+				numSamplers++;
+			}
+			else if (binding.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+			{
+				numUniformBuffers++;
+			}
+		}
+
+		VkDescriptorPoolSize poolSize{};
+		poolSize.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		poolSize.descriptorCount = numSamplers;
+		if (poolSize.descriptorCount != 0)
+		{
+			poolSizes.push_back(poolSize);
+		}
+		poolSize.type = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSize.descriptorCount = numUniformBuffers;
+		if (poolSize.descriptorCount != 0)
+		{
+			poolSizes.push_back(poolSize);
+		}
+
+		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
+		descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		descriptorPoolCreateInfo.maxSets = 1;
+		descriptorPoolCreateInfo.poolSizeCount = (uint32_t)poolSizes.size();
+		descriptorPoolCreateInfo.pPoolSizes = poolSizes.data();
+
+		vkCreateDescriptorPool(logicalDevice_, &descriptorPoolCreateInfo, nullptr, &descriptorPool);
+		return descriptorPool;
 	}
 }

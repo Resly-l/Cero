@@ -26,6 +26,9 @@ namespace graphics
 		};
 
 	public:
+		Texture() { type_ = ShaderBinding::Type::TEXTURE_2D; }
+
+	public:
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 	};

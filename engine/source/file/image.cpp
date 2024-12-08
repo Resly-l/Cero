@@ -15,7 +15,7 @@ namespace file
 		stbi_uc* loaded = stbi_load(_path.data(), &width, &height, &numChannels, STBI_rgb_alpha);
 		if (!loaded)
 		{
-			std::cout << Log::Format(Log::Category::file, Log::Level::warning, "failed to load image");
+			std::cout << Log::Format(Log::Category::file, Log::Level::warning, "failed to load image, path : " + std::string(_path.data()));
 			return false;
 		}
 
