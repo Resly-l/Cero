@@ -28,11 +28,10 @@ namespace graphics
 
 	public:
 		void AddAttachment(VkPhysicalDevice _physicalDevice, ShaderDescriptor::Output _description);
-		void Bind(VkRenderPass _renderPass);
 
 		uint32_t GetNumAttachments() const;
 		std::vector<VkImageView> GetImageViews() const;
-		VkFramebuffer GetFramebuffer(VkRenderPass _renderPass) const;
+		VkFramebuffer GetFramebuffer(VkRenderPass _renderPass);
 
 	private:
 		static VkImageAspectFlags GetAspectMask(VkFormat _format, VkImageUsageFlags _usage);

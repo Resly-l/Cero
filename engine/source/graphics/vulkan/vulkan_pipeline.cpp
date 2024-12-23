@@ -129,11 +129,6 @@ namespace graphics
 		return descriptorSetLayout_;
 	}
 
-	uint32_t VulkanPipeline::GetNumBindings() const
-	{
-		return (uint32_t)shaderDescriptor_.bindings_.size();
-	}
-
 	void VulkanPipeline::LoadShaders(std::wstring_view _vsPath, std::wstring_view _fsPath)
 	{
 		auto vsCode = file::Explorer::LoadFile(_vsPath, true, true);

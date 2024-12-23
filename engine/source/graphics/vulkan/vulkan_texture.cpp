@@ -48,7 +48,7 @@ namespace graphics
 					deferredImage_ = std::make_unique<file::Image>();
 					if (!deferredImage_->Load(_layout.imagePath_))
 					{
-						std::cout << Log::Format(Log::Category::file, Log::Level::error, "failed to load image, path : " + std::string(_layout.imagePath_));
+						std::cout << Log::Format(Log::Category::file, Log::Level::error, "failed to load image, path : " + std::string(_layout.imagePath_)) << std::endl;
 						return;
 					}
 
@@ -67,7 +67,7 @@ namespace graphics
 		{
 			if (!_layout.buffer_.has_value())
 			{
-				std::cout << Log::Format(Log::Category::file, Log::Level::error, "tried to load image with buffer but has no buffer" + std::string(_layout.imagePath_));
+				std::cout << Log::Format(Log::Category::file, Log::Level::error, "tried to load image with buffer but has no buffer" + std::string(_layout.imagePath_)) << std::endl;
 				Initialize(physicalDevice_, graphicsQueue_, commandPool_, placeholder_);
 			}
 			else

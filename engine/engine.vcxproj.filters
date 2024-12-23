@@ -432,6 +432,15 @@
     <ClInclude Include="source\graphics\vulkan\vulkan_shader_binding.h">
       <Filter>source\graphics\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="source\graphics\render_pass.h">
+      <Filter>source\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\graphics\renderer.h">
+      <Filter>source\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\graphics\vulkan\vulkan_render_pass.h">
+      <Filter>source\graphics\vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\math\matrix.cpp">
@@ -489,6 +498,15 @@
       <Filter>source\file</Filter>
     </ClCompile>
     <ClCompile Include="source\graphics\vulkan\vulkan_material.cpp">
+      <Filter>source\graphics\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="source\graphics\render_pass.cpp">
+      <Filter>source\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\graphics\renderer.cpp">
+      <Filter>source\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\graphics\vulkan\vulkan_render_pass.cpp">
       <Filter>source\graphics\vulkan</Filter>
     </ClCompile>
   </ItemGroup>
