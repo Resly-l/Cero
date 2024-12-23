@@ -36,7 +36,7 @@ namespace graphics
 		~VulkanAPI();
 
 	public:
-		vkb::Device GetLogicalDevice() const;
+		VkQueue GetGraphicsQueue() const;
 
 		virtual std::shared_ptr<Pipeline> CreatePipeline(const Pipeline::Layout& _pipelineLayout) override;
 		virtual std::shared_ptr<Mesh> CreateMesh(const Mesh::Layout& _meshLayout) override;

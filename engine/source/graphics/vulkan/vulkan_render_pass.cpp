@@ -7,7 +7,6 @@
 #include "vulkan_texture.h"
 #include "vulkan_material.h"
 #include "utility/log.h"
-#include "../thirdparty/vk_bootstrap/VkBootstrap.h"
 
 using utility::Log;
 
@@ -138,6 +137,6 @@ namespace graphics
 		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
-		vkQueueSubmit(vulkanAPI.GetLogicalDevice().get_queue(vkb::QueueType::graphics).value(), 1, &submitInfo, vulkanAPI.GetFrameFence()) >> VulkanResultChecker::Get();
+		vkQueueSubmit(vulkanAPI.GetGraphicsQueue(), 1, &submitInfo, vulkanAPI.GetFrameFence()) >> VulkanResultChecker::Get();
 	}
 }

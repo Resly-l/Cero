@@ -58,9 +58,9 @@ namespace graphics
 		vkb::destroy_instance(instance_);
 	}
 
-	vkb::Device VulkanAPI::GetLogicalDevice() const
+	VkQueue VulkanAPI::GetGraphicsQueue() const
 	{
-		return logicalDevice_;
+		return logicalDevice_.get_queue(vkb::QueueType::graphics).value();
 	}
 
 	std::shared_ptr<Pipeline> VulkanAPI::CreatePipeline(const Pipeline::Layout& _pipelineLayout)
