@@ -36,6 +36,8 @@ namespace graphics
 		virtual ~Pipeline() {};
 
 	public:
+		uint32_t GetNumBindings() const { return (uint32_t)shaderDescriptor_.bindings_.size(); }
+
 		virtual std::shared_ptr<RenderTarget> CreateRenderTarget(uint32_t _width, uint32_t _height) const = 0;
 		virtual bool BindShaderBinding(std::shared_ptr<ShaderBinding> _shaderBinding, uint32_t _slot)
 		{

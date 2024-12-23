@@ -17,6 +17,9 @@ namespace graphics
 	class Model;
 	class Texture;
 
+	class RenderPass;
+	class Renderer;
+
 	class ShaderBinding;
 	struct ShaderDescriptor;
 

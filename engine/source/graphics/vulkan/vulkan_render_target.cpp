@@ -102,11 +102,12 @@ namespace graphics
 		return imageViews;
 	}
 
-	void VulkanRenderTarget::Bind(VkRenderPass _renderPass)
+	VkFramebuffer VulkanRenderTarget::GetFramebuffer(VkRenderPass _renderPass)
 	{
-		if (framebuffers_.find(_renderPass) != framebuffers_.end())
+		auto found = framebuffers_.find(_renderPass);
+		if (found != framebuffers_.end())
 		{
-			return;
+			return found->second;
 		}
 
 		std::vector<VkImageView> imageViews;
@@ -126,12 +127,8 @@ namespace graphics
 		framebufferCreateInfo.pAttachments = imageViews.data();
 		vkCreateFramebuffer(logicalDevice_, &framebufferCreateInfo, nullptr, &framebuffer) >> VulkanResultChecker::Get();
 
-		framebuffers_[_renderPass] = framebuffer;
-	}
-
-	VkFramebuffer VulkanRenderTarget::GetFramebuffer(VkRenderPass _renderPass) const
-	{
-		return framebuffers_.at(_renderPass);
+		framebuffers_.insert(std::make_pair(_renderPass, framebuffer));
+		return framebuffer;
 	}
 
 	VkImageAspectFlags VulkanRenderTarget::GetAspectMask(VkFormat _format, VkImageUsageFlags _usage)

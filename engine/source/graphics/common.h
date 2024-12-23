@@ -1,5 +1,8 @@
 #pragma once
-#include <cstdint>
+#include "utility/forward_declaration.h"
+#include <unordered_map>
+#include <string>
+#include <memory>
 
 namespace graphics
 {
@@ -68,5 +71,16 @@ namespace graphics
 		NONE,
 		CLEAR,
 		STORE,
+	};
+
+	struct PassResources
+	{
+		std::unordered_map<std::string, std::shared_ptr<RenderTarget>> renderTargets_;
+	};
+
+	struct Drawable
+	{
+		std::shared_ptr<Mesh> mesh_;
+		std::shared_ptr<Material> material_;
 	};
 }

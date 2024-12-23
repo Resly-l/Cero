@@ -7,9 +7,13 @@ class AssimpTest : public window::Application
 private:
     std::shared_ptr<graphics::Pipeline> pipeline_;
     std::shared_ptr<graphics::Mesh> mesh_;
-    std::shared_ptr<graphics::Texture> brickDiffuse_;
 	std::shared_ptr<graphics::UniformBuffer> modelViewUniformBuffer_;
 	std::shared_ptr<graphics::UniformBuffer> projectionUniformBuffer_;
+
+	std::shared_ptr<graphics::Texture> defaultTexture_;
+	std::shared_ptr<graphics::Material> defaultMaterial_;
+	std::shared_ptr<graphics::RenderPass> renderPass_;
+
 	utility::ByteBuffer mvBuffer_;
 	utility::ByteBuffer pBuffer_;
 
@@ -19,6 +23,5 @@ private:
 public:
     AssimpTest();
 
-    virtual void Update() override;
-    virtual void Render() override;
+    virtual void Tick() override;
 };

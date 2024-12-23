@@ -1,18 +1,19 @@
 #include "vulkan_api.h"
+#include "vulkan_result.hpp"
+#include "vulkan_utility.h"
 #include "vulkan_pipeline.h"
 #include "vulkan_render_target.h"
 #include "vulkan_mesh.h"
 #include "vulkan_material.h"
 #include "vulkan_uniform_buffer.h"
 #include "vulkan_texture.h"
-#include "vulkan_result.hpp"
-#include "vulkan_utility.h"
+#include "vulkan_render_pass.h"
 #include "window/window_min.h"
 #include <vulkan/vulkan_win32.h>
-#include <iostream>
 #include "utility/log.h"
 #include "math/vector.h"
 #include "math/matrix.h"
+#include <iostream>
 
 using utility::Log;
 
@@ -29,52 +30,22 @@ namespace graphics
 		CreateSwapchain();
 		CreateCommandPools();
 		CreateDescriptorPool();
-		CreateCommandBuffers();
 		CreateSwapchainRenderTargets();
 		CreateSyncObjects();
-
-		// CreateDefaultMaterial(), temporary code
-		{
-			VulkanTexture::Initializer textureInitializer{};
-			textureInitializer.logicalDevice_ = logicalDevice_;
-			textureInitializer.physicalDevice_ = physicalDevice_;
-			textureInitializer.graphicsQueue_ = *logicalDevice_.get_queue(vkb::QueueType::graphics);
-			textureInitializer.commandPool_ = commandPool_;
-			VulkanTexture::Layout textureLayout{};
-			textureLayout.initializationType_ = Texture::InitializationType::BUFFER;
-			defaultTexture_ = std::make_shared<VulkanTexture>(textureInitializer, textureLayout);
-
-			VulkanMaterial::Initializer materialInitializer{};
-			materialInitializer.logicalDevice_ = logicalDevice_;
-			materialInitializer.descriptorPool_ = CreateDescriptorPool(VulkanMaterial::GetDescriptorSetLayoutBindings());
-			defaultMaterial_ = std::make_unique<VulkanMaterial>(materialInitializer);
-
-			defaultMaterial_->SetFixedBinding(Material::FixedBindingIndex::DIFFUSE_MAP, defaultTexture_);
-			defaultMaterial_->SetFixedBinding(Material::FixedBindingIndex::NORMAL_MAP, defaultTexture_);
-			defaultMaterial_->UpdateDescriptorSet();
-		}
 	}
 
 	VulkanAPI::~VulkanAPI()
 	{
-		defaultTexture_ = nullptr;
-		defaultMaterial_ = nullptr;
-
 		vkDeviceWaitIdle(logicalDevice_);
-
-		mesh_ = nullptr;
-		renderTarget_ = nullptr;
-		pipeline_ = nullptr;
 
 		swapchainRenderTargets_.clear();
 
 		for (Frame& frame : frames_)
 		{
-			frame.descriptorSets_.clear();
 			vkDestroySemaphore(logicalDevice_, frame.imageAcquiringSemaphore_, nullptr);
 			vkDestroySemaphore(logicalDevice_, frame.commandExecutionSemaphore_, nullptr);
 			vkDestroyFence(logicalDevice_, frame.frameFence_, nullptr);
-			vkFreeCommandBuffers(logicalDevice_, commandPool_, 1, &frame.commandBuffer_);
+			//vkFreeCommandBuffers(logicalDevice_, commandPool_, 1, &frame.commandBuffer_);
 		}
 
 		vkDestroyDescriptorPool(logicalDevice_, descriptorPool_, nullptr);
@@ -87,28 +58,14 @@ namespace graphics
 		vkb::destroy_instance(instance_);
 	}
 
+	VkQueue VulkanAPI::GetGraphicsQueue() const
+	{
+		return logicalDevice_.get_queue(vkb::QueueType::graphics).value();
+	}
+
 	std::shared_ptr<Pipeline> VulkanAPI::CreatePipeline(const Pipeline::Layout& _pipelineLayout)
 	{
-		auto pipeline = std::make_shared<VulkanPipeline>(logicalDevice_, physicalDevice_, _pipelineLayout);
-
-		// pipeline registration to api
-		{
-			std::vector<VkDescriptorSetLayout> descriptorSetLayouts(frames_.size(), pipeline->GetDescriptorSetLayout());
-			std::vector<VkDescriptorSet> descriptorSets(frames_.size());
-			VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
-			descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-			descriptorSetAllocateInfo.descriptorPool = descriptorPool_;
-			descriptorSetAllocateInfo.descriptorSetCount = (uint32_t)descriptorSets.size();
-			descriptorSetAllocateInfo.pSetLayouts = descriptorSetLayouts.data();
-			vkAllocateDescriptorSets(logicalDevice_, &descriptorSetAllocateInfo, descriptorSets.data());
-
-			for (size_t i = 0; i < frames_.size(); i++)
-			{
-				frames_[i].descriptorSets_[pipeline] = descriptorSets[i];
-			}
-		}
-
-		return pipeline;
+		return std::make_shared<VulkanPipeline>(logicalDevice_, physicalDevice_, _pipelineLayout);
 	}
 
 	std::shared_ptr<Mesh> VulkanAPI::CreateMesh(const Mesh::Layout& _meshLayout)
@@ -141,39 +98,68 @@ namespace graphics
 		return std::make_shared<VulkanTexture>(initializer, _textureLayout);
 	}
 
-	std::shared_ptr<RenderTarget> VulkanAPI::GetSwapchainRenderTarget()
+	std::shared_ptr<RenderPass> VulkanAPI::CreateRenderPass()
+	{
+		return std::make_shared<VulkanRenderPass>();
+	}
+
+	uint32_t VulkanAPI::GetCurrentFrameIndex() const
+	{
+		return frameIndex_;
+	}
+
+	std::shared_ptr<RenderTarget> VulkanAPI::GetSwapchainRenderTarget() const
 	{
 		return swapchainRenderTargets_[swapchainImageIndex_];
 	}
 
-	void VulkanAPI::BindPipeline(std::shared_ptr<Pipeline> _pipeline)
+	VkExtent2D VulkanAPI::GetSwapchainExtent() const
 	{
-		pipeline_ = std::static_pointer_cast<VulkanPipeline>(_pipeline);
-		renderTarget_ = nullptr;
+		return swapchain_.extent;
 	}
 
-	void VulkanAPI::BindRenderTarget(std::shared_ptr<RenderTarget> _renderTarget)
+	VkSemaphore VulkanAPI::GetImageAcquiringSemaphore() const
 	{
-		if (!pipeline_)
-		{
-			throw std::exception("pipeline must be bound first before binding render target");
-		}
-
-		renderTarget_ = std::static_pointer_cast<VulkanRenderTarget>(_renderTarget);
-		renderTarget_->Bind(pipeline_->GetRenderPass());
+		return frames_[frameIndex_].imageAcquiringSemaphore_;
 	}
 
-	void VulkanAPI::BindMesh(std::shared_ptr<Mesh> _mesh)
+	VkSemaphore VulkanAPI::GetCommandExecutionSemaphore() const
 	{
-		mesh_ = std::static_pointer_cast<VulkanMesh>(_mesh);
+		return frames_[frameIndex_].commandExecutionSemaphore_;
 	}
 
-	void VulkanAPI::BindMaterial(std::shared_ptr<Material> _material)
+	VkFence VulkanAPI::GetFrameFence() const
 	{
-		material_ = std::static_pointer_cast<VulkanMaterial>(_material);
+		return frames_[frameIndex_].frameFence_;
 	}
 
-	bool VulkanAPI::BeginFrame()
+	VkCommandBuffer VulkanAPI::AllocateCommnadBuffer() const
+	{
+		VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+		VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
+		commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		commandBufferAllocateInfo.commandPool = commandPool_;
+		commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		commandBufferAllocateInfo.commandBufferCount = 1;
+		vkAllocateCommandBuffers(logicalDevice_, &commandBufferAllocateInfo, &commandBuffer) >> VulkanResultChecker::Get();
+
+		return commandBuffer;
+	}
+
+	VkDescriptorSet VulkanAPI::AllocateDescriptorSet(VkDescriptorSetLayout _descriptorSetLayout) const
+	{
+		VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
+		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
+		descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		descriptorSetAllocateInfo.descriptorPool = descriptorPool_;
+		descriptorSetAllocateInfo.descriptorSetCount = 1;
+		descriptorSetAllocateInfo.pSetLayouts = &_descriptorSetLayout;
+		vkAllocateDescriptorSets(logicalDevice_, &descriptorSetAllocateInfo, &descriptorSet) >> VulkanResultChecker::Get();
+
+		return descriptorSet;
+	}
+
+	bool VulkanAPI::WaitSwapchainImage()
 	{
 		Frame& currentFrame = frames_[frameIndex_];
 		vkWaitForFences(logicalDevice_, 1, &currentFrame.frameFence_, VK_TRUE, UINT64_MAX);
@@ -189,98 +175,9 @@ namespace graphics
 		return true;
 	}
 
-	void VulkanAPI::Draw()
-	{
-		if (!pipeline_ || !renderTarget_ || !mesh_)
-		{
-			return;
-		}
-
-		if (pipeline_->IsPendingDescriptorSetUpdate())
-		{
-			std::vector<VkDescriptorSet> descriptorSets;
-			
-			for (auto& frame : frames_)
-			{
-				descriptorSets.push_back(frame.descriptorSets_[pipeline_]);
-			}
-
-			pipeline_->UpdateDescriptorSet(descriptorSets);
-		}
-
-		Frame& currentFrame = frames_[frameIndex_];
-
-		VkCommandBufferBeginInfo commandBufferBeginInfo{};
-		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		vkResetCommandBuffer(currentFrame.commandBuffer_, VkCommandBufferResetFlags{});
-		vkBeginCommandBuffer(currentFrame.commandBuffer_, &commandBufferBeginInfo);
-
-		VkClearValue clearValues[2]{};
-		clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
-		clearValues[1].depthStencil = { 1.0f, 0 };
-
-		VkRenderPass renderPass = pipeline_->GetRenderPass();
-		VkRenderPassBeginInfo renderPassBeginInfo{};
-		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassBeginInfo.renderPass = renderPass;
-		renderPassBeginInfo.framebuffer = renderTarget_->GetFramebuffer(renderPass);
-		renderPassBeginInfo.renderArea.extent = swapchain_.extent;
-		renderPassBeginInfo.clearValueCount = 2;
-		renderPassBeginInfo.pClearValues = clearValues;
-		vkCmdBeginRenderPass(currentFrame.commandBuffer_, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		VkViewport viewport{};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(swapchain_.extent.width);
-		viewport.height = static_cast<float>(swapchain_.extent.height);
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(currentFrame.commandBuffer_, 0, 1, &viewport);
-
-		VkRect2D scissor{};
-		scissor.offset = { 0, 0 };
-		scissor.extent = swapchain_.extent;
-		vkCmdSetScissor(currentFrame.commandBuffer_, 0, 1, &scissor);
-
-		VkBuffer vertexBuffers[] = { mesh_->GetVertexBuffer()};
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindPipeline(currentFrame.commandBuffer_, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->GetInstance());
-		vkCmdBindVertexBuffers(currentFrame.commandBuffer_, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(currentFrame.commandBuffer_, mesh_->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
-
-		if (pipeline_->GetNumBindings() > 0)
-		{
-			VkDescriptorSet descriptorSets[2] =
-			{
-				material_ ? material_->GetDescriptorSet() : defaultMaterial_->GetDescriptorSet(),
-				currentFrame.descriptorSets_[pipeline_]
-			};
-
-			vkCmdBindDescriptorSets(currentFrame.commandBuffer_, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->GetLayout(), 0, 2, descriptorSets, 0, nullptr);
-		}
-
-		vkCmdDrawIndexed(currentFrame.commandBuffer_, mesh_->GetNumIndices(), 1, 0, 0, 0);
-		vkCmdEndRenderPass(currentFrame.commandBuffer_);
-
-		vkEndCommandBuffer(currentFrame.commandBuffer_) >> VulkanResultChecker::Get();
-	}
-
-	void VulkanAPI::EndFrame()
+	void VulkanAPI::Present()
 	{
 		Frame& currentFrame = frames_[frameIndex_];
-
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.pWaitDstStageMask = waitStages;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &currentFrame.commandBuffer_;
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = &currentFrame.imageAcquiringSemaphore_;
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &currentFrame.commandExecutionSemaphore_;
-		vkQueueSubmit(logicalDevice_.get_queue(vkb::QueueType::graphics).value(), 1, &submitInfo, currentFrame.frameFence_) >> VulkanResultChecker::Get();
 
 		VkSwapchainKHR swapchains[] = { swapchain_ };
 		VkPresentInfoKHR presentInfo{};
@@ -298,10 +195,6 @@ namespace graphics
 		}
 
 		frameIndex_ = (frameIndex_ + 1) % config_.numFrameConcurrency_;
-
-		pipeline_ = nullptr;
-		renderTarget_ = nullptr;
-		mesh_ = nullptr;
 	}
 
 	void VulkanAPI::WaitIdle()
@@ -389,20 +282,6 @@ namespace graphics
 		vkCreateDescriptorPool(logicalDevice_, &descriptorPoolCreateInfo, nullptr, &descriptorPool_);
     }
 
-	void VulkanAPI::CreateCommandBuffers()
-	{
-		VkCommandBufferAllocateInfo allocateInfo{};
-		allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocateInfo.commandPool = commandPool_;
-		allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocateInfo.commandBufferCount = 1;
-
-		for (Frame& frame : frames_)
-		{
-			vkAllocateCommandBuffers(logicalDevice_, &allocateInfo, &frame.commandBuffer_) >> VulkanResultChecker::Get();
-		}
-	}
-
 	void VulkanAPI::CreateSyncObjects()
 	{
 		VkSemaphoreCreateInfo semaphoreCreateInfo{};
@@ -446,14 +325,6 @@ namespace graphics
 
 		CreateSwapchain();
 		CreateSwapchainRenderTargets();
-
-		if (pipeline_)
-		{
-			for (auto& renderTarget : swapchainRenderTargets_)
-			{
-				renderTarget->Bind(pipeline_->GetRenderPass());
-			}
-		}
 	}
 
 	VkDescriptorPool VulkanAPI::CreateDescriptorPool(const std::vector<VkDescriptorSetLayoutBinding>& _bindings) const

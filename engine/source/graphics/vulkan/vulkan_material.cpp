@@ -27,7 +27,6 @@ namespace graphics
 			descriptorSetLayout_ = VK_NULL_HANDLE;
 		}
 
-		//vkFreeDescriptorSets(logicalDevice_, descriptorPool_, 1, &descriptorSet_);
 		vkDestroyDescriptorPool(logicalDevice_, descriptorPool_, nullptr);
 	}
 
@@ -121,6 +120,6 @@ namespace graphics
 		}
 
 		vkUpdateDescriptorSets(logicalDevice_, (uint32_t)descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
-		pendingCompilation_ = true;
+		pendingCompilation_ = false;
 	}
 }

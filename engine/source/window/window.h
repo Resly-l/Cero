@@ -28,8 +28,7 @@ namespace window
 
 	protected:
 		bool ProcessMessage();
-		virtual void Update() = 0;
-		virtual void Render() = 0;
+		virtual void Tick() = 0;
 
 	private:
 		void RegisterWindowClass(std::string_view _iconPath) const;

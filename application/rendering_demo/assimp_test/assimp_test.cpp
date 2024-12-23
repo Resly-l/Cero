@@ -1,6 +1,8 @@
 #include "assimp_test.h"
 #include "file/model.h"
 #include "graphics/mesh.h"
+#include "graphics/render_pass.h"
+#include "graphics/material.h"
 #include "utility/shader_compiler.h"
 #include "utility/timer.hpp"
 #include "math/vector.h"
@@ -10,14 +12,14 @@
 AssimpTest::AssimpTest()
     : window::Application(graphics::GraphicsAPI::Type::VULKAN)
 {
-	file::Model brickPlane;
-	brickPlane.Load("bunny.obj");
+	file::Model bunny;
+	bunny.Load("bunny.obj");
 
 	utility::ShaderCompiler::CompileShaders("shader/", "shader/bin/");
 
 	graphics::Mesh::Layout meshLayout;
-	meshLayout.vertices_ = brickPlane.meshes_[0].vertices_;
-	meshLayout.indices_ = brickPlane.meshes_[0].indices_;
+	meshLayout.vertices_ = bunny.meshes_[0].vertices_;
+	meshLayout.indices_ = bunny.meshes_[0].indices_;
 	mesh_ = graphicsAPI_->CreateMesh(meshLayout);
 
 	utility::ByteBuffer::Layout modelViewMatrixLayout;
@@ -65,7 +67,7 @@ AssimpTest::AssimpTest()
 	pipelineLayout.primitiveTopology_ = graphics::PrimitiveTopology::TRIANGLE_LIST;
 	pipelineLayout.vertexShaderPath_ = L"shader/bin/model.vert.spv";
 	pipelineLayout.pixelShaderPath_ = L"shader/bin/model.frag.spv";
-	pipelineLayout.vertexInputLayout_ = brickPlane.meshes_[0].vertices_.GetLayout().value();
+	pipelineLayout.vertexInputLayout_ = bunny.meshes_[0].vertices_.GetLayout().value();
 	pipelineLayout.depthFunc_ = graphics::ComparisonFunc::LESS_EQUAL;
 	pipelineLayout.shaderDescriptor_.outputs.push_back(colorOutput);
 	pipelineLayout.shaderDescriptor_.outputs.push_back(depthOutput);
@@ -85,12 +87,29 @@ AssimpTest::AssimpTest()
 	pipelineLayout.shaderDescriptor_.bindings_.push_back(binding);
 
 	pipeline_ = graphicsAPI_->CreatePipeline(pipelineLayout);
-
 	pipeline_->BindShaderBinding(modelViewUniformBuffer_, 0);
 	pipeline_->BindShaderBinding(projectionUniformBuffer_, 1);
+
+	renderPass_ = graphicsAPI_->CreateRenderPass();
+	renderPass_->SetPipeline(pipeline_, *graphicsAPI_);
+	renderer_->SetEntryPass(renderPass_);
+
+	graphics::Texture::Layout textureLayout{};
+	textureLayout.initializationType_ = graphics::Texture::InitializationType::BUFFER;
+	defaultTexture_ = graphicsAPI_->CreateTexture(textureLayout);
+
+	defaultMaterial_ = graphicsAPI_->CreateMaterial();
+	defaultMaterial_->SetFixedBinding(graphics::Material::FixedBindingIndex::DIFFUSE_MAP, defaultTexture_);
+	defaultMaterial_->SetFixedBinding(graphics::Material::FixedBindingIndex::NORMAL_MAP, defaultTexture_);
+
+	graphics::Drawable drawable;
+	drawable.mesh_ = mesh_;
+	drawable.material_ = defaultMaterial_;
+
+	renderPass_->AddDrawable(drawable);
 }
 
-void AssimpTest::Update()
+void AssimpTest::Tick()
 {
 	float deltaSeconds = timer_.Mark();
 
@@ -112,13 +131,6 @@ void AssimpTest::Update()
 		std::cout << "fps : " << fpsCount << std::endl;
 		fpsCount = 0;
 	}
-	fpsCount++;
-}
 
-void AssimpTest::Render()
-{
-    graphicsAPI_->BindPipeline(pipeline_);
-    graphicsAPI_->BindRenderTarget(graphicsAPI_->GetSwapchainRenderTarget());
-    graphicsAPI_->BindMesh(mesh_);
-	graphicsAPI_->Draw();
+	fpsCount++;
 }

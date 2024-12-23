@@ -38,7 +38,6 @@ namespace graphics
 		VkRenderPass GetRenderPass() const;
 
 		VkDescriptorSetLayout GetDescriptorSetLayout() const;
-		uint32_t GetNumBindings() const;
 
 	private:
 		void LoadShaders(std::wstring_view _vsPath, std::wstring_view _fsPath);

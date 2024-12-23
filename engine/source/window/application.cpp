@@ -9,34 +9,35 @@ namespace window
 	{
 		thread::ThreadPool::Initialize();
 
-		switch (_apiType)
+		if (_apiType == graphics::GraphicsAPI::Type::VULKAN)
 		{
-		case graphics::GraphicsAPI::Type::VULKAN:
 			graphicsAPI_ = std::make_unique<graphics::VulkanAPI>(wnd_);
-			return;
-		default:
+		}
+		else
+		{
 			throw std::exception("invalid graphics api type");
 		}
+
+		renderer_ = std::make_unique<graphics::Renderer>();
 	}
 
 	void Application::Run()
 	{
 		while (Window::ProcessMessage())
 		{
-			const bool minimized = IsMinimized();
 			bool frameBegun = false;
 
-			if (!minimized)
+			if (IsMinimized() == false)
 			{
-				frameBegun = graphicsAPI_->BeginFrame();
+				frameBegun = graphicsAPI_->WaitSwapchainImage();
 			}
 
-			Update();
+			Tick();
 
-			if (!minimized && frameBegun)
+			if (frameBegun)
 			{
-				Render();
-				graphicsAPI_->EndFrame();
+				renderer_->RenderFrame(*graphicsAPI_);
+				graphicsAPI_->Present();
 			}
 		}
 

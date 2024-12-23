@@ -1,6 +1,6 @@
 #pragma once
 #include "window/window.h"
-#include "graphics/graphics_api.h"
+#include "graphics/renderer.h"
 
 namespace window
 {
@@ -12,6 +12,7 @@ namespace window
 
 	protected:
 		std::unique_ptr<graphics::GraphicsAPI> graphicsAPI_;
+		std::unique_ptr<graphics::Renderer> renderer_;
 
 	public:
 		Application(graphics::GraphicsAPI::Type _apiType);

@@ -9,13 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "application", "application"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rendering_demo", "rendering_demo", "{81D04BF6-A8C7-40B1-A980-B0E00EFCEAEA}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hello_triangle", "application\rendering_demo\hello_triangle\hello_triangle.vcxproj", "{19E04362-16B9-4C7C-ACBF-24A0E71C5945}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "console_sandbox", "console_sandbox\console_sandbox.vcxproj", "{7228B4B9-9742-418C-87E1-6BFC27A0C810}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "texture", "application\rendering_demo\texture\texture.vcxproj", "{7A01CDEA-C2B4-4B18-BAE2-F4ED9996B620}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "depth_buffer", "application\rendering_demo\depth_buffer\depth_buffer.vcxproj", "{0675B113-F231-4F1F-8912-FF977A0102C7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp_test", "application\rendering_demo\assimp_test\assimp_test.vcxproj", "{D1A99740-F8DA-4DC2-9C7C-32408A924D7C}"
 EndProject
@@ -29,22 +23,10 @@ Global
 		{36D67B8A-077E-4C96-9AD5-A4A6ADAEA117}.Debug|x64.Build.0 = Debug|x64
 		{36D67B8A-077E-4C96-9AD5-A4A6ADAEA117}.Release|x64.ActiveCfg = Release|x64
 		{36D67B8A-077E-4C96-9AD5-A4A6ADAEA117}.Release|x64.Build.0 = Release|x64
-		{19E04362-16B9-4C7C-ACBF-24A0E71C5945}.Debug|x64.ActiveCfg = Debug|x64
-		{19E04362-16B9-4C7C-ACBF-24A0E71C5945}.Debug|x64.Build.0 = Debug|x64
-		{19E04362-16B9-4C7C-ACBF-24A0E71C5945}.Release|x64.ActiveCfg = Release|x64
-		{19E04362-16B9-4C7C-ACBF-24A0E71C5945}.Release|x64.Build.0 = Release|x64
 		{7228B4B9-9742-418C-87E1-6BFC27A0C810}.Debug|x64.ActiveCfg = Debug|x64
 		{7228B4B9-9742-418C-87E1-6BFC27A0C810}.Debug|x64.Build.0 = Debug|x64
 		{7228B4B9-9742-418C-87E1-6BFC27A0C810}.Release|x64.ActiveCfg = Release|x64
 		{7228B4B9-9742-418C-87E1-6BFC27A0C810}.Release|x64.Build.0 = Release|x64
-		{7A01CDEA-C2B4-4B18-BAE2-F4ED9996B620}.Debug|x64.ActiveCfg = Debug|x64
-		{7A01CDEA-C2B4-4B18-BAE2-F4ED9996B620}.Debug|x64.Build.0 = Debug|x64
-		{7A01CDEA-C2B4-4B18-BAE2-F4ED9996B620}.Release|x64.ActiveCfg = Release|x64
-		{7A01CDEA-C2B4-4B18-BAE2-F4ED9996B620}.Release|x64.Build.0 = Release|x64
-		{0675B113-F231-4F1F-8912-FF977A0102C7}.Debug|x64.ActiveCfg = Debug|x64
-		{0675B113-F231-4F1F-8912-FF977A0102C7}.Debug|x64.Build.0 = Debug|x64
-		{0675B113-F231-4F1F-8912-FF977A0102C7}.Release|x64.ActiveCfg = Release|x64
-		{0675B113-F231-4F1F-8912-FF977A0102C7}.Release|x64.Build.0 = Release|x64
 		{D1A99740-F8DA-4DC2-9C7C-32408A924D7C}.Debug|x64.ActiveCfg = Debug|x64
 		{D1A99740-F8DA-4DC2-9C7C-32408A924D7C}.Debug|x64.Build.0 = Debug|x64
 		{D1A99740-F8DA-4DC2-9C7C-32408A924D7C}.Release|x64.ActiveCfg = Release|x64
@@ -55,9 +37,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{81D04BF6-A8C7-40B1-A980-B0E00EFCEAEA} = {A45B1DF6-9D3F-4903-BA14-9C45F179084E}
-		{19E04362-16B9-4C7C-ACBF-24A0E71C5945} = {81D04BF6-A8C7-40B1-A980-B0E00EFCEAEA}
-		{7A01CDEA-C2B4-4B18-BAE2-F4ED9996B620} = {81D04BF6-A8C7-40B1-A980-B0E00EFCEAEA}
-		{0675B113-F231-4F1F-8912-FF977A0102C7} = {81D04BF6-A8C7-40B1-A980-B0E00EFCEAEA}
 		{D1A99740-F8DA-4DC2-9C7C-32408A924D7C} = {81D04BF6-A8C7-40B1-A980-B0E00EFCEAEA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

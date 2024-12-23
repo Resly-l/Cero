@@ -65,7 +65,6 @@ we only need to re-bind descriptor set when drawing different meshes
 so we have to make material to own descriptor set
 
 2024/10/09---------------------------------------------------------------------------------------------------------------------------
-
 reason separate descriptor sets are requried in each frames is because of cpu/gpu sync
 specifically for descriptor sets which require dynamic updates like transform buffer
 using single set for these buffer will cause performance issue or race condition between cpu/gpu (depends on how you implement it)
@@ -73,7 +72,6 @@ using single set for these buffer will cause performance issue or race condition
 but in other words, static buffers like static materials, since there's no write operation, we can reuse it (single set)
 
 2024/11/03---------------------------------------------------------------------------------------------------------------------------
-
 we're doing two things in order
 1. optimizing static uniform buffers to be only updated once
 	- make descriptors be owned by per material
@@ -82,8 +80,10 @@ we're doing two things in order
 2. implemeting render pass to optimize ridiculous draw call overhead
 
 
-
-
+2024/12/24---------------------------------------------------------------------------------------------------------------------------
+- separated renderer from api
+- in vulkan, binding index must be unique across shader stages unlike d3d11
+	- it is possible to bind to every stages with VK_SHADER_STAGE_ALL but will have all sorts of downsides including performance
 
 
 
